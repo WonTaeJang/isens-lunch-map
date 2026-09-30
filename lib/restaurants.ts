@@ -1,19 +1,8 @@
 import "server-only";
 import { getDb } from "./db";
 
-export type Restaurant = {
-  id: string;
-  name: string;
-  category: string | null;
-  main_menu: string | null;
-  address: string | null;
-  distance: string | null;
-  active: boolean | null;
-  latitude: string | null;
-  longitude: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
+import type { Restaurant } from './restaurant-types';
+export type { Restaurant } from './restaurant-types';
 
 // Server-only. Call from a Server Component, Route Handler or Server Action.
 // Reads the existing schema without modifying any records.

@@ -1,4 +1,5 @@
 "use client";
+import Button from './button';
 
 import { hasCoordinates } from "@/lib/coordinates";
 import { formatDistance } from "@/lib/distance";
@@ -8,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 const appKey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY?.trim();
 const officeAddress = "서울 서초구 반포대로28길 43";
 
-export type MapRestaurant = { id: string; name: string; category: string | null; main_menu: string | null; address: string | null; distance: string | null; latitude: string | null; longitude: string | null };
+import type { MapRestaurant } from '@/lib/restaurant-types';
 export default function LunchMap({ restaurants = [], focusRequest }: { restaurants?: MapRestaurant[]; focusRequest?: {id: string} | null }) {
   const mapRef = useRef<{setCenter: (position: object) => void} | null>(null);
   const officeCenterRef = useRef<object | null>(null);
@@ -146,7 +147,7 @@ export default function LunchMap({ restaurants = [], focusRequest }: { restauran
       {status === 'ready' && <button type="button" className="map-center-button" aria-label="아이센스 빌딩 중심으로 지도 이동" onClick={() => {
         if (officeCenterRef.current) mapRef.current?.setCenter(officeCenterRef.current);
       }}><span aria-hidden="true">⌖</span></button>}
-      {(!appKey || status !== "ready") && <div className="map-message" role="status"><span className="empty-symbol" aria-hidden="true">⌖</span><strong>{!appKey ? "지도 설정이 필요해요" : status === "error" ? "지도를 불러오지 못했어요" : "지도를 펼치고 있어요"}</strong><p>{!appKey ? "카카오맵 키를 설정하면 지도를 볼 수 있어요." : status === "error" ? "키와 등록 도메인, 네트워크 연결을 확인해 주세요." : "잠시만 기다려 주세요."}</p>{status === "error" && <button className="button" onClick={() => window.location.reload()}>다시 시도</button>}</div>}
+      {(!appKey || status !== "ready") && <div className="map-message" role="status"><span className="empty-symbol" aria-hidden="true">⌖</span><strong>{!appKey ? "지도 설정이 필요해요" : status === "error" ? "지도를 불러오지 못했어요" : "지도를 펼치고 있어요"}</strong><p>{!appKey ? "카카오맵 키를 설정하면 지도를 볼 수 있어요." : status === "error" ? "키와 등록 도메인, 네트워크 연결을 확인해 주세요." : "잠시만 기다려 주세요."}</p>{status === "error" && <Button  onClick={() => window.location.reload()}>다시 시도</Button>}</div>}
       {appKey && <Script id="kakao-maps-sdk" src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(appKey)}&autoload=false&libraries=services`} strategy="afterInteractive" onReady={initializeMap} onError={() => setStatus("error")} />}
     </section>
   );

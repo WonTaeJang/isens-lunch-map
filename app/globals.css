@@ -115,3 +115,5 @@ td .button { margin: 0; white-space: nowrap; }
 .map-center-button { position: absolute; z-index: 10; bottom: 8px; right: 12px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; width: 44px; height: 44px; padding: 0; border: 1px solid #dce5e1; border-radius: 10px; background: white; color: #127e70; box-shadow: 0 2px 8px #0002; font-size: 12px; font-weight: 600; cursor: pointer; }
 .map-center-button span { font-size: 22px; line-height: 1; }
 .map-center-button:hover { background: #edf6f3; }
+
+.main-nav a.admin-nav-icon { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; flex-shrink: 0; }

@@ -7,10 +7,11 @@ import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 
 const appKey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY?.trim();
+const EMPTY_RESTAURANTS: MapRestaurant[] = [];
 const officeAddress = "서울 서초구 반포대로28길 43";
 
 import type { MapRestaurant } from '@/lib/restaurant-types';
-export default function LunchMap({ restaurants = [], focusRequest }: { restaurants?: MapRestaurant[]; focusRequest?: {id: string} | null }) {
+export default function LunchMap({ restaurants = EMPTY_RESTAURANTS, focusRequest }: { restaurants?: MapRestaurant[]; focusRequest?: {id: string} | null }) {
   const mapRef = useRef<{setCenter: (position: object) => void} | null>(null);
   const officeCenterRef = useRef<object | null>(null);
   const focusHandlers = useRef(new Map<string, () => void>());
@@ -71,7 +72,13 @@ export default function LunchMap({ restaurants = [], focusRequest }: { restauran
       const title = document.createElement('h3');
       title.textContent = r.name;
       content.append(title);
-      for (const text of [r.category || '분류 정보 없음', `대표메뉴: ${r.main_menu || '정보 없음'}`, r.address || '주소 확인 필요', `거리: ${formatDistance(r.distance)}`]) {
+      const restaurantDetails = [
+        r.category || '분류 정보 없음',
+        `대표메뉴: ${r.main_menu || '정보 없음'}`,
+        r.address || '주소 확인 필요',
+        `거리: ${formatDistance(r.distance)}`,
+      ];
+      for (const text of restaurantDetails) {
         const paragraph = document.createElement('p');
         paragraph.textContent = text;
         content.append(paragraph);

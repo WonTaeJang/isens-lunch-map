@@ -17,7 +17,8 @@ export default function LunchExplorer({restaurants, failed}: {restaurants: MapRe
     const normalize = (value: string) => value.normalize('NFKC').toLocaleLowerCase('ko-KR').replace(/\s+/g, '');
     const terms = query.trim().split(/\s+/).filter(Boolean).map(normalize);
     return restaurants.filter(row => {
-      const text = normalize([row.name, row.category, row.main_menu, row.address].filter(Boolean).join(' '));
+      const searchableFields = [row.name, row.category, row.main_menu, row.address];
+      const text = normalize(searchableFields.filter(Boolean).join(' '));
       const distance = row.distance?.trim() ? Number(row.distance) : NaN;
       return terms.every(term => text.includes(term)) && (maxDistance === null || (Number.isFinite(distance) && distance >= 0 && distance <= maxDistance));
     });

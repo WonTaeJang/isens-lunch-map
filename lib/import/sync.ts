@@ -51,7 +51,8 @@ export async function geocode(address: string) {
   if (!key) throw new ImportError('좌표 검색을 위해 KAKAO_REST_API_KEY를 설정해 주세요.');
   const roadAddress = address.match(/^(.+?(?:대로|로|길)\s*\d+(?:-\d+)?)(?=\s|[,(.]|$)/)?.[1];
   const normalizedRoadAddress = roadAddress?.replace(/^서울시\s/, '서울특별시 ').replace(/(대로|로|길)(?=\d+(?:-\d+)?$)/, '$1 ');
-  const queries = [...new Set([address, roadAddress, normalizedRoadAddress].filter((value): value is string => !!value))];
+  const addressCandidates = [address, roadAddress, normalizedRoadAddress];
+  const queries = [...new Set(addressCandidates.filter((value): value is string => !!value))];
   let document: { x: string; y: string } | undefined;
   for (const query of queries) {
     const url = new URL('https://dapi.kakao.com/v2/local/search/address.json');

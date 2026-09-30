@@ -1,5 +1,7 @@
 import ExcelJS from "exceljs";
 
+const WORKBOOK_FIELDS = ['가맹점명', '주소', '카테고리', '대표메뉴', '거리'] as const;
+
 export class ImportError extends Error {}
 export type ImportRow = { name: string; address: string; category: string; main_menu: string; distance: number | null; active: boolean; row: number };
 export const identity = (r: { name: string; address: string | null }) => JSON.stringify([r.name.normalize('NFKC').replace(/\s+/g, '').toLowerCase(), (r.address ?? "").normalize('NFKC').replace(/\s+/g, '').toLowerCase()]);
@@ -33,8 +35,7 @@ export async function parseWorkbook(buffer: Buffer): Promise<ImportRow[]> {
   const keys = new Set<string>();
   for (let n = header + 1; n <= sheet.rowCount; n++) {
     const row = sheet.getRow(n);
-    const fields = ['가맹점명', '주소', '카테고리', '대표메뉴', '거리'];
-    const cells = fields.map(field => columns[field] ? row.getCell(columns[field]) : null);
+    const cells = WORKBOOK_FIELDS.map(field => columns[field] ? row.getCell(columns[field]) : null);
     const values = cells.map(cell => cell ? text(cell) : '');
     if (values.every(value => !value)) continue;
     const [name, address, category, main_menu, rawDistance] = values;

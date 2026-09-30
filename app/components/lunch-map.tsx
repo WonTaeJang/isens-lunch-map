@@ -53,7 +53,7 @@ export default function LunchMap({ restaurants = EMPTY_RESTAURANTS, focusRequest
     const officeMarker = officeMarkerRef.current;
     const officeContent = document.createElement('div');
     officeContent.className = 'map-office-info';
-    officeContent.textContent = '아이센스 ❤️';
+    officeContent.textContent = '아이센스 빌딩';
     addCloseButton(officeContent);
     const officeInfo = new maps.InfoWindow({ content: officeContent, removable: false, zIndex: 20 });
     const onOfficeClick = () => {

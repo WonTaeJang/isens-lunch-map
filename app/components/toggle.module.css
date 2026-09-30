@@ -1,0 +1,42 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #52635b;
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.track {
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #85938d;
+  transition: background 150ms;
+}
+
+.thumb {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px #0003;
+  transition: transform 150ms;
+}
+
+.toggle[aria-checked='true'] .track { background: #127e70; }
+.toggle[aria-checked='true'] .thumb { transform: translateX(18px); }
+.toggle:disabled { opacity: .5; cursor: not-allowed; }
+
+@media (prefers-reduced-motion: reduce) {
+  .track, .thumb { transition: none; }
+}

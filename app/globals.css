@@ -54,7 +54,11 @@ h3 { font-size: 14px; font-weight: 600; letter-spacing: -.4px; }
 .file-symbol { width: 36px; height: 43px; display: grid; place-items: center; background: #e4f1e9; color: #367d61; border-radius: 6px; font-weight: 700; font-size: 18px; position: relative; margin-bottom: 18px; }
 .file-symbol span { position: absolute; right: -9px; bottom: -3px; border: 2px solid white; width: 21px; height: 21px; border-radius: 50%; background: #72a58b; color: white; font-size: 13px; }
 .upload-placeholder p { margin-top: 6px; }
-.button { display: inline-flex; justify-content: center; padding: 11px 23px; border-radius: 8px; background: #127e70; color: white; font-size: 12px; font-weight: 600; margin-top: 20px; cursor: pointer; }
+.button { display: inline-flex; justify-content: center; padding: 11px 23px; border-radius: 8px; font-size: 12px; font-weight: 600; margin-top: 20px; cursor: pointer; }
+.button-primary { background: #127e70; color: white; }
+.button-secondary { background: #edf0f2; color: #52616b; }
+.button-primary:hover:not(:disabled) { background: #0e6c60; }
+.button-secondary:hover:not(:disabled) { background: #dfe5e8; }
 .button:disabled { background: #e5ece8; color: #81938a; cursor: not-allowed; }
 .upload-placeholder small { font-size: 10px; color: #828d94; margin-top: 12px; }
 .table-scroll { overflow-x: auto; margin-top: 20px; }

@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import Button from '@/components/ui/button';
+import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { reviewRequest as request } from './review-api';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from './review-form';
@@ -29,7 +30,7 @@ function ReviewPanelContent({ restaurant, onClose, identity, identityReady, stor
   const [actionError, setError] = useState('');
   const error = actionError || feed.error;
   const [editing, setEditing] = useState<Review | 'new' | null>(null);
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<Review | null>(null);
   const [notice, setNotice] = useState('');
   useEffect(() => {
     const element = dialog.current;
@@ -42,7 +43,7 @@ function ReviewPanelContent({ restaurant, onClose, identity, identityReady, stor
     if (await feed.mutate(method, { ...identity, restaurant_id: restaurant.id, id: review?.id, version: review?.updated_at ?? review?.created_at, ...input })) {
       router.refresh();
       setEditing(null); setDeleting(null);
-      setNotice(method === 'DELETE' ? '리뷰를 삭제했습니다.' : '리뷰를 저장했습니다.');
+      setNotice(method === 'DELETE' ? '' : '리뷰를 저장했습니다.');
     }
   }
   async function reloadEditing() {
@@ -61,6 +62,7 @@ function ReviewPanelContent({ restaurant, onClose, identity, identityReady, stor
   }
 
   return <dialog ref={dialog} className="review-panel" aria-labelledby="review-panel-title" onCancel={event => { event.preventDefault(); close(); }}>
+    {deleting && <ConfirmDialog title="리뷰를 삭제할까요?" description="삭제한 리뷰는 복구할 수 없습니다." confirmLabel="삭제" busy={busy} error={error} onCancel={() => setDeleting(null)} onConfirm={() => void mutate('DELETE', deleting).catch(cause => setError(cause instanceof Error ? cause.message : '삭제하지 못했습니다.'))} />}
     <header className="review-panel-header"><div><p className="subtle">식당 리뷰</p><h2 id="review-panel-title">{restaurant.name}</h2></div><button type="button" className="review-close" aria-label="리뷰 닫기" disabled={busy} onClick={close}>×</button></header>
     <div className="review-panel-body">
       {page && <div className="review-summary"><strong>리뷰 {page.total}개</strong><span>추천 {page.recommended}</span><span>비추천 {page.not_recommended}</span></div>}
@@ -77,7 +79,7 @@ function ReviewPanelContent({ restaurant, onClose, identity, identityReady, stor
         <p className="review-content">{review.content}</p>
         <div className="review-tags">{review.tags.map(tag => <span key={tag}>{REVIEW_TAGS.find(option => option.value === tag)?.label}</span>)}</div>
         {review.is_mine && <div className="review-actions">
-          {deleting === review.id ? <><span>리뷰를 삭제할까요?</span><Button disabled={busy || loading} onClick={() => void mutate('DELETE', review).catch(cause => setError(cause instanceof Error ? cause.message : '삭제하지 못했습니다.'))}>삭제 확인</Button><Button disabled={busy} onClick={() => setDeleting(null)}>취소</Button></> : <><Button disabled={busy || loading || Boolean(editing)} onClick={() => setEditing(review)}>수정</Button><Button disabled={busy || loading || Boolean(editing)} onClick={() => setDeleting(review.id)}>삭제</Button></>}
+          <Button disabled={busy || loading || Boolean(editing)} onClick={() => setEditing(review)}>수정</Button><Button variant="secondary" disabled={busy || loading || Boolean(editing)} onClick={() => { setError(''); setDeleting(review); }}>삭제</Button>
         </div>}
       </li>)}</ul>
       {page?.hasMore && <Button disabled={loading || busy || Boolean(editing)} onClick={() => void load(true)}>리뷰 더 보기</Button>}

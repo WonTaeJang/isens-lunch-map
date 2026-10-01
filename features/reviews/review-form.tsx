@@ -51,6 +51,6 @@ export default function ReviewForm({ review, name, busy, onSave, onCancel, onRel
       </fieldset>)}</div>
     </fieldset>
     {error && <p role="alert" className="review-error">{error}</p>}
-    <div className="review-actions"><Button type="submit" loading={busy || checking} disabled={conflict || !length || length > MAX_REVIEW_LENGTH || recommended === null}>{base ? '수정 저장' : '리뷰 등록'}</Button><Button disabled={busy} onClick={onCancel}>취소</Button></div>
+    <div className="review-actions"><Button type="submit" loading={busy || checking} disabled={conflict || !length || length > MAX_REVIEW_LENGTH || recommended === null}>{base ? '수정 저장' : '리뷰 등록'}</Button><Button variant="secondary" disabled={busy} onClick={onCancel}>취소</Button></div>
   </form>;
 }

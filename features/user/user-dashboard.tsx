@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button';
+import ConfirmDialog from '@/components/ui/confirm-dialog';
 import useFavorites from '@/features/favorites/use-favorites';
 import { toggleStoredFavorite } from '@/features/favorites/favorites-store';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
@@ -40,14 +41,14 @@ function UserDashboardContent({ restaurants, failed, identity, identityReady, id
   const [favoriteError, setFavoriteError] = useState('');
   const [notice, setNotice] = useState('');
   const [editing, setEditing] = useState<UserReview | null>(null);
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<Review | null>(null);
   const savedRestaurants = restaurants.filter(row => favorites.has(row.id));
   async function mutate(method: 'PATCH' | 'DELETE', review: Review, input?: ReturnType<typeof reviewInput>) {
     if (!identity) return;
     setError(''); setNotice('');
     if (await feed.mutate(method, { user_id: identity.user_id, id: review.id, version: review.updated_at ?? review.created_at, ...input })) {
       setEditing(null); setDeleting(null);
-      setNotice(method === 'DELETE' ? '리뷰를 삭제했습니다.' : '리뷰를 수정했습니다.');
+      setNotice(method === 'DELETE' ? '' : '리뷰를 수정했습니다.');
       router.refresh();
     }
   }
@@ -62,6 +63,7 @@ function UserDashboardContent({ restaurants, failed, identity, identityReady, id
       <span className={styles['user-avatar']} aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg></span>
       <div><p className="subtle">나의 점심 기록</p><h1>{identity?.user_name ?? (identityReady ? '사용자 정보를 확인해 주세요' : '불러오는 중…')}</h1><p className="subtle">작성한 리뷰 {page?.total ?? '—'} · 즐겨찾기 {identityReady ? favorites.size : '—'}</p></div>
     </section>
+    {deleting && <ConfirmDialog title="리뷰를 삭제할까요?" description="삭제한 리뷰는 복구할 수 없습니다." confirmLabel="삭제" busy={busy} error={error} onCancel={() => setDeleting(null)} onConfirm={() => void mutate('DELETE', deleting).catch(cause => setError(cause instanceof Error ? cause.message : '삭제하지 못했습니다.'))} />}
     <UserProgress stats={page} loading={loading} />
     <div className={styles['user-tabs']} aria-label="내 기록 분류">{TABS.map(item => <button type="button" key={item.value} aria-pressed={tab === item.value} disabled={busy || Boolean(editing)} onClick={() => setTab(item.value)}>{item.label}</button>)}</div>
     {tab === 'reviews' ? <section className={styles['user-records']} aria-label="내 리뷰">
@@ -77,7 +79,7 @@ function UserDashboardContent({ restaurants, failed, identity, identityReady, id
         {editing?.id === review.id ? <ReviewForm key={editing.id} review={editing} name={identity?.user_name ?? ''} busy={busy || loading} onReload={reloadEditing} onCancel={() => setEditing(null)} onSave={(input, base) => mutate('PATCH', base ?? editing, input)} /> : <>
           <p className="review-content">{review.content}</p>
           <div className="review-tags">{review.tags.map(tag => <span key={tag}>{REVIEW_TAGS.find(option => option.value === tag)?.label}</span>)}</div>
-          <div className="review-actions">{deleting === review.id ? <><span>리뷰를 삭제할까요?</span><Button disabled={busy || loading} onClick={() => void mutate('DELETE', review).catch(cause => setError(cause instanceof Error ? cause.message : '삭제하지 못했습니다.'))}>삭제 확인</Button><Button disabled={busy} onClick={() => setDeleting(null)}>취소</Button></> : <><Button disabled={busy || loading || Boolean(editing)} onClick={() => { setEditing(review); setDeleting(null); }}>수정</Button><Button disabled={busy || loading || Boolean(editing)} onClick={() => setDeleting(review.id)}>삭제</Button></>}</div>
+          <div className="review-actions"><Button disabled={busy || loading || Boolean(editing)} onClick={() => { setEditing(review); setDeleting(null); }}>수정</Button><Button variant="secondary" disabled={busy || loading || Boolean(editing)} onClick={() => { setError(''); setDeleting(review); }}>삭제</Button></div>
         </>}
       </li>)}</ul>
       {page?.hasMore && <Button disabled={busy || loading || Boolean(editing)} onClick={() => void load(true)}>더 보기</Button>}

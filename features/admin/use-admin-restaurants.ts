@@ -1,21 +1,18 @@
 'use client';
 import { useRef, useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import type { RestaurantRow as Row, ImportPreview as Preview } from '@/lib/restaurant-types';
 import { updateRestaurant, previewImport, commitImport } from './admin-api';
-export default function useAdminRestaurants(restaurants: Row[]) {
-    const router = useRouter();
+export default function useAdminRestaurants(restaurants: Row[], password: string, reload: () => Promise<void>) {
     const [activeTab, setActiveTab] = useState<'active' | 'inactive'>('active');
     const activeCount = restaurants.filter(r => r.active === true).length;
     const visibleRestaurants = restaurants.filter(r => (r.active === true) === (activeTab === 'active'));
-    const [password, setPassword] = useState('');
     const [file, setFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<Preview | null>(null);
     const [saving, setBusy] = useState(false);
     const [refreshing, startRefresh] = useTransition();
     const requestInFlight = useRef(false);
     const busy = saving || refreshing;
-    function refresh() { startRefresh(() => router.refresh()); }
+    function refresh() { startRefresh(async () => { await reload(); }); }
     const [message, setMessage] = useState('');
     const [addresses, setAddresses] = useState<Record<string, string>>({});
     const [addressMessage, setAddressMessage] = useState('');
@@ -107,5 +104,5 @@ export default function useAdminRestaurants(restaurants: Row[]) {
     }
     function onFileChange(next: File | null) { setFile(next); setPreview(null); setMessage(''); }
     function onAddressChange(id: string, value: string) { setAddresses(current => ({ ...current, [id]: value })); }
-    return { activeTab, onTabChange: setActiveTab, activeCount, visibleRestaurants, password, onPasswordChange: setPassword, file, onFileChange, preview, busy, message, addresses, onAddressChange, addressMessage, addressErrors, saveAddress, upload, toggle };
+    return { activeTab, onTabChange: setActiveTab, activeCount, visibleRestaurants, file, onFileChange, preview, busy, message, addresses, onAddressChange, addressMessage, addressErrors, saveAddress, upload, toggle };
 }

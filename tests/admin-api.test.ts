@@ -25,3 +25,30 @@ test('admin API serializes state changes and propagates server errors',async()=>
   };
   try {await assert.rejects(updateRestaurant('test-password',{id:'test',active:false,previous:true}),/상태가 변경되었습니다/);} finally {globalThis.fetch=previous;}
 });
+
+test('admin list requires a password header and bypasses the browser cache', async () => {
+  const { loadAdminRestaurants } = await import('../features/admin/admin-api');
+  const previous = globalThis.fetch;
+  globalThis.fetch = async (_url, init) => {
+    assert.equal(new Headers(init?.headers).get('x-admin-password'), 'test-password');
+    assert.equal(init?.cache, 'no-store');
+    return Response.json({ restaurants: [{ id: 'a' }] });
+  };
+  try { assert.deepEqual(await loadAdminRestaurants('test-password'), [{ id: 'a' }]); }
+  finally { globalThis.fetch = previous; }
+});
+
+test('admin list rejects unauthenticated requests before accessing the database', async () => {
+  const { GET } = await import('../app/api/admin/restaurants/route');
+  const original = process.env.ADMIN_PASSWORD;
+  process.env.ADMIN_PASSWORD = 'test-password';
+  try {
+    const response = await GET(new Request('http://localhost/api/admin/restaurants'));
+    assert.equal(response.status, 401);
+    assert.equal(response.headers.get('Cache-Control'), 'private, no-store');
+    assert.equal('restaurants' in await response.json(), false);
+  } finally {
+    if (original === undefined) delete process.env.ADMIN_PASSWORD;
+    else process.env.ADMIN_PASSWORD = original;
+  }
+});

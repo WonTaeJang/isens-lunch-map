@@ -4,8 +4,6 @@ import Button from '@/components/ui/button';
 import type { ImportPreview } from '@/lib/restaurant-types';
 
 type Props = {
-  password: string;
-  onPasswordChange: (value: string) => void;
   busy: boolean;
   file: File | null;
   onFileChange: (value: File | null) => void;
@@ -15,15 +13,14 @@ type Props = {
   upload: (mode: 'preview' | 'commit') => Promise<void>;
 };
 
-export default function ExcelImportSection({ password, onPasswordChange, busy, file, onFileChange, preview, message, error, upload }: Props) {
+export default function ExcelImportSection({ busy, file, onFileChange, preview, message, error, upload }: Props) {
   return (
     <section className="upload-section">
       <h2>엑셀로 전체 리스트 업데이트</h2>
       <p className="description">가맹점명·주소가 같은 식당은 갱신됩니다. 파일에 없는 기존 식당과 취소선 항목은 비활성화됩니다. 다음 업로드 시 수동 상태보다 엑셀 상태가 우선합니다.</p>
       <div className="upload-placeholder">
-        <label>관리자 비밀번호<input className="admin-input" type="password" autoComplete="current-password" value={password} onChange={event => onPasswordChange(event.target.value)} disabled={busy} /></label>
         <label className="description">전체 식당 목록 (.xlsx, 최대 3MB)<input aria-label="엑셀 파일" type="file" accept=".xlsx" disabled={busy} onChange={event => onFileChange(event.target.files?.[0] ?? null)} className="admin-input" /></label>
-        <Button loading={busy} disabled={!file || !password || !!error} onClick={() => upload('preview')}>데이터 검증 및 미리보기</Button>
+        <Button loading={busy} disabled={!file || !!error} onClick={() => upload('preview')}>데이터 검증 및 미리보기</Button>
         <small>카테고리 / 가맹점명 / 대표메뉴 / 주소 / 거리 헤더를 인식합니다. 숨겨진 시트는 제외합니다. 취소선은 해당 행의 데이터 셀 중 하나라도 있으면 적용됩니다.</small>
       </div>
       <p role="status" className="description">{message || error}</p>

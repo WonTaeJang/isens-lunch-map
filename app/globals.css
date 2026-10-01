@@ -213,3 +213,9 @@ td .button { margin: 0; white-space: nowrap; }
 
 .restaurant-list-name { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .restaurant-list-name h3 { min-width: 0; overflow-wrap: anywhere; }
+
+.admin-login { max-width: 400px; margin: 64px auto; padding: 28px; background: white; border: 1px solid #e4e9eb; border-radius: 16px; }
+.admin-login h1 { font-size: 22px; }
+.admin-login form { margin-top: 24px; }
+.admin-login label { display: block; font-size: 13px; }
+.admin-login input, .admin-login .button { width: 100%; }

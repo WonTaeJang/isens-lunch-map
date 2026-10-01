@@ -41,3 +41,15 @@ export async function PATCH(request: Request) {
     return Response.json({ error: error instanceof ImportError ? error.message : '변경하지 못했습니다. 잠시 후 다시 시도해 주세요.' }, { status: 400 });
   }
 }
+
+export async function GET(request: Request) {
+  const headers = { 'Cache-Control': 'private, no-store' };
+  try { authorize(request); }
+  catch (error) {
+    return Response.json({ error: error instanceof ImportError ? error.message : '인증에 실패했습니다.' }, { status: 401, headers });
+  }
+  try {
+    const restaurants = await getRestaurants();
+    return Response.json({ restaurants: restaurants.map(({ id, name, category, main_menu, address, active, distance, latitude, longitude }) => ({ id, name, category, main_menu, address, active, distance, latitude, longitude })) }, { headers });
+  } catch { return Response.json({ error: '식당 목록을 불러오지 못했습니다. 다시 시도해 주세요.' }, { status: 500, headers }); }
+}

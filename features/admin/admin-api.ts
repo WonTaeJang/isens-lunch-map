@@ -3,6 +3,7 @@ import type { ImportPreview, ImportSummary } from '@/lib/restaurant-types';
 export type RestaurantUpdate =
   | { action?: 'active'; id: string; active: boolean; previous: boolean }
   | { action: 'address'; id: string; address: string; previousAddress: string | null };
+  
 type CommitResult = { summary: ImportSummary & { addressErrors: number } };
 
 async function request<T>(password: string, method: 'POST' | 'PATCH', body: FormData | RestaurantUpdate): Promise<T> {
@@ -27,4 +28,16 @@ export function previewImport(password: string, form: FormData) {
 }
 export function commitImport(password: string, form: FormData) {
   return request<CommitResult>(password, 'POST', form);
+}
+
+export async function loadAdminRestaurants(password: string) {
+  const response = await fetch('/api/admin/restaurants', {
+    headers: { 'x-admin-password': password }, 
+    cache: 'no-store',
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) throw new Error(result.error || '관리자 목록을 불러오지 못했습니다.');
+  return result.restaurants as import('@/lib/restaurant-types').RestaurantRow[];
 }

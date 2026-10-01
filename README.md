@@ -210,7 +210,9 @@ are not supported). Unstruck imported rows become active; this supersedes manual
 status changes on the next import. Hidden/filtered rows within the selected visible worksheet are also imported.
 
 All coordinates are resolved before writes. Valid existing coordinates are reused.
-Failed/ambiguous address lookups save NULL address, latitude and longitude.
+Unmatched/ambiguous addresses save NULL address, latitude and longitude.
+Service failures (network, API credentials/quota, malformed responses, or the
+import deadline) abort before any database writes, preserving existing data.
 The address-error list shows rows whose address is NULL and lets administrators
 enter an address to search and save coordinates. No additional columns are needed.
 On reimport, a NULL-address row matches by name only when unambiguous; otherwise
@@ -275,3 +277,30 @@ localStorage의 기존 닉네임·ID를 읽고 내 리뷰와 즐겨찾기 탭을
 페이지네이션과 무관하게 전체 기록을 집계하고, 식당별 중복 리뷰는 최신 작성 건 하나를 사용합니다.
 평가가 NULL인 기존 리뷰는 탐방 수에는 포함하되 추천·비추천 비율에서는 제외합니다.
 식당 또는 평가가 없으면 회색 막대와 안내를 표시합니다.
+
+
+## 리뷰 상태와 오류 처리
+
+- `features/reviews/review-feed.ts`는 조회 취소·응답 순서·저장 잠금을 관리하고,
+  `use-review-feed.ts`가 지도 리뷰 패널과 사용자 페이지에 연결합니다.
+  저장 시작 전에 기존 조회를 무효화하며, 취소된 요청이 늦게 응답해도 반영하지 않습니다.
+- 목록 API의 `nextCursor`를 다음 요청의 `cursor`로 전달합니다. 커서는 생성 시각의
+  PostgreSQL 마이크로초와 ID를 보존하여, 앞 페이지 삭제로 다음 항목이 누락되지 않게 합니다.
+- `ApiError.status`로 수정 충돌(409)을 구분합니다. 작성 내용은 유지하고 최신 리뷰를
+  확인한 뒤 사용자가 명시적으로 최신 버전을 선택해야 재저장할 수 있습니다.
+  삭제된 리뷰는 이전 버전으로 다시 저장하지 않습니다.
+- `local-user-store.ts`와 `use-local-user.ts`가 사용자 초기화와 다른 탭의 저장소 변경을 공유합니다.
+  사용자 ID가 바뀌면 이전 사용자의 조회·편집 상태를 분리합니다.
+- `lib/server/reviews.ts`에서 DB 날짜와 NULL을 API 응답으로 명시적으로 변환합니다.
+- 사용자 페이지 스타일은 `features/user/user.module.css`에서 관리합니다.
+  지도 이벤트 콜백이 변경돼도 지도 인스턴스를 다시 만들지 않습니다.
+
+### PostgreSQL 통합 테스트
+
+`npm test`는 요청 순서 역전, 충돌 시 작성 내용 보존, 검색 서비스 장애 중 쓰기 중단 등을 검증합니다.
+실제 PostgreSQL 검증은 전용 테스트 DB의 `REVIEW_TEST_DATABASE_URL`을 지정한 뒤
+`npm run test:integration`으로 실행합니다. 지정하지 않으면 해당 테스트는 건너뜁니다.
+일반 `DATABASE_URL`은 사용하지 않습니다. 테스트는 임의 이름의 스키마를 생성하고
+해당 스키마에서만 실행한 후 삭제하므로 테스트 DB 계정에 스키마 생성 권한이 필요합니다.
+검증 항목은 페이지 사이 삭제·삽입, 마이크로초 커서, NULL 평가·중복 리뷰 집계,
+동시 리뷰 등록, 이전 버전 수정 거절입니다.

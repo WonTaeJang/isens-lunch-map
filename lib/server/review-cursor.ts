@@ -3,7 +3,8 @@ import { ReviewError, uuid } from '@/features/reviews/review-model';
 
 export type ReviewCursor = { 
   createdAt: string; 
-  id: string 
+  id: string;
+  restaurantActive?: boolean;
 };
 
 export function decodeReviewCursor(raw: string | null): ReviewCursor | null {
@@ -20,9 +21,11 @@ export function decodeReviewCursor(raw: string | null): ReviewCursor | null {
       throw new Error();
     }
 
+    if (value.restaurantActive !== undefined && typeof value.restaurantActive !== 'boolean') throw new Error();
     return { 
       createdAt: value.createdAt, 
-      id: uuid(value.id) 
+      id: uuid(value.id),
+      ...(value.restaurantActive === undefined ? {} : { restaurantActive: value.restaurantActive })
     };
   } catch { 
     throw new ReviewError('페이지 정보가 올바르지 않습니다.'); 

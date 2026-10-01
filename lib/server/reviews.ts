@@ -18,10 +18,10 @@ function present(row: ReviewRow): Review {
     is_recommended: row.is_recommended, tags: decodeTags(row.tags),
     created_at: iso(row.created_at), updated_at: row.updated_at === null ? null : iso(row.updated_at), is_mine: row.is_mine };
 }
-function pageCursor(rows: PagedReviewRow[]) {
+function pageCursor(rows: PagedReviewRow[], restaurantActive?: boolean) {
   const last = rows[REVIEW_PAGE_SIZE - 1];
   // Keep PostgreSQL microseconds: JS Date loses precision at page boundaries.
-  return rows.length > REVIEW_PAGE_SIZE && last ? encodeReviewCursor({ createdAt: last.cursor_time, id: last.id }) : null;
+  return rows.length > REVIEW_PAGE_SIZE && last ? encodeReviewCursor({ createdAt: last.cursor_time, id: last.id, ...(restaurantActive === undefined ? {} : { restaurantActive }) }) : null;
 }
 export async function listReviews(db: Pool, restaurant: string, user: string | null, cursor: ReviewCursor | null = null): Promise<ReviewPage> {
   const summary = await db.query<{total: number; recommended: number; not_recommended: number}>(`select count(*)::int total,
@@ -108,11 +108,11 @@ export async function listUserReviews(db: Pool, user: string, cursor: ReviewCurs
     to_char(r.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') cursor_time,
     s.name restaurant_name, s.active restaurant_active, s.latitude, s.longitude
     from public.review r join public.restaurants s on s.id=r.restaurant_id
-    where r.user_id=$1 and ($2::timestamptz is null or (r.created_at,r.id)<($2::timestamptz,$3::uuid))
-    order by r.created_at desc,r.id desc limit $4`, [user, cursor?.createdAt ?? null, cursor?.id ?? null, REVIEW_PAGE_SIZE + 1]);
+    where r.user_id=$1 and ($2::timestamptz is null or (coalesce(s.active,false),r.created_at,r.id)<($5::boolean,$2::timestamptz,$3::uuid))
+    order by coalesce(s.active,false) desc,r.created_at desc,r.id desc limit $4`, [user, cursor?.createdAt ?? null, cursor?.id ?? null, REVIEW_PAGE_SIZE + 1, cursor?.restaurantActive ?? true]);
   return { ...summary.rows[0], reviews: rows.slice(0, REVIEW_PAGE_SIZE).map(row => ({ ...present(row),
     restaurant_id: row.restaurant_id, restaurant_name: row.restaurant_name, restaurant_active: row.restaurant_active,
-    latitude: row.latitude, longitude: row.longitude })), hasMore: rows.length > REVIEW_PAGE_SIZE, nextCursor: pageCursor(rows) };
+    latitude: row.latitude, longitude: row.longitude })), hasMore: rows.length > REVIEW_PAGE_SIZE, nextCursor: pageCursor(rows, Boolean(rows[REVIEW_PAGE_SIZE - 1]?.restaurant_active)) };
 }
 
 export async function listReviewedRestaurantIds(db: Pool, user: string): Promise<string[]> {

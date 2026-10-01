@@ -54,7 +54,7 @@ function UserDashboardContent({ restaurants, failed, identity, identityReady, id
   const [notice, setNotice] = useState('');
   const [editing, setEditing] = useState<UserReview | null>(null);
   const [deleting, setDeleting] = useState<Review | null>(null);
-  const savedRestaurants = restaurants.filter(row => favorites.has(row.id));
+  const savedRestaurants = restaurants.filter(row => favorites.has(row.id)).sort((a, b) => Number(Boolean(b.active)) - Number(Boolean(a.active)));
   async function mutate(method: 'PATCH' | 'DELETE', review: Review, input?: ReturnType<typeof reviewInput>) {
     if (!identity) return;
     setError(''); setNotice('');

@@ -78,6 +78,7 @@ test('list paginates and exposes ownership flag without selecting author UUIDs',
   assert.equal(result.hasMore, true);
   assert.equal(result.mine?.is_mine, true);
   assert.deepEqual(result.reviews[0].tags, ['tasty']);
+
   assert.ok(mock.calls.every(call => !/select[^]*, user_id,/.test(call.sql)));
 });
 
@@ -106,8 +107,9 @@ test('my reviews are scoped to one user, join restaurant data and include inacti
     assert.match(sql, /where r.user_id=\$1/);
     assert.match(sql, /join public.restaurants/);
     assert.doesNotMatch(sql, /active\s*=\s*true/);
-    assert.deepEqual(values, [user, cursor.createdAt, cursor.id, 21]);
-    assert.match(sql, /\(r.created_at,r.id\)</);
+    assert.deepEqual(values, [user, cursor.createdAt, cursor.id, 21, true]);
+    assert.match(sql, /\(coalesce\(s.active,false\),r.created_at,r.id\)</);
+    assert.match(sql, /order by coalesce\(s.active,false\) desc,r.created_at desc,r.id desc/);
     assert.doesNotMatch(sql, /offset/i);
     return { rows: Array.from({ length: 21 }, (_, i) => ({ ...row, id: `33333333-3333-4333-8333-${String(i).padStart(12, '0')}`, restaurant_id: restaurant, restaurant_name: '식당', restaurant_active: false, tags: '["tasty"]' })), rowCount: 21 };
   });
@@ -116,6 +118,8 @@ test('my reviews are scoped to one user, join restaurant data and include inacti
   assert.equal(result.reviews.length, 20);
   assert.equal(result.hasMore, true);
   assert.deepEqual(result.reviews[0].tags, ['tasty']);
+  const { decodeReviewCursor } = await import('../lib/server/review-cursor');
+  assert.equal(decodeReviewCursor(result.nextCursor)?.restaurantActive, false);
 });
 
 test('expanded tags preserve existing codes and allow mixed experiences for either recommendation', async () => {
@@ -178,6 +182,8 @@ test('review response serializes dates and never leaks DB fields or author ident
 test('cursor preserves microseconds and rejects malformed inputs', async () => {
   const { encodeReviewCursor, decodeReviewCursor } = await import('../lib/server/review-cursor');
   assert.deepEqual(decodeReviewCursor(encodeReviewCursor(cursor)), cursor);
+  const inactiveCursor = { ...cursor, restaurantActive: false };
+  assert.deepEqual(decodeReviewCursor(encodeReviewCursor(inactiveCursor)), inactiveCursor);
   assert.equal(decodeReviewCursor(null), null);
   for (const raw of ['invalid', 'x'.repeat(513), Buffer.from(JSON.stringify({ ...cursor, id: 'bad' })).toString('base64url')]) {
     assert.throws(() => decodeReviewCursor(raw), ReviewError);

@@ -2,7 +2,7 @@
 
 import type { ReviewCounts } from '@/features/reviews/review-model';
 import Script from 'next/script';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '@/components/ui/button';
 import RestaurantMapCard from './restaurant-map-card';
@@ -23,6 +23,8 @@ type Props = {
 };
 
 export default function LunchMap({ reviewedIds, reviewCounts, restaurants, favorites, selectedId, focusRequest, onSelect, onFavorite, onReviews }: Props) {
+  const onSelectRef = useRef(onSelect);
+  useLayoutEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [sdkReady, setSdkReady] = useState(false);
   const [controller, setController] = useState<MapController | null>(null);
@@ -49,7 +51,7 @@ export default function LunchMap({ reviewedIds, reviewCounts, restaurants, favor
               const map = new maps.Map(containerRef.current, { center, level: 4 });
               map.setMaxLevel(5);
               map.addControl(new maps.ZoomControl(), maps.ControlPosition.RIGHT);
-              instance = createMapController(maps, map, center, containerRef.current, onSelect);
+              instance = createMapController(maps, map, center, containerRef.current, id => onSelectRef.current(id));
               setController(instance);
               setError(false);
             } catch { setError(true); }
@@ -65,7 +67,7 @@ export default function LunchMap({ reviewedIds, reviewCounts, restaurants, favor
       // The SDK has no map destroy method. Drop its detached DOM on unmount.
       if (instance) container?.replaceChildren();
     };
-  }, [sdkReady, onSelect]);
+  }, [sdkReady]);
 
   useEffect(() => {
     controller?.update(restaurants, favorites, selectedId);

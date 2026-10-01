@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { percent } from '../features/user/user-progress';
+import { percent } from '../features/user/progress-model';
 
 test('progress and recommendation ratios handle empty and complete records', () => {
   assert.equal(percent(0, 0), 0);

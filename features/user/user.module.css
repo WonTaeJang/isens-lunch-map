@@ -36,14 +36,8 @@
 .user-stat-track { display: flex; height: 10px; border-radius: 8px; overflow: hidden; background: #e9edef; margin-bottom: 8px; }
 .user-stat-track > span { height: 100%; }
 .user-stat-progress { background: #128574; }
-.user-stat-recommended { background: #2563eb; }
-.user-stat-not-recommended { background: #dc2626; }
-.user-stat-legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 12px; margin-bottom: 6px; }
-.user-stat-legend > :first-child { color: #2563eb; }
-.user-stat-legend > :last-child { color: #dc2626; }
 @media (max-width: 760px) { .user-progress { padding: 20px; } }
 
-.user-stat-legend > span { display: inline-flex; align-items: center; gap: 5px; }
 
 .favorite-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .favorite-title h2 { min-width: 0; }

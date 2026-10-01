@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import Button from '@/components/ui/button';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { reviewRequest as request } from './review-api';
+import RecommendationBar from './recommendation-bar';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from './review-form';
 import { type Review, type ReviewPage, type reviewInput } from './review-model';
@@ -83,7 +84,7 @@ function ReviewPanelContent({ restaurant, onClose, identity, identityReady, stor
     {deleting && <ConfirmDialog title="리뷰를 삭제할까요?" description="삭제한 리뷰는 복구할 수 없습니다." confirmLabel="삭제" busy={busy} error={error} onCancel={() => setDeleting(null)} onConfirm={() => void mutate('DELETE', deleting).catch(cause => setError(cause instanceof Error ? cause.message : '삭제하지 못했습니다.'))} />}
     <header className="review-panel-header"><div><p className="subtle">식당 리뷰</p><h2 id="review-panel-title">{restaurant.name}</h2></div><button type="button" className="review-close" aria-label="리뷰 닫기" disabled={busy} onClick={close}>×</button></header>
     <div className="review-panel-body">
-      {page && <div className="review-summary"><strong>리뷰 {page.total}개</strong><span>추천 {page.recommended}</span><span>비추천 {page.not_recommended}</span></div>}
+      {page && <div className="review-summary"><strong>리뷰 {page.total}개</strong><RecommendationBar recommended={page.recommended} notRecommended={page.not_recommended} /></div>}
       {storageError && <p className="subtle">{storageError}</p>}
       {notice && <p role="status">{notice}</p>}
       {error && <div role="alert" className="review-error">{error} <Button disabled={loading || busy || Boolean(editing)} onClick={() => { setError(''); void load(); }}>다시 불러오기</Button></div>}

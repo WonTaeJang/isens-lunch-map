@@ -74,3 +74,32 @@ test('HTTP conflicts preserve status even when server returns a non-JSON body', 
     await assert.rejects(reviewRequest('/reviews'), error => error instanceof ApiError && error.status === 502);
   } finally { globalThis.fetch = previous; }
 });
+
+test('successful creation is counted once before reload even when reload fails', async () => {
+  const { request, pending } = pendingRequests();
+  const feed = createReviewFeed<Page>('/api/reviews', request);
+  feed.start(); pending[0].resolve(page('first')); await flush();
+  let count = 0;
+  const save = feed.mutate('POST', {}, () => { count++; });
+  assert.equal(count, 0);
+  pending[1].resolve({ ok: true }); await flush();
+  assert.equal(count, 1);
+  pending[2].reject(new Error('reload failed'));
+  assert.equal(await save, true);
+  assert.equal(count, 1);
+  feed.dispose();
+});
+test('failed creation does not count, but a successful in-flight creation counts after disposal', async () => {
+  const { request, pending } = pendingRequests();
+  const feed = createReviewFeed<Page>('/api/reviews', request);
+  feed.start(); pending[0].resolve(page('first')); await flush();
+  let count = 0;
+  const failed = feed.mutate('POST', {}, () => { count++; });
+  pending[1].reject(new Error('save failed'));
+  await assert.rejects(failed, /save failed/);
+  assert.equal(count, 0);
+  const success = feed.mutate('POST', {}, () => { count++; });
+  feed.dispose(); pending[2].resolve({ ok: true });
+  await success;
+  assert.equal(count, 1);
+});

@@ -13,6 +13,8 @@ import { REVIEW_TAGS } from './constants';
 import useLocalUser from '@/features/local-user/use-local-user';
 import type { LocalIdentity } from '@/features/local-user/local-user-store';
 import useReviewFeed from './use-review-feed';
+import { getDailyReviewCount, recordDailyReview } from './daily-review-limit';
+import { DAILY_REVIEW_LIMIT } from './constants';
 type Props = { restaurant: { id: string; name: string }; onClose: () => void };
 const DATE_FORMAT = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -33,15 +35,29 @@ function ReviewPanelContent({ restaurant, onClose, identity, identityReady, stor
   const [editing, setEditing] = useState<Review | 'new' | null>(null);
   const [deleting, setDeleting] = useState<Review | null>(null);
   const [notice, setNotice] = useState('');
+  const [limitReached, setLimitReached] = useState(false);
   useEffect(() => {
     const element = dialog.current;
     element?.showModal();
     return () => element?.close();
   }, []);
+  function canCreateReview() {
+    try {
+      if (getDailyReviewCount(window.localStorage) < DAILY_REVIEW_LIMIT) return true;
+      setLimitReached(true);
+    } catch {
+      setError('리뷰 작성 횟수를 확인할 수 없습니다. 브라우저 저장소 설정을 확인해 주세요.');
+    }
+    return false;
+  }
   async function mutate(method: 'POST' | 'PATCH' | 'DELETE', review: Review | null, input?: ReturnType<typeof reviewInput>) {
     if (!identity) return;
+    if (method === 'POST' && !canCreateReview()) return;
     setError(''); setNotice('');
-    if (await feed.mutate(method, { ...identity, restaurant_id: restaurant.id, id: review?.id, version: review?.updated_at ?? review?.created_at, ...input })) {
+    if (await feed.mutate(method, { ...identity, restaurant_id: restaurant.id, id: review?.id, version: review?.updated_at ?? review?.created_at, ...input }, method === 'POST' ? () => {
+      try { recordDailyReview(window.localStorage); }
+      catch { setError('리뷰는 등록되었지만 작성 횟수를 저장하지 못했습니다.'); }
+    } : undefined)) {
       router.refresh();
       setEditing(null); setDeleting(null);
       setNotice(method === 'DELETE' ? '' : '리뷰를 저장했습니다.');
@@ -63,6 +79,7 @@ function ReviewPanelContent({ restaurant, onClose, identity, identityReady, stor
   }
 
   return <dialog ref={dialog} className="review-panel" aria-labelledby="review-panel-title" onCancel={event => { event.preventDefault(); close(); }}>
+    {limitReached && <ConfirmDialog title="오늘의 리뷰를 모두 작성했어요" description={`하루에 작성할 수 있는 리뷰 ${DAILY_REVIEW_LIMIT}개를 모두 사용했어요.\n내일 다시 점심 이야기를 남겨 주세요.`} confirmLabel="확인" showCancel={false} onConfirm={() => setLimitReached(false)} onCancel={() => setLimitReached(false)} />}
     {deleting && <ConfirmDialog title="리뷰를 삭제할까요?" description="삭제한 리뷰는 복구할 수 없습니다." confirmLabel="삭제" busy={busy} error={error} onCancel={() => setDeleting(null)} onConfirm={() => void mutate('DELETE', deleting).catch(cause => setError(cause instanceof Error ? cause.message : '삭제하지 못했습니다.'))} />}
     <header className="review-panel-header"><div><p className="subtle">식당 리뷰</p><h2 id="review-panel-title">{restaurant.name}</h2></div><button type="button" className="review-close" aria-label="리뷰 닫기" disabled={busy} onClick={close}>×</button></header>
     <div className="review-panel-body">
@@ -70,7 +87,7 @@ function ReviewPanelContent({ restaurant, onClose, identity, identityReady, stor
       {storageError && <p className="subtle">{storageError}</p>}
       {notice && <p role="status">{notice}</p>}
       {error && <div role="alert" className="review-error">{error} <Button disabled={loading || busy || Boolean(editing)} onClick={() => { setError(''); void load(); }}>다시 불러오기</Button></div>}
-      {page && identity && !editing && <Button disabled={busy || loading} onClick={() => { setEditing(page.mine ?? 'new'); setDeleting(null); }}>{page.mine ? '내 리뷰 수정' : '리뷰 작성'}</Button>}
+      {page && identity && !editing && <Button disabled={busy || loading} onClick={() => { if (!page.mine && !canCreateReview()) return; setEditing(page.mine ?? 'new'); setDeleting(null); }}>{page.mine ? '내 리뷰 수정' : '리뷰 작성'}</Button>}
       {editing && <ReviewForm key={editing === 'new' ? 'new' : editing.id} review={editing === 'new' ? null : editing} name={identity?.user_name ?? ''} busy={busy || loading} onReload={reloadEditing} onCancel={() => setEditing(null)} onSave={(input, base) => mutate(base ? 'PATCH' : 'POST', base, input)} />}
       {loading && <p role="status">리뷰를 불러오는 중…</p>}
       {page?.total === 0 && !loading && <p className="review-empty">아직 리뷰가 없어요. 첫 점심 후기를 남겨 주세요.</p>}

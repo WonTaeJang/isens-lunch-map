@@ -40,13 +40,14 @@ export function createReviewFeed<P extends Page>(url: string | null, request: Re
     start() { active = true; void load(); },
     dispose() { active = false; invalidate(); },
     load,
-    async mutate(method: 'POST' | 'PATCH' | 'DELETE', body: object) {
+    async mutate(method: 'POST' | 'PATCH' | 'DELETE', body: object, onSuccess?: () => void) {
       if (!active || snapshot.busy) return false;
       invalidate();
       const token = generation;
       publish({ busy: true, loading: false, error: '' });
       try {
         await request('/api/reviews', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        onSuccess?.();
         if (!active || token !== generation) return false;
         await load(false, true);
         return active;

@@ -1,4 +1,5 @@
 import 'server-only';
+import { geocode, validCoordinates, AddressNotFoundError, GeocodingUnavailableError } from './geocoder';
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { getDb } from '@/lib/server/db';
 import { identity, ImportError, type ImportRow } from './parser';
@@ -43,31 +44,6 @@ export function plan(incoming: ImportRow[], existing: Restaurant[]) {
   return { added: incoming.filter(r => !matches.get(identity(r))).length, updated: incoming.filter(r => matches.get(identity(r))).length,
     inactive: incoming.filter(r => !r.active).length, missing: existing.filter(r => !matchedIds.has(r.id) && r.active !== false).length };
 }
-function validCoordinates(r?: { latitude: string | null; longitude: string | null }) {
-  return !!r && r.latitude !== null && r.longitude !== null && r.latitude.trim() !== '' && r.longitude.trim() !== '' && Number.isFinite(Number(r.latitude)) && Number.isFinite(Number(r.longitude)) && Math.abs(Number(r.latitude)) <= 90 && Math.abs(Number(r.longitude)) <= 180;
-}
-export async function geocode(address: string) {
-  const key = process.env.KAKAO_REST_API_KEY;
-  if (!key) throw new ImportError('좌표 검색을 위해 KAKAO_REST_API_KEY를 설정해 주세요.');
-  const roadAddress = address.match(/^(.+?(?:대로|로|길)\s*\d+(?:-\d+)?)(?=\s|[,(.]|$)/)?.[1];
-  const normalizedRoadAddress = roadAddress?.replace(/^서울시\s/, '서울특별시 ').replace(/(대로|로|길)(?=\d+(?:-\d+)?$)/, '$1 ');
-  const addressCandidates = [address, roadAddress, normalizedRoadAddress];
-  const queries = [...new Set(addressCandidates.filter((value): value is string => !!value))];
-  let document: { x: string; y: string } | undefined;
-  for (const query of queries) {
-    const url = new URL('https://dapi.kakao.com/v2/local/search/address.json');
-    url.searchParams.set('query', query);
-    url.searchParams.set('analyze_type', 'exact');
-    const response = await fetch(url, { headers: { Authorization: `KakaoAK ${key}` }, signal: AbortSignal.timeout(10000), cache: 'no-store' });
-    if (!response.ok) throw new ImportError('카카오 주소 검색에 실패했습니다. REST API 키·권한·사용량을 확인해 주세요.');
-    const data = await response.json();
-    if (data.documents?.length === 1 && data.meta?.total_count === 1) { document = data.documents[0]; break; }
-  }
-  if (!document) throw new ImportError(`주소를 하나로 확정할 수 없습니다: ${address}. 도로명과 건물번호 위주로 수정해 주세요.`);
-  const result = { latitude: String(document.y), longitude: String(document.x) };
-  if (!validCoordinates(result)) throw new ImportError('카카오 검색 결과의 좌표가 올바르지 않습니다.');
-  return result;
-}
 export async function synchronize(incoming: ImportRow[], existing: Restaurant[], expected: string) {
   const summary = { ...plan(incoming, existing), addressErrors: 0 };
   const lookup = matchRows(incoming, existing);
@@ -83,9 +59,10 @@ export async function synchronize(incoming: ImportRow[], existing: Restaurant[],
     let addressFailed = false;
     if (!validCoordinates(coordinates)) {
       try {
-        if (Date.now() > deadline) throw new ImportError('주소 검색 시간이 초과되었습니다. 주소를 다시 검색해 주세요.');
+        if (Date.now() > deadline) throw new GeocodingUnavailableError('주소 검색 시간이 초과되었습니다. DB는 변경하지 않았습니다. 다시 시도해 주세요.');
         coordinates = await geocode(row.address);
-      } catch {
+      } catch (error) {
+        if (!(error instanceof AddressNotFoundError)) throw error;
         addressFailed = true;
         coordinates = { latitude: null, longitude: null };
         summary.addressErrors++;

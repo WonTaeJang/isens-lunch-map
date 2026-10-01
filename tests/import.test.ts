@@ -69,7 +69,7 @@ test('multiple visible tables still require disambiguation', async () => {
   await assert.rejects(parseWorkbook(Buffer.from(await book.xlsx.writeBuffer())));
 });
 test('geocoding strips parentheses and punctuation attached to building numbers', async () => {
-  const { geocode } = await import('../lib/server/import/sync');
+  const { geocode } = await import('../lib/server/import/geocoder');
   const oldFetch = globalThis.fetch;
   const oldKey = process.env.KAKAO_REST_API_KEY;
   process.env.KAKAO_REST_API_KEY = 'test';
@@ -93,13 +93,13 @@ test('NULL address matches an unambiguous name on reimport without adding a dupl
   const failed=[{...existing[0],address:null,latitude:null,longitude:null}];
   assert.deepEqual(plan(rows,failed),{added:0,updated:1,inactive:0,missing:0});
   const calls=mockDb(failed);
-  const oldFetch=globalThis.fetch;globalThis.fetch=async()=>{throw new Error('offline');};
+  const oldFetch=globalThis.fetch; const oldKey=process.env.KAKAO_REST_API_KEY; process.env.KAKAO_REST_API_KEY='test'; globalThis.fetch=async()=>Response.json({documents:[],meta:{total_count:0}});
   try {
     await synchronize(rows,failed,revision(failed));
     assert.ok(!calls.some(c=>c.text.startsWith('insert into')));
     assert.equal(calls.find(c=>c.text.startsWith('update public.restaurants set name'))?.values?.[3],null);
     assert.equal(calls.at(-1)?.text,'COMMIT');
-  } finally {globalThis.fetch=oldFetch;}
+  } finally {globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.KAKAO_REST_API_KEY;else process.env.KAKAO_REST_API_KEY=oldKey;}
 });
 test('ambiguous NULL-address name is rejected before import',async()=>{
   const rows=await parseWorkbook(await fixture());
@@ -118,4 +118,32 @@ test('address correction saves server coordinates; failed searches do not write'
     await correctAddress(existing[0].id,' 수정 주소 ',null);
     assert.deepEqual(calls[0],['수정 주소','37.49','127.01',existing[0].id,null]);
   } finally {globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.KAKAO_REST_API_KEY;else process.env.KAKAO_REST_API_KEY=oldKey;}
+});
+
+
+test('service failures and exhausted deadline abort before any database writes', async () => {
+  const rows = await parseWorkbook(await fixture());
+  const withoutCoordinates = [{ ...existing[0], latitude: null, longitude: null }];
+  const originalFetch = globalThis.fetch;
+  const originalKey = process.env.KAKAO_REST_API_KEY;
+  const originalNow = Date.now;
+  try {
+    for (const failure of ['network', 'quota', 'missing-key', 'deadline', 'bad-response']) {
+      const calls = mockDb(withoutCoordinates);
+      process.env.KAKAO_REST_API_KEY = 'test';
+      if (failure === 'missing-key') delete process.env.KAKAO_REST_API_KEY;
+      globalThis.fetch = async () => {
+        if (failure === 'network') throw new Error('offline');
+        return failure === 'bad-response' ? Response.json({ unexpected: true }) : new Response('', { status: 429 });
+      };
+      let tick = 0;
+      Date.now = failure === 'deadline' ? () => tick++ * 300000 : originalNow;
+      await assert.rejects(synchronize(rows, withoutCoordinates, revision(withoutCoordinates)));
+      assert.equal(calls.length, 0, failure + ' must not start a transaction');
+      assert.equal(withoutCoordinates[0].address, existing[0].address);
+    }
+  } finally {
+    globalThis.fetch = originalFetch; Date.now = originalNow;
+    if (originalKey === undefined) delete process.env.KAKAO_REST_API_KEY; else process.env.KAKAO_REST_API_KEY = originalKey;
+  }
 });

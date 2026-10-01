@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import Tabs from '@/components/ui/tabs';
 import EmptyState from '@/components/ui/empty-state';
 import CountBadge from '@/components/ui/count-badge';
 import Toggle from '@/components/ui/toggle';
@@ -11,7 +12,6 @@ const STATUS_TABS = [
   { value: 'inactive', label: '비활성화' },
   { value: 'errors', label: '오류 식당' },
 ] as const;
-const TAB_NAVIGATION_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'Home', 'End']);
 type ActiveTab = 'active' | 'inactive' | 'errors';
 type Props = {
   restaurants: RestaurantRow[];
@@ -38,53 +38,26 @@ export default function RestaurantTable({
   busy,
   toggle,
 }: Props) {
-  function navigateTab(key: string) {
-    const index = STATUS_TABS.findIndex((tab) => tab.value === activeTab);
-    const nextIndex =
-      key === 'Home'
-        ? 0
-        : key === 'End'
-          ? STATUS_TABS.length - 1
-          : (index + (key === 'ArrowRight' ? 1 : -1) + STATUS_TABS.length) % STATUS_TABS.length;
-    const next = STATUS_TABS[nextIndex].value;
-    onTabChange(next);
-    document.getElementById(`restaurant-tab-${next}`)?.focus();
-  }
+  const counts = {
+    active: activeCount,
+    inactive: restaurants.length - activeCount - errorCount,
+    errors: errorCount,
+  };
+  const tabs = STATUS_TABS.map((item) => ({ ...item, count: error ? '—' : counts[item.value] }));
   return (
     <section className="table-section">
       <h2>
         등록된 식당 <CountBadge>{error ? '—' : restaurants.length}</CountBadge>
       </h2>
-      <div className="restaurant-tabs" role="tablist" aria-label="식당 분류">
-        {STATUS_TABS.map(({ value, label }) => (
-          <button
-            key={value}
-            type="button"
-            role="tab"
-            id={`restaurant-tab-${value}`}
-            aria-selected={activeTab === value}
-            aria-controls="restaurant-panel"
-            tabIndex={activeTab === value ? 0 : -1}
-            onClick={() => onTabChange(value)}
-            onKeyDown={(event) => {
-              if (!TAB_NAVIGATION_KEYS.has(event.key)) return;
-              event.preventDefault();
-              navigateTab(event.key);
-            }}
-          >
-            {label}{' '}
-            <span>
-              {error
-                ? '—'
-                : value === 'active'
-                  ? activeCount
-                  : value === 'errors'
-                    ? errorCount
-                    : restaurants.length - activeCount - errorCount}
-            </span>
-          </button>
-        ))}
-      </div>
+      <Tabs
+        items={tabs}
+        value={activeTab}
+        onChange={onTabChange}
+        idPrefix="restaurant"
+        panelId="restaurant-panel"
+        label="식당 분류"
+        className="restaurant-tabs"
+      />
       <div
         id="restaurant-panel"
         role="tabpanel"

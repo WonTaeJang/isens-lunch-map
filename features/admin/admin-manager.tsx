@@ -1,5 +1,6 @@
 'use client';
 
+import Tabs from '@/components/ui/tabs';
 import { useState } from 'react';
 import styles from './admin-manager.module.css';
 import ExcelImportSection from './excel-import-section';
@@ -30,35 +31,14 @@ export default function AdminManager({
   const admin = useAdminRestaurants(restaurants, password, onReload);
   return (
     <>
-      <div className={styles.tabs} role="tablist" aria-label="관리자 메뉴">
-        {ADMIN_TABS.map(({ value, label }, index) => (
-          <button
-            type="button"
-            key={value}
-            id={`admin-tab-${value}`}
-            role="tab"
-            aria-selected={tab === value}
-            aria-controls={`admin-panel-${value}`}
-            tabIndex={tab === value ? 0 : -1}
-            onClick={() => setTab(value)}
-            onKeyDown={(event) => {
-              let next: number;
-              if (event.key === 'ArrowRight') next = (index + 1) % ADMIN_TABS.length;
-              else if (event.key === 'ArrowLeft')
-                next = (index - 1 + ADMIN_TABS.length) % ADMIN_TABS.length;
-              else if (event.key === 'Home') next = 0;
-              else if (event.key === 'End') next = ADMIN_TABS.length - 1;
-              else return;
-              event.preventDefault();
-              const nextTab = ADMIN_TABS[next].value;
-              setTab(nextTab);
-              document.getElementById(`admin-tab-${nextTab}`)?.focus();
-            }}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        items={ADMIN_TABS}
+        value={tab}
+        onChange={setTab}
+        idPrefix="admin"
+        label="관리자 메뉴"
+        className={styles.tabs}
+      />
       <div
         role="tabpanel"
         id="admin-panel-update"

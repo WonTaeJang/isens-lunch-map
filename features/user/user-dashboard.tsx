@@ -10,6 +10,7 @@ import Button from '@/components/ui/button';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import useFavorites from '@/features/favorites/use-favorites';
 import { toggleStoredFavorite } from '@/features/favorites/favorites-store';
+import ReviewActionIcons from '@/features/reviews/review-action-icons';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from '@/features/reviews/review-form';
 import { reviewRequest } from '@/features/reviews/review-api';
@@ -85,14 +86,13 @@ function UserDashboardContent({ restaurants, failed, identity, identityReady, id
       {loading && <p role="status">내 리뷰를 불러오는 중…</p>}
       {page?.total === 0 && !loading && <div className="review-empty">아직 작성한 리뷰가 없어요. <Link href="/" className="text-link">점심 지도에서 식당 찾아보기</Link></div>}
       <ul className="review-list">{page?.reviews.map(review => <li className={`review-item${review.restaurant_active ? '' : ` ${styles['user-restaurant-inactive']}`}`} key={review.id}>
-        <div className="review-item-heading"><h2>{review.restaurant_active && hasCoordinates(review) ? <Link href={mapLink(review.restaurant_id)}>{review.restaurant_name} ↗</Link> : review.restaurant_name}</h2><RecommendationBadge recommended={review.is_recommended} /></div>
+        <div className="review-item-heading"><h2>{review.restaurant_active && hasCoordinates(review) ? <Link href={mapLink(review.restaurant_id)}>{review.restaurant_name} ↗</Link> : review.restaurant_name}</h2><div className="review-heading-actions"><RecommendationBadge recommended={review.is_recommended} /><ReviewActionIcons disabled={busy || loading || Boolean(editing)} onEdit={() => { setEditing(review); setDeleting(null); }} onDelete={() => { setError(''); setDeleting(review); }} /></div></div>
         {!review.restaurant_active && <p className="subtle">현재 비활성 식당입니다.</p>}
         {review.restaurant_active && !hasCoordinates(review) && <p className="subtle">위치 확인 중 · 지도 이동 불가</p>}
         <p className="subtle">{DATE_FORMAT.format(new Date(review.updated_at ?? review.created_at))}{review.updated_at && ' · 수정됨'}</p>
         {editing?.id === review.id ? <ReviewForm key={editing.id} review={editing} name={identity?.user_name ?? ''} busy={busy || loading} onReload={reloadEditing} onCancel={() => setEditing(null)} onSave={(input, base) => mutate('PATCH', base ?? editing, input)} /> : <>
           <p className="review-content">{review.content}</p>
           <div className="review-tags">{review.tags.map(tag => <span key={tag}>{REVIEW_TAGS.find(option => option.value === tag)?.label}</span>)}</div>
-          <div className="review-actions"><Button disabled={busy || loading || Boolean(editing)} onClick={() => { setEditing(review); setDeleting(null); }}>수정</Button><Button variant="secondary" disabled={busy || loading || Boolean(editing)} onClick={() => { setError(''); setDeleting(review); }}>삭제</Button></div>
         </>}
       </li>)}</ul>
       {page?.hasMore && <Button disabled={busy || loading || Boolean(editing)} onClick={() => void load(true)}>더 보기</Button>}

@@ -222,3 +222,10 @@ td .button { margin: 0; white-space: nowrap; }
 
 .restaurant-panel .panel-heading h2 { display: flex; align-items: center; gap: 8px; margin: 0; }
 .restaurant-panel .panel-heading h2 .count { margin-left: 0; line-height: 1.5; }
+
+.review-heading-actions { display: flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0; }
+.review-heading-actions .recommendation-badge { margin-right: 4px; }
+.review-action-icon { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #74838b; cursor: pointer; }
+.review-action-icon:hover:not(:disabled) { color: #127e70; background: #edf6f3; }
+.review-action-icon:focus-visible { outline: 2px solid #127e70; outline-offset: 2px; }
+.review-action-icon:disabled { opacity: .4; cursor: not-allowed; }

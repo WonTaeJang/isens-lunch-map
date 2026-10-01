@@ -6,6 +6,7 @@ import Button from '@/components/ui/button';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { reviewRequest as request } from './review-api';
 import RecommendationBar from './recommendation-bar';
+import ReviewActionIcons from './review-action-icons';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from './review-form';
 import { type Review, type ReviewPage, type reviewInput } from './review-model';
@@ -93,13 +94,13 @@ function ReviewPanelContent({ restaurant, onClose, identity, identityReady, stor
       {loading && <p role="status">리뷰를 불러오는 중…</p>}
       {page?.total === 0 && !loading && <p className="review-empty">아직 리뷰가 없어요. 첫 점심 후기를 남겨 주세요.</p>}
       <ul className="review-list">{page?.reviews.map(review => <li key={review.id} className="review-item">
-        <div className="review-item-heading"><strong>{review.user_name || '익명'} {review.is_mine && <small>내 리뷰</small>}</strong><RecommendationBadge recommended={review.is_recommended} /></div>
+        <div className="review-item-heading"><strong>{review.user_name || '익명'} {review.is_mine && <small>내 리뷰</small>}</strong><div className="review-heading-actions"><RecommendationBadge recommended={review.is_recommended} />
+          {review.is_mine && <ReviewActionIcons disabled={busy || loading || Boolean(editing)} onEdit={() => setEditing(review)} onDelete={() => { setError(''); setDeleting(review); }} />}
+        </div></div>
         <p className="subtle">{DATE_FORMAT.format(new Date(review.updated_at ?? review.created_at))}{review.updated_at && ' · 수정됨'}</p>
         <p className="review-content">{review.content}</p>
         <div className="review-tags">{review.tags.map(tag => <span key={tag}>{REVIEW_TAGS.find(option => option.value === tag)?.label}</span>)}</div>
-        {review.is_mine && <div className="review-actions">
-          <Button disabled={busy || loading || Boolean(editing)} onClick={() => setEditing(review)}>수정</Button><Button variant="secondary" disabled={busy || loading || Boolean(editing)} onClick={() => { setError(''); setDeleting(review); }}>삭제</Button>
-        </div>}
+
       </li>)}</ul>
       {page?.hasMore && <Button disabled={loading || busy || Boolean(editing)} onClick={() => void load(true)}>리뷰 더 보기</Button>}
     </div>

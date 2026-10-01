@@ -27,7 +27,8 @@ const TAG_GROUP_LABELS = [
   { value: 'negative', label: '아쉬웠어요' },
   { value: 'usage', label: '이용 특징' },
 ] as const;
-export const REVIEW_TAG_GROUPS = TAG_GROUP_LABELS.map(group => ({
-  ...group, tags: REVIEW_TAGS.filter(tag => tag.group === group.value),
+export const REVIEW_TAG_GROUPS = TAG_GROUP_LABELS.map((group) => ({
+  ...group,
+  tags: REVIEW_TAGS.filter((tag) => tag.group === group.value),
 }));
 export const MAX_REVIEW_LENGTH = 1000;

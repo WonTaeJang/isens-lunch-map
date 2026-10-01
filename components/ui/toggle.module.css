@@ -33,10 +33,20 @@
   transition: transform 150ms;
 }
 
-.toggle[aria-checked='true'] .track { background: #127e70; }
-.toggle[aria-checked='true'] .thumb { transform: translateX(18px); }
-.toggle:disabled { opacity: .5; cursor: not-allowed; }
+.toggle[aria-checked='true'] .track {
+  background: #127e70;
+}
+.toggle[aria-checked='true'] .thumb {
+  transform: translateX(18px);
+}
+.toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .track, .thumb { transition: none; }
+  .track,
+  .thumb {
+    transition: none;
+  }
 }

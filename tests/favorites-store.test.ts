@@ -1,6 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { getFavoritesSnapshot, subscribeFavorites, toggleStoredFavorite } from '../features/favorites/favorites-store';
+import {
+  getFavoritesSnapshot,
+  subscribeFavorites,
+  toggleStoredFavorite,
+} from '../features/favorites/favorites-store';
 import { FAVORITES_STORAGE_KEY } from '../features/favorites/favorites';
 
 test('favorite store notifies after successful writes, syncs tabs and cleans up listeners', () => {
@@ -10,12 +14,17 @@ test('favorite store notifies after successful writes, syncs tabs and cleans up 
   const target = Object.assign(new EventTarget(), {
     localStorage: {
       getItem: (key: string) => values.get(key) ?? null,
-      setItem: (key: string, value: string) => { if (blocked) throw new Error('Blocked'); values.set(key, value); },
+      setItem: (key: string, value: string) => {
+        if (blocked) throw new Error('Blocked');
+        values.set(key, value);
+      },
     },
   });
   Object.defineProperty(globalThis, 'window', { configurable: true, value: target });
   let calls = 0;
-  const unsubscribe = subscribeFavorites(() => { calls++; });
+  const unsubscribe = subscribeFavorites(() => {
+    calls++;
+  });
   try {
     assert.equal(toggleStoredFavorite('a'), null);
     assert.equal(getFavoritesSnapshot(), '["a"]');

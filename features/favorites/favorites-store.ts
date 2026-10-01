@@ -13,8 +13,11 @@ export function subscribeFavorites(onChange: () => void) {
 }
 
 export function getFavoritesSnapshot() {
-  try { return window.localStorage.getItem(FAVORITES_STORAGE_KEY) ?? ''; }
-  catch { return ''; }
+  try {
+    return window.localStorage.getItem(FAVORITES_STORAGE_KEY) ?? '';
+  } catch {
+    return '';
+  }
 }
 
 export function toggleStoredFavorite(id: string): string | null {

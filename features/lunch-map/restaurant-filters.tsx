@@ -29,33 +29,53 @@ export default function RestaurantFilters({
 }: Props) {
   return (
     <div className="restaurant-filters">
-      <label className="search-label" htmlFor="restaurant-search">식당 검색</label>
+      <label className="search-label" htmlFor="restaurant-search">
+        식당 검색
+      </label>
       <input
         id="restaurant-search"
         type="search"
         className="restaurant-search"
         placeholder="식당명, 메뉴, 주소 검색"
         value={query}
-        onChange={event => onQueryChange(event.target.value)}
+        onChange={(event) => onQueryChange(event.target.value)}
       />
       <div className="restaurant-filter-controls">
-      <div className="distance-filters" role="group" aria-label="거리 필터">
-        {DISTANCE_FILTER_OPTIONS.map(option => (
-          <FilterChip
-            key={option.label}
-            selected={maxDistance === option.value}
-            onClick={() => onDistanceChange(option.value)}
+        <div className="distance-filters" role="group" aria-label="거리 필터">
+          {DISTANCE_FILTER_OPTIONS.map((option) => (
+            <FilterChip
+              key={option.label}
+              selected={maxDistance === option.value}
+              onClick={() => onDistanceChange(option.value)}
+            >
+              {option.label}
+            </FilterChip>
+          ))}
+        </div>
+        <FilterChip
+          className="favorite-filter-chip"
+          selected={favoritesOnly}
+          onClick={() => onFavoritesOnlyChange(!favoritesOnly)}
+        >
+          <svg
+            width="14"
+            height="16"
+            viewBox="0 0 18 22"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            aria-hidden="true"
           >
-            {option.label}
-          </FilterChip>
-        ))}
+            <path d="M3 2h12v18l-6-4-6 4z" />
+          </svg>
+          즐겨찾기만
+        </FilterChip>
       </div>
-      <FilterChip className="favorite-filter-chip" selected={favoritesOnly} onClick={() => onFavoritesOnlyChange(!favoritesOnly)}>
-        <svg width="14" height="16" viewBox="0 0 18 22" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M3 2h12v18l-6-4-6 4z" /></svg>
-        즐겨찾기만
-      </FilterChip>
-      </div>
-      {failed && <p className="subtle" role="alert">목록 조회 실패</p>}
+      {failed && (
+        <p className="subtle" role="alert">
+          목록 조회 실패
+        </p>
+      )}
     </div>
   );
 }

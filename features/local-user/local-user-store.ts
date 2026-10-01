@@ -8,20 +8,38 @@ export function createLocalUserStore(read: () => Promise<LocalIdentity>) {
   let generation = 0;
   let pending: Promise<void> | null = null;
   const listeners = new Set<() => void>();
-  function publish(next: typeof initial) { snapshot = next; listeners.forEach(listener => listener()); }
+  function publish(next: typeof initial) {
+    snapshot = next;
+    listeners.forEach((listener) => listener());
+  }
   return {
     getSnapshot: () => snapshot,
     getServerSnapshot: () => initial,
-    subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    subscribe(listener: () => void) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
     initialize(force = false) {
       if (!force && (pending || snapshot.ready)) return pending ?? Promise.resolve();
       const token = ++generation;
       if (force) publish(initial);
-      pending = read().then(identity => {
-        if (generation === token) publish({ identity, ready: true, error: '' });
-      }).catch(() => {
-        if (generation === token) publish({ identity: null, ready: true, error: '브라우저의 사용자 정보를 사용할 수 없습니다. 저장소 설정을 확인해 주세요.' });
-      }).finally(() => { if (generation === token) pending = null; });
+      pending = read()
+        .then((identity) => {
+          if (generation === token) publish({ identity, ready: true, error: '' });
+        })
+        .catch(() => {
+          if (generation === token)
+            publish({
+              identity: null,
+              ready: true,
+              error: '브라우저의 사용자 정보를 사용할 수 없습니다. 저장소 설정을 확인해 주세요.',
+            });
+        })
+        .finally(() => {
+          if (generation === token) pending = null;
+        });
       return pending;
     },
   };
@@ -29,6 +47,7 @@ export function createLocalUserStore(read: () => Promise<LocalIdentity>) {
 export const localUserStore = createLocalUserStore(async () => {
   const { ensureLocalUser } = await import('./local-user');
   const identity = ensureLocalUser(window.localStorage);
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identity.user_id)) throw new Error('Invalid identity');
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identity.user_id))
+    throw new Error('Invalid identity');
   return identity;
 });

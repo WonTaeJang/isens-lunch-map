@@ -12,15 +12,27 @@ export default function useReviewedRestaurants(reviewCounts: ReviewCounts | null
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
-      if (!identity) { setResult(null); return; }
+      if (!identity) {
+        setResult(null);
+        return;
+      }
       try {
-        const params = new URLSearchParams({ scope: 'reviewed-restaurants', user_id: identity.user_id });
-        const response = await reviewRequest<{ restaurantIds: string[] }>(`/api/reviews?${params}`, { signal: controller.signal });
-        if (!controller.signal.aborted) setResult({ owner: identity.user_id, ids: new Set(response.restaurantIds) });
-      } catch { if (!controller.signal.aborted) setResult(null); }
+        const params = new URLSearchParams({
+          scope: 'reviewed-restaurants',
+          user_id: identity.user_id,
+        });
+        const response = await reviewRequest<{ restaurantIds: string[] }>(
+          `/api/reviews?${params}`,
+          { signal: controller.signal },
+        );
+        if (!controller.signal.aborted)
+          setResult({ owner: identity.user_id, ids: new Set(response.restaurantIds) });
+      } catch {
+        if (!controller.signal.aborted) setResult(null);
+      }
     }
     void load();
     return () => controller.abort();
   }, [reviewCounts, identity]);
-  return result?.owner === identity?.user_id ? result?.ids ?? null : null;
+  return result?.owner === identity?.user_id ? (result?.ids ?? null) : null;
 }

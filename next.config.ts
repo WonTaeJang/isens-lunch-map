@@ -1,7 +1,7 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  outputFileTracingIncludes: { "/*": ["./lib/certs/supabase-ca.crt"] },
+  outputFileTracingIncludes: { '/*': ['./lib/certs/supabase-ca.crt'] },
 };
 
 export default nextConfig;

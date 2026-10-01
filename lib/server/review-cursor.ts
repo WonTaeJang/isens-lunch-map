@@ -1,8 +1,8 @@
 import 'server-only';
 import { ReviewError, uuid } from '@/features/reviews/review-model';
 
-export type ReviewCursor = { 
-  createdAt: string; 
+export type ReviewCursor = {
+  createdAt: string;
   id: string;
   restaurantActive?: boolean;
 };
@@ -16,19 +16,24 @@ export function decodeReviewCursor(raw: string | null): ReviewCursor | null {
     }
 
     const value = JSON.parse(Buffer.from(raw, 'base64url').toString('utf8'));
-    
-    if (typeof value.createdAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/.test(value.createdAt) || !Number.isFinite(Date.parse(value.createdAt))) {
+
+    if (
+      typeof value.createdAt !== 'string' ||
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/.test(value.createdAt) ||
+      !Number.isFinite(Date.parse(value.createdAt))
+    ) {
       throw new Error();
     }
 
-    if (value.restaurantActive !== undefined && typeof value.restaurantActive !== 'boolean') throw new Error();
-    return { 
-      createdAt: value.createdAt, 
+    if (value.restaurantActive !== undefined && typeof value.restaurantActive !== 'boolean')
+      throw new Error();
+    return {
+      createdAt: value.createdAt,
       id: uuid(value.id),
-      ...(value.restaurantActive === undefined ? {} : { restaurantActive: value.restaurantActive })
+      ...(value.restaurantActive === undefined ? {} : { restaurantActive: value.restaurantActive }),
     };
-  } catch { 
-    throw new ReviewError('페이지 정보가 올바르지 않습니다.'); 
+  } catch {
+    throw new ReviewError('페이지 정보가 올바르지 않습니다.');
   }
 }
 export function encodeReviewCursor(cursor: ReviewCursor): string {

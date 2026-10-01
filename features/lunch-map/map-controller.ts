@@ -21,10 +21,10 @@ export function createMapController(
   onSelect: (id: string | null) => void,
 ) {
   const entries = new Map<string, MarkerEntry>();
-  const image = (file: string, selected: boolean) => new maps.MarkerImage(
-    file, new maps.Size(selected ? 40 : 24, selected ? 50 : 30),
-    { offset: new maps.Point(selected ? 20 : 12, selected ? 48 : 28.8) },
-  );
+  const image = (file: string, selected: boolean) =>
+    new maps.MarkerImage(file, new maps.Size(selected ? 40 : 24, selected ? 50 : 30), {
+      offset: new maps.Point(selected ? 20 : 12, selected ? 48 : 28.8),
+    });
   const images = {
     normal: image('/restaurant-marker-default.svg', false),
     favorite: image('/restaurant-marker-default-favorite.svg', false),
@@ -36,14 +36,29 @@ export function createMapController(
   const host = document.createElement('div');
   host.className = 'restaurant-map-overlay';
   const stop = (event: Event) => event.stopPropagation();
-  const stopDoubleClick = (event: Event) => { event.preventDefault(); event.stopPropagation(); };
+  const stopDoubleClick = (event: Event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
   const blockedEvents = ['pointerdown', 'mousedown', 'touchstart', 'click'];
-  blockedEvents.forEach(name => host.addEventListener(name, stop));
+  blockedEvents.forEach((name) => host.addEventListener(name, stop));
   host.addEventListener('dblclick', stopDoubleClick);
-  const overlay = new maps.CustomOverlay({ content: host, position: center, xAnchor: 0.5, yAnchor: 1, zIndex: 20 });
+  const overlay = new maps.CustomOverlay({
+    content: host,
+    position: center,
+    xAnchor: 0.5,
+    yAnchor: 1,
+    zIndex: 20,
+  });
   const officeMarker = new maps.Marker({
-    map, position: center, title: '아이센스 빌딩', zIndex: 10, clickable: true,
-    image: new maps.MarkerImage('/office-marker.svg', new maps.Size(40, 50), { offset: new maps.Point(20, 48) }),
+    map,
+    position: center,
+    title: '아이센스 빌딩',
+    zIndex: 10,
+    clickable: true,
+    image: new maps.MarkerImage('/office-marker.svg', new maps.Size(40, 50), {
+      offset: new maps.Point(20, 48),
+    }),
   });
   const officeContent = document.createElement('div');
   officeContent.className = 'map-office-info';
@@ -55,9 +70,16 @@ export function createMapController(
   closeButton.textContent = '×';
   officeContent.append(closeButton);
   const officeInfo = new maps.InfoWindow({ content: officeContent, removable: false, zIndex: 20 });
-  const close = () => { officeInfo.close(); onSelect(null); };
+  const close = () => {
+    officeInfo.close();
+    onSelect(null);
+  };
   closeButton.onclick = close;
-  const openOffice = () => { onSelect(null); overlay.setMap(null); officeInfo.open(map, officeMarker); };
+  const openOffice = () => {
+    onSelect(null);
+    overlay.setMap(null);
+    officeInfo.open(map, officeMarker);
+  };
   maps.event.addListener(map, 'click', close);
   maps.event.addListener(officeMarker, 'click', openOffice);
   function remove(entry: MarkerEntry) {
@@ -66,20 +88,36 @@ export function createMapController(
   }
   return {
     host,
-    update(rows: MapRestaurant[], favorites: ReadonlySet<string>, selectedId: string | null, reviewedIds?: ReadonlySet<string> | null) {
-      const visible = new Map(rows.filter(hasCoordinates).map(row => [row.id, row]));
+    update(
+      rows: MapRestaurant[],
+      favorites: ReadonlySet<string>,
+      selectedId: string | null,
+      reviewedIds?: ReadonlySet<string> | null,
+    ) {
+      const visible = new Map(rows.filter(hasCoordinates).map((row) => [row.id, row]));
       entries.forEach((entry, id) => {
         const row = visible.get(id);
-        if (!row || row.latitude !== entry.row.latitude || row.longitude !== entry.row.longitude || row.name !== entry.row.name) {
+        if (
+          !row ||
+          row.latitude !== entry.row.latitude ||
+          row.longitude !== entry.row.longitude ||
+          row.name !== entry.row.name
+        ) {
           remove(entry);
           entries.delete(id);
         }
       });
-      visible.forEach(row => {
+      visible.forEach((row) => {
         let entry = entries.get(row.id);
         if (!entry) {
           const position = new maps.LatLng(Number(row.latitude), Number(row.longitude));
-          const marker = new maps.Marker({ map, position, title: row.name, clickable: true, image: images.normal });
+          const marker = new maps.Marker({
+            map,
+            position,
+            title: row.name,
+            clickable: true,
+            image: images.normal,
+          });
           const onClick = () => onSelect(row.id);
           maps.event.addListener(marker, 'click', onClick);
           entry = { row, marker, position, onClick, appearance: '' };
@@ -88,10 +126,16 @@ export function createMapController(
         const selected = row.id === selectedId;
         const favorite = favorites.has(row.id);
         const appearance = selected
-          ? (favorite ? 'selectedFavorite' : 'selected')
+          ? favorite
+            ? 'selectedFavorite'
+            : 'selected'
           : reviewedIds?.has(row.id)
-            ? (favorite ? 'reviewedFavorite' : 'reviewed')
-            : (favorite ? 'favorite' : 'normal');
+            ? favorite
+              ? 'reviewedFavorite'
+              : 'reviewed'
+            : favorite
+              ? 'favorite'
+              : 'normal';
         if (entry.appearance !== appearance) {
           entry.marker.setImage(images[appearance]);
           entry.marker.setZIndex(selected ? 11 : 0);
@@ -111,7 +155,9 @@ export function createMapController(
       map.setCenter(entry.position);
       map.panBy(0, -Math.max(0, 310 - container.clientHeight / 2));
     },
-    center() { map.setCenter(center); },
+    center() {
+      map.setCenter(center);
+    },
     dispose() {
       entries.forEach(remove);
       entries.clear();
@@ -120,7 +166,7 @@ export function createMapController(
       officeMarker.setMap(null);
       maps.event.removeListener(map, 'click', close);
       maps.event.removeListener(officeMarker, 'click', openOffice);
-      blockedEvents.forEach(name => host.removeEventListener(name, stop));
+      blockedEvents.forEach((name) => host.removeEventListener(name, stop));
       host.removeEventListener('dblclick', stopDoubleClick);
       closeButton.onclick = null;
     },

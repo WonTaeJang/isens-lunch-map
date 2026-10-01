@@ -1,8 +1,20 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createReviewEditor, reviewEditorReducer as reduce } from '../features/reviews/review-editor';
+import {
+  createReviewEditor,
+  reviewEditorReducer as reduce,
+} from '../features/reviews/review-editor';
 import type { Review } from '../features/reviews/review-model';
-const review: Review = { id: 'one', user_name: 'name', content: 'original', tags: [], is_recommended: true, created_at: '2026-10-01T00:00:00Z', updated_at: null, is_mine: true };
+const review: Review = {
+  id: 'one',
+  user_name: 'name',
+  content: 'original',
+  tags: [],
+  is_recommended: true,
+  created_at: '2026-10-01T00:00:00Z',
+  updated_at: null,
+  is_mine: true,
+};
 test('conflict recovery preserves the draft and requires explicit version acceptance', () => {
   let state = createReviewEditor(review);
   state = reduce(state, { type: 'content', value: 'my unsaved draft' });

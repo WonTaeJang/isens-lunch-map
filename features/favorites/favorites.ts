@@ -8,9 +8,15 @@ export function readFavorites(storage: Pick<Storage, 'getItem'>): string[] {
   try {
     const value: unknown = JSON.parse(raw);
     return Array.isArray(value)
-      ? [...new Set(value.filter((id): id is string => typeof id === 'string' && id.trim().length > 0))]
+      ? [
+          ...new Set(
+            value.filter((id): id is string => typeof id === 'string' && id.trim().length > 0),
+          ),
+        ]
       : [];
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 
 export function toggleFavorite(storage: FavoriteStorage, id: string): string[] {

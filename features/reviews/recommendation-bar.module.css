@@ -1,10 +1,41 @@
-.track { display: flex; width: 100%; height: 10px; border-radius: 8px; overflow: hidden; background: #e9edef; margin-bottom: 8px; }
-.track > span { height: 100%; }
-.positive { background: #2563eb; }
-.negative { background: #dc2626; }
+.track {
+  display: flex;
+  width: 100%;
+  height: 10px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #e9edef;
+  margin-bottom: 8px;
+}
+.track > span {
+  height: 100%;
+}
+.positive {
+  background: #2563eb;
+}
+.negative {
+  background: #dc2626;
+}
 
-.container { width: 100%; }
-.legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 12px; margin-bottom: 6px; }
-.legend > span { display: inline-flex; align-items: center; gap: 5px; }
-.legend > :first-child { color: #2563eb; }
-.legend > :last-child { color: #dc2626; }
+.container {
+  width: 100%;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.legend > :first-child {
+  color: #2563eb;
+}
+.legend > :last-child {
+  color: #dc2626;
+}

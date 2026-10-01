@@ -6,71 +6,53 @@ import Button from '@/components/ui/button';
 import { reviewRequest as request } from './review-api';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from './review-form';
-import { REVIEW_TAGS, uuid, type Review, type ReviewPage, type reviewInput } from './review-model';
+import { REVIEW_TAGS, type Review, type ReviewPage, type reviewInput } from './review-model';
 
-type Identity = { user_id: string; user_name: string };
+import useLocalUser from '@/features/local-user/use-local-user';
+import type { LocalIdentity } from '@/features/local-user/local-user-store';
+import useReviewFeed from './use-review-feed';
+type Props = { restaurant: { id: string; name: string }; onClose: () => void };
 const DATE_FORMAT = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 
-export default function ReviewPanel({ restaurant, onClose }: { restaurant: { id: string; name: string }; onClose: () => void }) {
+export default function ReviewPanel(props: Props) {
+  const user = useLocalUser();
+  return <ReviewPanelContent key={user.identity?.user_id ?? String(user.ready)} {...props} identity={user.identity} identityReady={user.ready} storageError={user.error} />;
+}
+function ReviewPanelContent({ restaurant, onClose, identity, identityReady, storageError }: Props & { identity: LocalIdentity | null; identityReady: boolean; storageError: string }) {
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
-  const alive = useRef(true);
-  const [identity, setIdentity] = useState<Identity | null>(null);
-  const [page, setPage] = useState<ReviewPage | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [storageError, setStorageError] = useState('');
+  const params = new URLSearchParams({ restaurant_id: restaurant.id });
+  if (identity) params.set('user_id', identity.user_id);
+  const feed = useReviewFeed<ReviewPage>(identityReady ? `/api/reviews?${params}` : null);
+  const { page, busy, load } = feed;
+  const loading = !identityReady || feed.loading;
+  const [actionError, setError] = useState('');
+  const error = actionError || feed.error;
   const [editing, setEditing] = useState<Review | 'new' | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
-  const mutationLock = useRef(false);
-
   useEffect(() => {
-    alive.current = true;
-    const controller = new AbortController();
-    dialog.current?.showModal();
-    async function initialize() {
-      let user: Identity | null = null;
-      try {
-        const { ensureLocalUser } = await import('@/features/local-user/local-user');
-        user = ensureLocalUser(window.localStorage);
-        uuid(user.user_id);
-      } catch { user = null; if (!controller.signal.aborted) setStorageError('브라우저의 사용자 정보를 사용할 수 없어 리뷰 조회만 가능합니다.'); }
-      if (controller.signal.aborted) return;
-      setIdentity(user);
-      try {
-        const params = new URLSearchParams({ restaurant_id: restaurant.id });
-        if (user) params.set('user_id', user.user_id);
-        const result = await request<ReviewPage>(`/api/reviews?${params}`, { signal: controller.signal });
-        if (!controller.signal.aborted) setPage(result);
-      } catch (cause) { if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : '리뷰를 불러오지 못했습니다.'); }
-      finally { if (!controller.signal.aborted) setLoading(false); }
-    }
-    void initialize();
-    return () => { alive.current = false; controller.abort(); };
-  }, [restaurant.id]);
-
-  async function load(more = false) {
-    setLoading(true); setError('');
-    try {
-      const params = new URLSearchParams({ restaurant_id: restaurant.id, offset: String(more ? page?.reviews.length ?? 0 : 0) });
-      if (identity) params.set('user_id', identity.user_id);
-      const result = await request<ReviewPage>(`/api/reviews?${params}`);
-      if (alive.current) setPage(current => more && current ? { ...result, reviews: [...current.reviews, ...result.reviews.filter(row => !current.reviews.some(existing => existing.id === row.id))] } : result);
-    } catch (cause) { if (alive.current) setError(cause instanceof Error ? cause.message : '리뷰를 불러오지 못했습니다.'); }
-    finally { if (alive.current) setLoading(false); }
-  }
-  async function mutate(method: string, review: Review | null, input?: ReturnType<typeof reviewInput>) {
-    if (!identity || mutationLock.current) return;
-    mutationLock.current = true; setBusy(true); setError(''); setNotice('');
-    try {
-      await request('/api/reviews', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...identity, restaurant_id: restaurant.id, id: review?.id, version: review?.updated_at ?? review?.created_at, ...input }) });
-      if (!alive.current) return;
+    const element = dialog.current;
+    element?.showModal();
+    return () => element?.close();
+  }, []);
+  async function mutate(method: 'POST' | 'PATCH' | 'DELETE', review: Review | null, input?: ReturnType<typeof reviewInput>) {
+    if (!identity) return;
+    setError(''); setNotice('');
+    if (await feed.mutate(method, { ...identity, restaurant_id: restaurant.id, id: review?.id, version: review?.updated_at ?? review?.created_at, ...input })) {
       router.refresh();
-      setEditing(null); setDeleting(null); setNotice(method === 'DELETE' ? '리뷰를 삭제했습니다.' : '리뷰를 저장했습니다.');
-      await load();
-    } finally { mutationLock.current = false; if (alive.current) setBusy(false); }
+      setEditing(null); setDeleting(null);
+      setNotice(method === 'DELETE' ? '리뷰를 삭제했습니다.' : '리뷰를 저장했습니다.');
+    }
+  }
+  async function reloadEditing() {
+    if (!identity) return null;
+    if (editing && editing !== 'new') {
+      const result = await request<{ review: Review | null }>(`/api/reviews?${new URLSearchParams({ scope: 'review', review_id: editing.id, user_id: identity.user_id })}`);
+      return result.review;
+    }
+    const result = await request<ReviewPage>(`/api/reviews?${params}`);
+    return result.mine;
   }
   function close() {
     if (busy) return;
@@ -84,9 +66,9 @@ export default function ReviewPanel({ restaurant, onClose }: { restaurant: { id:
       {page && <div className="review-summary"><strong>리뷰 {page.total}개</strong><span>추천 {page.recommended}</span><span>비추천 {page.not_recommended}</span></div>}
       {storageError && <p className="subtle">{storageError}</p>}
       {notice && <p role="status">{notice}</p>}
-      {error && <div role="alert" className="review-error">{error} <Button disabled={loading || busy} onClick={() => void load()}>다시 불러오기</Button></div>}
+      {error && <div role="alert" className="review-error">{error} <Button disabled={loading || busy || Boolean(editing)} onClick={() => { setError(''); void load(); }}>다시 불러오기</Button></div>}
       {page && identity && !editing && <Button disabled={busy || loading} onClick={() => { setEditing(page.mine ?? 'new'); setDeleting(null); }}>{page.mine ? '내 리뷰 수정' : '리뷰 작성'}</Button>}
-      {editing && <ReviewForm key={editing === 'new' ? 'new' : editing.id} review={editing === 'new' ? null : editing} name={identity?.user_name ?? ''} busy={busy} onCancel={() => setEditing(null)} onSave={input => mutate(editing === 'new' ? 'POST' : 'PATCH', editing === 'new' ? null : editing, input)} />}
+      {editing && <ReviewForm key={editing === 'new' ? 'new' : editing.id} review={editing === 'new' ? null : editing} name={identity?.user_name ?? ''} busy={busy || loading} onReload={reloadEditing} onCancel={() => setEditing(null)} onSave={(input, base) => mutate(base ? 'PATCH' : 'POST', base, input)} />}
       {loading && <p role="status">리뷰를 불러오는 중…</p>}
       {page?.total === 0 && !loading && <p className="review-empty">아직 리뷰가 없어요. 첫 점심 후기를 남겨 주세요.</p>}
       <ul className="review-list">{page?.reviews.map(review => <li key={review.id} className="review-item">
@@ -98,7 +80,7 @@ export default function ReviewPanel({ restaurant, onClose }: { restaurant: { id:
           {deleting === review.id ? <><span>리뷰를 삭제할까요?</span><Button disabled={busy || loading} onClick={() => void mutate('DELETE', review).catch(cause => setError(cause instanceof Error ? cause.message : '삭제하지 못했습니다.'))}>삭제 확인</Button><Button disabled={busy} onClick={() => setDeleting(null)}>취소</Button></> : <><Button disabled={busy || loading || Boolean(editing)} onClick={() => setEditing(review)}>수정</Button><Button disabled={busy || loading || Boolean(editing)} onClick={() => setDeleting(review.id)}>삭제</Button></>}
         </div>}
       </li>)}</ul>
-      {page?.hasMore && <Button disabled={loading || busy} onClick={() => void load(true)}>리뷰 더 보기</Button>}
+      {page?.hasMore && <Button disabled={loading || busy || Boolean(editing)} onClick={() => void load(true)}>리뷰 더 보기</Button>}
     </div>
   </dialog>;
 }

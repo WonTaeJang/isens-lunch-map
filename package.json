@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "db:check": "node scripts/check-db.mjs",
-    "test": "node --conditions=react-server --import tsx --test tests/*.test.ts"
+    "test": "node --conditions=react-server --import tsx --test tests/*.test.ts",
+    "test:integration": "node --conditions=react-server --import tsx --test tests/integration/*.test.ts"
   },
   "dependencies": {
     "exceljs": "^4.4.0",

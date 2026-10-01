@@ -1,21 +1,44 @@
 import 'server-only';
 import type { Pool } from 'pg';
-import { decodeTags, ReviewError, reviewInput, uuid, type Review, type ReviewCounts } from '@/features/reviews/review-model';
+import { encodeReviewCursor, type ReviewCursor } from './review-cursor';
+import { decodeTags, ReviewError, reviewInput, uuid, type Review, type ReviewCounts, type UserReview, type ReviewPage, type UserReviewPage } from '@/features/reviews/review-model';
 
 const PAGE_SIZE = 20;
 const FIELDS = 'id, user_name, content, is_recommended, tags, created_at, updated_at';
-function present(row: Record<string, unknown>): Review {
-  return { ...row, tags: decodeTags(row.tags) } as Review;
+type ReviewRow = {
+  id: string; user_name: string | null; content: string; is_recommended: boolean | null;
+  tags: unknown; created_at: Date | string; updated_at: Date | string | null;
+  is_mine: boolean;
+};
+type PagedReviewRow = ReviewRow & { cursor_time: string };
+type UserReviewRow = PagedReviewRow & Pick<UserReview, 'restaurant_id' | 'restaurant_name' | 'restaurant_active' | 'latitude' | 'longitude'>;
+function iso(value: Date | string) { return new Date(value).toISOString(); }
+function present(row: ReviewRow): Review {
+  return { id: row.id, user_name: row.user_name, content: row.content,
+    is_recommended: row.is_recommended, tags: decodeTags(row.tags),
+    created_at: iso(row.created_at), updated_at: row.updated_at === null ? null : iso(row.updated_at), is_mine: row.is_mine };
 }
-export async function listReviews(db: Pool, restaurant: string, user: string | null, offset: number) {
-  const summary = await db.query(`select count(*)::int total,
+function pageCursor(rows: PagedReviewRow[]) {
+  const last = rows[PAGE_SIZE - 1];
+  // Keep PostgreSQL microseconds: JS Date loses precision at page boundaries.
+  return rows.length > PAGE_SIZE && last ? encodeReviewCursor({ createdAt: last.cursor_time, id: last.id }) : null;
+}
+export async function listReviews(db: Pool, restaurant: string, user: string | null, cursor: ReviewCursor | null = null): Promise<ReviewPage> {
+  const summary = await db.query<{total: number; recommended: number; not_recommended: number}>(`select count(*)::int total,
     count(*) filter (where is_recommended=true)::int recommended,
     count(*) filter (where is_recommended=false)::int not_recommended
     from public.review where restaurant_id=$1`, [restaurant]);
-  const rows = await db.query(`select ${FIELDS}, coalesce(user_id=$2::uuid,false) is_mine from public.review
-    where restaurant_id=$1 order by created_at desc,id desc limit $3 offset $4`, [restaurant, user, PAGE_SIZE + 1, offset]);
-  const mine = user ? await db.query(`select ${FIELDS}, true is_mine from public.review where restaurant_id=$1 and user_id=$2 order by created_at desc limit 1`, [restaurant, user]) : { rows: [] };
-  return { ...summary.rows[0], reviews: rows.rows.slice(0, PAGE_SIZE).map(present), mine: mine.rows[0] ? present(mine.rows[0]) : null, hasMore: rows.rows.length > PAGE_SIZE };
+  const rows = await db.query<PagedReviewRow>(`select ${FIELDS}, coalesce(user_id=$2::uuid,false) is_mine,
+    to_char(created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') cursor_time
+    from public.review where restaurant_id=$1
+    and ($3::timestamptz is null or (created_at,id)<($3::timestamptz,$4::uuid))
+    order by created_at desc,id desc limit $5`, [restaurant, user, cursor?.createdAt ?? null, cursor?.id ?? null, PAGE_SIZE + 1]);
+  const mine = user ? await db.query<ReviewRow>(`select ${FIELDS}, true is_mine from public.review where restaurant_id=$1 and user_id=$2 order by created_at desc,id desc limit 1`, [restaurant, user]) : { rows: [] };
+  return { ...summary.rows[0], reviews: rows.rows.slice(0, PAGE_SIZE).map(present), mine: mine.rows[0] ? present(mine.rows[0]) : null, hasMore: rows.rows.length > PAGE_SIZE, nextCursor: pageCursor(rows.rows) };
+}
+export async function getOwnReview(db: Pool, id: string, user: string): Promise<Review | null> {
+  const { rows } = await db.query<ReviewRow>(`select ${FIELDS}, true is_mine from public.review where id=$1 and user_id=$2`, [id, user]);
+  return rows[0] ? present(rows[0]) : null;
 }
 export async function mutateReview(db: Pool, method: string, body: Record<string, unknown>) {
   const user = uuid(body.user_id);
@@ -67,8 +90,8 @@ export async function getReviewCounts(db: Pool): Promise<ReviewCounts> {
   return Object.fromEntries(rows.map(({ restaurant_id, ...counts }) => [restaurant_id, counts]));
 }
 
-export async function listUserReviews(db: Pool, user: string, offset: number) {
-  const summary = await db.query(`with mine as (
+export async function listUserReviews(db: Pool, user: string, cursor: ReviewCursor | null = null): Promise<UserReviewPage> {
+  const summary = await db.query<Omit<UserReviewPage, 'reviews' | 'hasMore' | 'nextCursor'>>(`with mine as (
     select distinct on (restaurant_id) restaurant_id, is_recommended
     from public.review where user_id=$1
     order by restaurant_id, created_at desc, id desc
@@ -80,12 +103,16 @@ export async function listUserReviews(db: Pool, user: string, offset: number) {
     count(*) filter (where mine.is_recommended=false)::int not_recommended_active
   from public.restaurants s left join mine on mine.restaurant_id=s.id
   where s.active=true`, [user]);
-  const { rows } = await db.query(`select r.id, r.user_name, r.content, r.is_recommended, r.tags,
+  const { rows } = await db.query<UserReviewRow>(`select r.id, r.user_name, r.content, r.is_recommended, r.tags,
     r.created_at, r.updated_at, true is_mine, r.restaurant_id,
+    to_char(r.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') cursor_time,
     s.name restaurant_name, s.active restaurant_active, s.latitude, s.longitude
     from public.review r join public.restaurants s on s.id=r.restaurant_id
-    where r.user_id=$1 order by r.created_at desc,r.id desc limit $2 offset $3`, [user, PAGE_SIZE + 1, offset]);
-  return { ...summary.rows[0], reviews: rows.slice(0, PAGE_SIZE).map(present), hasMore: rows.length > PAGE_SIZE };
+    where r.user_id=$1 and ($2::timestamptz is null or (r.created_at,r.id)<($2::timestamptz,$3::uuid))
+    order by r.created_at desc,r.id desc limit $4`, [user, cursor?.createdAt ?? null, cursor?.id ?? null, PAGE_SIZE + 1]);
+  return { ...summary.rows[0], reviews: rows.slice(0, PAGE_SIZE).map(row => ({ ...present(row),
+    restaurant_id: row.restaurant_id, restaurant_name: row.restaurant_name, restaurant_active: row.restaurant_active,
+    latitude: row.latitude, longitude: row.longitude })), hasMore: rows.length > PAGE_SIZE, nextCursor: pageCursor(rows) };
 }
 
 export async function listReviewedRestaurantIds(db: Pool, user: string): Promise<string[]> {

@@ -31,7 +31,7 @@ export type Review = {
 };
 export type ReviewPage = {
   reviews: Review[]; mine: Review | null;
-  total: number; recommended: number; not_recommended: number; hasMore: boolean;
+  total: number; recommended: number; not_recommended: number; hasMore: boolean; nextCursor: string | null;
 };
 export class ReviewError extends Error {
   constructor(message: string, public status = 400) { super(message); }
@@ -64,4 +64,4 @@ export type UserReviewStats = {
   active_total: number; reviewed_active: number;
   recommended_active: number; not_recommended_active: number;
 };
-export type UserReviewPage = UserReviewStats & { reviews: UserReview[]; total: number; hasMore: boolean };
+export type UserReviewPage = UserReviewStats & { reviews: UserReview[]; total: number; hasMore: boolean; nextCursor: string | null };

@@ -9,6 +9,8 @@ const restaurant = '22222222-2222-4222-8222-222222222222';
 const id = '33333333-3333-4333-8333-333333333333';
 const input = { user_id: user, restaurant_id: restaurant, user_name: '즐거운만두#0123', content: '좋아요', is_recommended: false, tags: ['tasty'] };
 const version = '2026-10-01T01:00:00.123Z';
+const cursor = { createdAt: '2026-10-01T01:00:00.123456Z', id };
+const row = { id, user_name: '사용자', content: '리뷰', is_recommended: null, created_at: new Date(version), updated_at: null, cursor_time: cursor.createdAt, tags: null, is_mine: false };
 function database(handler: (sql: string, values: unknown[]) => { rows: object[]; rowCount: number }) {
   const calls: { sql: string; values: unknown[] }[] = [];
   let released = false;
@@ -68,10 +70,10 @@ test('invalid identity or missing review version never sends a write', async () 
 test('list paginates and exposes ownership flag without selecting author UUIDs', async () => {
   const mock = database(sql => {
     if (sql.includes('count(*)')) return { rows: [{ total: 21, recommended: 20, not_recommended: 1 }], rowCount: 1 };
-    if (sql.includes('true is_mine')) return { rows: [{ id, tags: null, is_mine: true }], rowCount: 1 };
-    return { rows: Array.from({ length: 21 }, (_, index) => ({ id: String(index), tags: '["tasty"]', is_mine: false })), rowCount: 21 };
+    if (sql.includes('true is_mine')) return { rows: [{ ...row, is_mine: true }], rowCount: 1 };
+    return { rows: Array.from({ length: 21 }, (_, index) => ({ ...row, id: `33333333-3333-4333-8333-${String(index).padStart(12, '0')}`, tags: '["tasty"]' })), rowCount: 21 };
   });
-  const result = await listReviews(mock.db, restaurant, user, 0);
+  const result = await listReviews(mock.db, restaurant, user);
   assert.equal(result.reviews.length, 20);
   assert.equal(result.hasMore, true);
   assert.equal(result.mine?.is_mine, true);
@@ -104,10 +106,12 @@ test('my reviews are scoped to one user, join restaurant data and include inacti
     assert.match(sql, /where r.user_id=\$1/);
     assert.match(sql, /join public.restaurants/);
     assert.doesNotMatch(sql, /active\s*=\s*true/);
-    assert.deepEqual(values, [user, 21, 20]);
-    return { rows: Array.from({ length: 21 }, (_, i) => ({ id: String(i), restaurant_id: restaurant, restaurant_name: '식당', restaurant_active: false, tags: '["tasty"]' })), rowCount: 21 };
+    assert.deepEqual(values, [user, cursor.createdAt, cursor.id, 21]);
+    assert.match(sql, /\(r.created_at,r.id\)</);
+    assert.doesNotMatch(sql, /offset/i);
+    return { rows: Array.from({ length: 21 }, (_, i) => ({ ...row, id: `33333333-3333-4333-8333-${String(i).padStart(12, '0')}`, restaurant_id: restaurant, restaurant_name: '식당', restaurant_active: false, tags: '["tasty"]' })), rowCount: 21 };
   });
-  const result = await listUserReviews(mock.db, user, 20);
+  const result = await listUserReviews(mock.db, user, cursor);
   assert.equal(result.total, 21);
   assert.equal(result.reviews.length, 20);
   assert.equal(result.hasMore, true);
@@ -155,6 +159,27 @@ test('user statistics aggregate all active restaurants independently of review p
     }
     return { rows: [], rowCount: 0 };
   });
-  const result = await listUserReviews(mock.db, user, 40);
-  assert.deepEqual(result, { ...stats, reviews: [], hasMore: false });
+  const result = await listUserReviews(mock.db, user, cursor);
+  assert.deepEqual(result, { ...stats, reviews: [], hasMore: false, nextCursor: null });
+});
+
+
+test('review response serializes dates and never leaks DB fields or author identifiers', async () => {
+  const { getOwnReview } = await import('../lib/server/reviews');
+  const mock = database((_sql, values) => {
+    assert.deepEqual(values, [id, user]);
+    return { rows: [{ ...row, user_id: user, internal: 'private', is_mine: true }], rowCount: 1 };
+  });
+  assert.deepEqual(await getOwnReview(mock.db, id, user), {
+    id, user_name: row.user_name, content: row.content, is_recommended: null,
+    created_at: version, updated_at: null, tags: [], is_mine: true,
+  });
+});
+test('cursor preserves microseconds and rejects malformed inputs', async () => {
+  const { encodeReviewCursor, decodeReviewCursor } = await import('../lib/server/review-cursor');
+  assert.deepEqual(decodeReviewCursor(encodeReviewCursor(cursor)), cursor);
+  assert.equal(decodeReviewCursor(null), null);
+  for (const raw of ['invalid', 'x'.repeat(513), Buffer.from(JSON.stringify({ ...cursor, id: 'bad' })).toString('base64url')]) {
+    assert.throws(() => decodeReviewCursor(raw), ReviewError);
+  }
 });

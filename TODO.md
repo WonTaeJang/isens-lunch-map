@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] localStorage를 이용한 즐겨찾기 기능 추가
+- [x] localStorage를 이용한 즐겨찾기 기능 추가
 - [ ] 음식 추천 기능 추가
 - [ ] 식당 리뷰 기능 추가
 - [ ] Vercel 연동 및 배포

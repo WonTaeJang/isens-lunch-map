@@ -13,6 +13,8 @@ type Props = {
   maxDistance: number | null;
   count: number;
   failed: boolean;
+  favoritesOnly: boolean;
+  onFavoritesOnlyChange: (value: boolean) => void;
   onQueryChange: (value: string) => void;
   onDistanceChange: (value: number | null) => void;
 };
@@ -22,6 +24,8 @@ export default function RestaurantFilters({
   maxDistance,
   count,
   failed,
+  favoritesOnly,
+  onFavoritesOnlyChange,
   onQueryChange,
   onDistanceChange,
 }: Props) {
@@ -38,6 +42,7 @@ export default function RestaurantFilters({
         value={query}
         onChange={event => onQueryChange(event.target.value)}
       />
+      <div className="restaurant-filter-controls">
       <div className="distance-filters" role="group" aria-label="거리 필터">
         {DISTANCE_FILTER_OPTIONS.map(option => (
           <FilterChip
@@ -48,6 +53,11 @@ export default function RestaurantFilters({
             {option.label}
           </FilterChip>
         ))}
+      </div>
+      <FilterChip className="favorite-filter-chip" selected={favoritesOnly} onClick={() => onFavoritesOnlyChange(!favoritesOnly)}>
+        <svg width="14" height="16" viewBox="0 0 18 22" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M3 2h12v18l-6-4-6 4z" /></svg>
+        즐겨찾기만
+      </FilterChip>
       </div>
       <p className="subtle" role="status">{resultMessage}</p>
     </div>

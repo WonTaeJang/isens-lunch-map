@@ -2,7 +2,8 @@
 import Button from './button';
 
 import { hasCoordinates } from "@/lib/coordinates";
-import { formatDistance } from "@/lib/distance";
+import { FAVORITES_CHANGED_EVENT, FAVORITES_STORAGE_KEY, readFavorites, toggleFavorite } from '@/lib/favorites';
+import { createRestaurantMapCard } from './restaurant-map-card';
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 
@@ -12,7 +13,7 @@ const officeAddress = "서울 서초구 반포대로28길 43";
 
 import type { MapRestaurant } from '@/lib/restaurant-types';
 export default function LunchMap({ restaurants = EMPTY_RESTAURANTS, focusRequest }: { restaurants?: MapRestaurant[]; focusRequest?: {id: string} | null }) {
-  const mapRef = useRef<{setCenter: (position: object) => void} | null>(null);
+  const mapRef = useRef<{setCenter: (position: object) => void; panBy: (x: number, y: number) => void} | null>(null);
   const officeCenterRef = useRef<object | null>(null);
   const focusHandlers = useRef(new Map<string, () => void>());
   const officeMarkerRef = useRef<object | null>(null);
@@ -32,13 +33,22 @@ export default function LunchMap({ restaurants = EMPTY_RESTAURANTS, focusRequest
     const map = mapRef.current;
     const defaultImage = new maps.MarkerImage('/restaurant-marker-default.svg', new maps.Size(24, 30), { offset: new maps.Point(12, 28.8) });
     const selectedImage = new maps.MarkerImage('/restaurant-marker-selected.svg', new maps.Size(40, 50), { offset: new maps.Point(20, 48) });
+    const favoriteImage = new maps.MarkerImage('/restaurant-marker-default-favorite.svg', new maps.Size(24, 30), { offset: new maps.Point(12, 28.8) });
+    const selectedFavoriteImage = new maps.MarkerImage('/restaurant-marker-selected-favorite.svg', new maps.Size(40, 50), { offset: new maps.Point(20, 48) });
+    let favorites = new Set<string>();
+    try { favorites = new Set(readFavorites(window.localStorage)); } catch { /* Storage may be blocked. */ }
+    let selectedId: string | null = null;
+    const markerImage = (id: string, selected: boolean) => favorites.has(id)
+      ? (selected ? selectedFavoriteImage : favoriteImage)
+      : (selected ? selectedImage : defaultImage);
     let selectedMarker: InstanceType<typeof maps.Marker> | null = null;
-    let currentInfo: InstanceType<typeof maps.InfoWindow> | null = null;
+    let currentInfo: {close: () => void} | null = null;
     const closeInfo = () => {
       currentInfo?.close(); currentInfo = null;
-      selectedMarker?.setImage(defaultImage);
+      if (selectedId) selectedMarker?.setImage(markerImage(selectedId, false));
       selectedMarker?.setZIndex(0);
       selectedMarker = null;
+      selectedId = null;
     };
     const addCloseButton = (content: HTMLElement) => {
       const button = document.createElement('button');
@@ -64,51 +74,62 @@ export default function LunchMap({ restaurants = EMPTY_RESTAURANTS, focusRequest
     };
     if (officeMarker) maps.event.addListener(officeMarker, 'click', onOfficeClick);
     const handlers = focusHandlers.current;
-    const markers = restaurants.filter(hasCoordinates).map(r => {
-      const marker = new maps.Marker({ map, position: new maps.LatLng(Number(r.latitude), Number(r.longitude)), title: r.name, clickable: true, image: defaultImage });
-      // Use textContent so imported spreadsheet text is never interpreted as HTML.
-      const content = document.createElement('div');
-      content.className = 'map-restaurant-info';
-      const title = document.createElement('h3');
-      title.textContent = r.name;
-      content.append(title);
-      const restaurantDetails = [
-        r.category || '분류 정보 없음',
-        `대표메뉴: ${r.main_menu || '정보 없음'}`,
-        r.address || '주소 확인 필요',
-        `거리: ${formatDistance(r.distance)}`,
-      ];
-      for (const text of restaurantDetails) {
-        const paragraph = document.createElement('p');
-        paragraph.textContent = text;
-        content.append(paragraph);
-      }
-      addCloseButton(content);
-      const info = new maps.InfoWindow({ content, removable: false, zIndex: 20 });
+    const markers = restaurants.filter(hasCoordinates).map(restaurant => {
+      const position = new maps.LatLng(Number(restaurant.latitude), Number(restaurant.longitude));
+      const marker = new maps.Marker({map, position, title: restaurant.name, clickable: true, image: markerImage(restaurant.id, false)});
+      const card = createRestaurantMapCard(restaurant, closeInfo, () => {
+        try {
+          favorites = new Set(toggleFavorite(window.localStorage, restaurant.id));
+          window.dispatchEvent(new Event(FAVORITES_CHANGED_EVENT));
+          card.showMessage('');
+        } catch {
+          card.showMessage('저장하지 못했습니다. 브라우저 저장소 설정을 확인해 주세요.');
+        }
+      });
+      card.setFavorite(favorites.has(restaurant.id));
+      const overlay = new maps.CustomOverlay({content: card.content, position, xAnchor: 0.5, yAnchor: 1, zIndex: 20});
       const onClick = () => {
         closeInfo();
+        selectedId = restaurant.id;
         selectedMarker = marker;
-        marker.setImage(selectedImage);
+        marker.setImage(markerImage(restaurant.id, true));
         marker.setZIndex(11);
-        info.open(map, marker);
-        currentInfo = info;
+        overlay.setMap(map);
+        currentInfo = {close: () => overlay.setMap(null)};
       };
-      handlers.set(r.id, () => {
-        map.setCenter(new maps.LatLng(Number(r.latitude), Number(r.longitude)));
+      // Recenter only when a restaurant is chosen from the list.
+      handlers.set(restaurant.id, () => {
+        map.setCenter(position);
         onClick();
+        const height = containerRef.current?.clientHeight ?? 450;
+        map.panBy(0, -Math.max(0, 310 - height / 2));
       });
       maps.event.addListener(marker, 'click', onClick);
-      return { marker, info, onClick };
+      return {id: restaurant.id, marker, overlay, card, onClick};
     });
+    const refreshFavorites = () => {
+      try { favorites = new Set(readFavorites(window.localStorage)); } catch { return; }
+      markers.forEach(({id, marker, card}) => {
+        marker.setImage(markerImage(id, id === selectedId));
+        card.setFavorite(favorites.has(id));
+      });
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === FAVORITES_STORAGE_KEY || event.key === null) refreshFavorites();
+    };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener(FAVORITES_CHANGED_EVENT, refreshFavorites);
     return () => {
       closeInfo();
       handlers.clear();
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener(FAVORITES_CHANGED_EVENT, refreshFavorites);
       maps.event.removeListener(map, 'click', closeInfo);
       if (officeMarker) maps.event.removeListener(officeMarker, 'click', onOfficeClick);
       officeInfo.close();
-      markers.forEach(({marker, info, onClick}) => {
+      markers.forEach(({marker, overlay, onClick}) => {
         maps.event.removeListener(marker, 'click', onClick);
-        info.close();
+        overlay.setMap(null);
         marker.setMap(null);
       });
     };

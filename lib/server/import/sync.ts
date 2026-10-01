@@ -1,8 +1,8 @@
 import 'server-only';
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
-import { getDb } from '../db';
+import { getDb } from '@/lib/server/db';
 import { identity, ImportError, type ImportRow } from './parser';
-import type { Restaurant } from '../restaurants';
+import type { Restaurant } from '@/lib/server/restaurants';
 
 export function authorize(request: Request) {
   const expected = process.env.ADMIN_PASSWORD;

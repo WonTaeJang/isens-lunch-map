@@ -1,7 +1,7 @@
-import { getRestaurants } from '@/lib/restaurants';
-import { getDb } from '@/lib/db';
-import { ImportError, parseWorkbook } from '@/lib/import/parser';
-import { authorize, plan, previewToken, revision, synchronize, correctAddress } from '@/lib/import/sync';
+import { getRestaurants } from '@/lib/server/restaurants';
+import { getDb } from '@/lib/server/db';
+import { ImportError, parseWorkbook } from '@/lib/server/import/parser';
+import { authorize, plan, previewToken, revision, synchronize, correctAddress } from '@/lib/server/import/sync';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;

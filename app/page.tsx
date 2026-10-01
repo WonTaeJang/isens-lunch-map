@@ -1,8 +1,8 @@
 import { connection } from "next/server";
-import { getRestaurants, type Restaurant } from "@/lib/restaurants";
-import LunchExplorer from "./components/lunch-explorer";
-import PageHeading from "./components/page-heading";
-import SiteHeader from "./components/site-header";
+import { getRestaurants, type Restaurant } from "@/lib/server/restaurants";
+import LunchExplorer from "@/features/lunch-map/lunch-explorer";
+import PageHeading from "@/components/ui/page-heading";
+import SiteHeader from "@/components/site-header";
 
 export default async function Home() {
   await connection();

@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {previewImport, updateRestaurant} from '../lib/admin-api';
+import {previewImport, updateRestaurant} from '../features/admin/admin-api';
 
 test('admin API keeps multipart boundary generation with fetch and forwards authentication', async()=>{
   const previous=globalThis.fetch;

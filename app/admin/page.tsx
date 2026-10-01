@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { connection } from 'next/server';
-import PageHeading from '../components/page-heading';
-import SiteHeader from '../components/site-header';
-import AdminManager from './admin-manager';
-import { getRestaurants, type Restaurant } from '@/lib/restaurants';
+import PageHeading from '@/components/ui/page-heading';
+import SiteHeader from '@/components/site-header';
+import AdminManager from '@/features/admin/admin-manager';
+import { getRestaurants, type Restaurant } from '@/lib/server/restaurants';
 export const metadata: Metadata = { title: '리스트 관리 | Lunch Map' };
 export const runtime = 'nodejs';
 export default async function AdminPage() {

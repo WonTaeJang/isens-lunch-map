@@ -1,8 +1,8 @@
 import "server-only";
 import { getDb } from "./db";
 
-import type { Restaurant } from './restaurant-types';
-export type { Restaurant } from './restaurant-types';
+import type { Restaurant } from '@/lib/restaurant-types';
+export type { Restaurant } from '@/lib/restaurant-types';
 
 // Server-only. Call from a Server Component, Route Handler or Server Action.
 // Reads the existing schema without modifying any records.

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createUserName, ensureLocalUser } from '../lib/local-user';
+import { createUserName, ensureLocalUser } from '../features/local-user/local-user';
 
 function memoryStorage(initial: Record<string, string> = {}) {
   const values = new Map(Object.entries(initial));

@@ -147,3 +147,5 @@ td .button { margin: 0; white-space: nowrap; }
 .restaurant-card-directions { padding: 0 18px; background: #308ff5; color: white; }
 .restaurant-card-status { color: #738078; font-size: 11px; margin-top: 8px; }
 .restaurant-card-status:empty { display: none; }
+
+.restaurant-results { max-height: 500px; overflow-y: auto; }

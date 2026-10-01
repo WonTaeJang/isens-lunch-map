@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { FAVORITES_STORAGE_KEY, readFavorites, toggleFavorite } from '../lib/favorites';
+import { FAVORITES_STORAGE_KEY, readFavorites, toggleFavorite } from '../features/favorites/favorites';
 
 test('favorites persist and toggling preserves other restaurant IDs', () => {
   const values = new Map<string, string>();

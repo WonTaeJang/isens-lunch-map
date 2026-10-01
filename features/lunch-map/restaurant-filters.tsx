@@ -1,5 +1,5 @@
 'use client';
-import FilterChip from './filter-chip';
+import FilterChip from '@/components/ui/filter-chip';
 const DISTANCE_FILTER_OPTIONS = [
   { label: '전체', value: null },
   { label: '100m 이내', value: 100 },

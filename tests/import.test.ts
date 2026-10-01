@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import ExcelJS from 'exceljs';
-import { parseWorkbook, identity } from '../lib/import/parser';
-import { plan, revision, synchronize } from '../lib/import/sync';
-import type { Restaurant } from '../lib/restaurants';
+import { parseWorkbook, identity } from '../lib/server/import/parser';
+import { plan, revision, synchronize } from '../lib/server/import/sync';
+import type { Restaurant } from '../lib/server/restaurants';
 
 async function fixture(options: {strike?: boolean; rich?: boolean; bad?: boolean; duplicate?: boolean; empty?: boolean} = {}) {
   const book = new ExcelJS.Workbook(); const sheet = book.addWorksheet('식당');
@@ -69,7 +69,7 @@ test('multiple visible tables still require disambiguation', async () => {
   await assert.rejects(parseWorkbook(Buffer.from(await book.xlsx.writeBuffer())));
 });
 test('geocoding strips parentheses and punctuation attached to building numbers', async () => {
-  const { geocode } = await import('../lib/import/sync');
+  const { geocode } = await import('../lib/server/import/sync');
   const oldFetch = globalThis.fetch;
   const oldKey = process.env.KAKAO_REST_API_KEY;
   process.env.KAKAO_REST_API_KEY = 'test';
@@ -106,7 +106,7 @@ test('ambiguous NULL-address name is rejected before import',async()=>{
   assert.throws(()=>plan([...rows,{...rows[0],address:'다른 주소'}],[{...existing[0],address:null}]));
 });
 test('address correction saves server coordinates; failed searches do not write', async()=>{
-  const {correctAddress}=await import('../lib/import/sync');
+  const {correctAddress}=await import('../lib/server/import/sync');
   const oldFetch=globalThis.fetch;const oldKey=process.env.KAKAO_REST_API_KEY;process.env.KAKAO_REST_API_KEY='test';
   const calls: unknown[][]=[];
   (globalThis as unknown as {lunchDb:unknown}).lunchDb={query:async(_sql:string,values:unknown[])=>{calls.push(values);return {rowCount:1};}};

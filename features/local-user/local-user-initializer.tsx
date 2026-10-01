@@ -9,7 +9,7 @@ export default function LocalUserInitializer() {
     async function initialize() {
       try {
         // Load the word dictionaries only in the browser, after the first render.
-        const { ensureLocalUser } = await import('@/lib/local-user');
+        const { ensureLocalUser } = await import('./local-user');
         if (!cancelled) ensureLocalUser(window.localStorage);
       } catch {
         // Storage can be blocked or full. The map remains usable in that case.

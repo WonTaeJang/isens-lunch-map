@@ -12,7 +12,7 @@
 .user-records :global(.review-item-heading) h2 { font-size: 16px; overflow-wrap: anywhere; }
 .user-records :global(.review-item-heading) a:hover { color: #087f73; text-decoration: underline; }
 .user-records :global(.description) { margin-top: 8px; }
-.user-remove-favorite { margin-top: 12px; padding: 6px 0; border: 0; background: transparent; color: #866500; font-size: 12px; cursor: pointer; }
+.user-remove-favorite { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 40px; height: 40px; padding: 0; border: 1px solid #e8c44d; border-radius: 4px; background: #fff9df; color: #866500; cursor: pointer; }
 .user-storage-note { margin-top: 20px; color: #75818a; font-size: 12px; line-height: 1.8; }
 @media (max-width: 760px) {
   .user-dashboard { margin-top: 20px; }
@@ -44,3 +44,6 @@
 @media (max-width: 760px) { .user-progress { padding: 20px; } }
 
 .user-stat-legend > span { display: inline-flex; align-items: center; gap: 5px; }
+
+.favorite-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.favorite-title h2 { min-width: 0; }

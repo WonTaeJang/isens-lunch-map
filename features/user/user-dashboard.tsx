@@ -86,10 +86,12 @@ function UserDashboardContent({ restaurants, failed, identity, identityReady, id
       {failed ? <p role="alert">식당 목록을 불러오지 못했습니다. <Button onClick={() => router.refresh()}>다시 불러오기</Button></p> : <>
         {!savedRestaurants.length && <p className="review-empty">즐겨찾기한 식당이 없어요. <Link href="/" className="text-link">식당 찾아보기</Link></p>}
         <ul className="review-list">{savedRestaurants.map(row => <li className={`review-item${row.active ? '' : ` ${styles['user-restaurant-inactive']}`}`} key={row.id}>
-          <div className="review-item-heading"><h2>{row.active && hasCoordinates(row) ? <Link href={mapLink(row.id)}>{row.name} ↗</Link> : row.name}</h2><span className="distance-badge">{formatDistance(row.distance)}</span></div>
+          <div className="review-item-heading"><div className={styles['favorite-title']}><button type="button" className={styles['user-remove-favorite']} onClick={() => setFavoriteError(toggleStoredFavorite(row.id) ?? '')} aria-label={`${row.name} 즐겨찾기 해제`} title="즐겨찾기 해제">
+            <svg width="18" height="20" viewBox="0 0 18 22" fill="#ffd338" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M3 2h12v18l-6-4-6 4z" /></svg>
+          </button><h2>{row.active && hasCoordinates(row) ? <Link href={mapLink(row.id)}>{row.name} ↗</Link> : row.name}</h2></div><span className="distance-badge">{formatDistance(row.distance)}</span></div>
           <p className="description">{row.category} · {row.main_menu}</p><p className="description">{row.address || '주소 확인 필요'}</p>
           {!row.active && <p className="subtle">현재 비활성 식당입니다.</p>}
-          <button type="button" className={styles['user-remove-favorite']} onClick={() => setFavoriteError(toggleStoredFavorite(row.id) ?? '')} aria-label={`${row.name} 즐겨찾기 해제`}>즐겨찾기 해제</button>
+
         </li>)}</ul>
       </>}
     </section>}

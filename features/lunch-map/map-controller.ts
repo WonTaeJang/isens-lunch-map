@@ -32,6 +32,7 @@ export function createMapController(
     selectedFavorite: image('/restaurant-marker-selected-favorite.svg', true),
   };
   const host = document.createElement('div');
+  host.className = 'restaurant-map-overlay';
   const stop = (event: Event) => event.stopPropagation();
   const stopDoubleClick = (event: Event) => { event.preventDefault(); event.stopPropagation(); };
   const blockedEvents = ['pointerdown', 'mousedown', 'touchstart', 'click'];

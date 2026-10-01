@@ -131,8 +131,10 @@ td .button { margin: 0; white-space: nowrap; }
 
 .main-nav a.admin-nav-icon { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; flex-shrink: 0; }
 
-.restaurant-map-card { position: relative; bottom: 58px; width: min(360px, 78vw); padding: 20px; border: 1px solid #d9dfe2; border-radius: 5px; background: white; box-shadow: 0 3px 12px #172c3026; color: #273239; white-space: normal; overflow-wrap: anywhere; }
-.restaurant-map-card::after { content: ''; position: absolute; bottom: -7px; left: calc(50% - 6px); width: 12px; height: 12px; background: white; border-right: 1px solid #d9dfe2; border-bottom: 1px solid #d9dfe2; transform: rotate(45deg); }
+/* The raised card leaves a transparent host area; only the card should intercept input. */
+.restaurant-map-overlay { pointer-events: none; }
+.restaurant-map-card { pointer-events: auto; position: relative; bottom: 58px; width: min(360px, 78vw); padding: 20px; border: 1px solid #d9dfe2; border-radius: 5px; background: white; box-shadow: 0 3px 12px #172c3026; color: #273239; white-space: normal; overflow-wrap: anywhere; }
+.restaurant-map-card::after { pointer-events: none; content: ''; position: absolute; bottom: -7px; left: calc(50% - 6px); width: 12px; height: 12px; background: white; border-right: 1px solid #d9dfe2; border-bottom: 1px solid #d9dfe2; transform: rotate(45deg); }
 .restaurant-card-header { padding-right: 28px; }
 .restaurant-card-header h3 { font-size: 17px; font-weight: 700; line-height: 1.4; }
 .restaurant-card-close { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; font-size: 27px; line-height: 1; color: #687880; cursor: pointer; }

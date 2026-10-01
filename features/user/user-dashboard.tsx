@@ -1,9 +1,10 @@
 'use client';
 import styles from './user.module.css';
 
+import IdentityEditor from './identity-editor';
 import UserProgress from './user-progress';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
@@ -31,6 +32,16 @@ export default function UserDashboard(props: Props) {
 }
 function UserDashboardContent({ restaurants, failed, identity, identityReady, identityError }: Props & { identity: LocalIdentity | null; identityReady: boolean; identityError: string }) {
   const router = useRouter();
+  const [identityEditorOpen, setIdentityEditorOpen] = useState(false);
+  const profileClicks = useRef({ start: 0, count: 0 });
+  function clickProfile() {
+    if (!identity || busy || editing) return;
+    const now = performance.now();
+    const clicks = profileClicks.current;
+    if (!clicks.count || now - clicks.start > 2000) { clicks.start = now; clicks.count = 0; }
+    clicks.count++;
+    if (clicks.count === 5) { clicks.count = 0; setIdentityEditorOpen(true); }
+  }
   const favorites = useFavorites();
   const feed = useReviewFeed<UserReviewPage>(identity ? `/api/reviews?${new URLSearchParams({ scope: 'mine', user_id: identity.user_id })}` : null);
   const { page, busy, load } = feed;
@@ -59,10 +70,11 @@ function UserDashboardContent({ restaurants, failed, identity, identityReady, id
   }
 
   return <div className={styles['user-dashboard']}>
-    <section className={styles['user-profile']} aria-label="내 프로필">
+    <section className={styles['user-profile']} aria-label="내 프로필" tabIndex={0} onClick={clickProfile} onKeyDown={event => { if (!event.repeat && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); clickProfile(); } }}>
       <span className={styles['user-avatar']} aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg></span>
       <div><p className="subtle">나의 점심 기록</p><h1>{identity?.user_name ?? (identityReady ? '사용자 정보를 확인해 주세요' : '불러오는 중…')}</h1><p className="subtle">작성한 리뷰 {page?.total ?? '—'} · 즐겨찾기 {identityReady ? favorites.size : '—'}</p></div>
     </section>
+    {identityEditorOpen && identity && <IdentityEditor identity={identity} onClose={() => setIdentityEditorOpen(false)} />}
     {deleting && <ConfirmDialog title="리뷰를 삭제할까요?" description="삭제한 리뷰는 복구할 수 없습니다." confirmLabel="삭제" busy={busy} error={error} onCancel={() => setDeleting(null)} onConfirm={() => void mutate('DELETE', deleting).catch(cause => setError(cause instanceof Error ? cause.message : '삭제하지 못했습니다.'))} />}
     <UserProgress stats={page} loading={loading} />
     <div className={styles['user-tabs']} aria-label="내 기록 분류">{TABS.map(item => <button type="button" key={item.value} aria-pressed={tab === item.value} disabled={busy || Boolean(editing)} onClick={() => setTab(item.value)}>{item.label}</button>)}</div>

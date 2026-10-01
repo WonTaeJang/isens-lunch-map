@@ -47,3 +47,9 @@
 
 .favorite-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .favorite-title h2 { min-width: 0; }
+
+.identity-editor { width: min(440px, calc(100vw - 32px)); max-height: 85dvh; overflow-y: auto; margin: auto; padding: 24px; border: 1px solid #e4e9eb; border-radius: 16px; color: #273239; background: white; }
+.identity-editor::backdrop { background: #172e3c66; }
+.identity-editor form { margin-top: 20px; }
+.identity-editor label { display: block; margin-top: 12px; font-size: 13px; }
+.identity-editor input { width: 100%; }

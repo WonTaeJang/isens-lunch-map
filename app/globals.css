@@ -227,24 +227,6 @@ h3 {
   width: 100%;
   height: 100%;
 }
-.map-caption {
-  position: absolute;
-  z-index: 10;
-  top: 18px;
-  left: 18px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 12px 15px;
-  font-size: 11px;
-  background: white;
-  border-radius: 9px;
-  box-shadow: 0 3px 15px #152e2510;
-  pointer-events: none;
-}
-.caption-divider {
-  color: #d2d9d6;
-}
 .map-message {
   position: absolute;
   inset: 0;
@@ -268,46 +250,6 @@ h3 {
 .admin-shell {
   max-width: 1120px;
 }
-.admin-summary {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  padding: 24px 0;
-  background: white;
-  border: 1px solid #e4e9eb;
-  border-radius: 14px;
-  margin-bottom: 25px;
-}
-.admin-summary > div {
-  padding: 0 28px;
-}
-.admin-summary > div + div {
-  border-left: 1px solid #edf0f1;
-}
-.admin-summary p {
-  margin-top: 9px;
-  font-size: 12px;
-  color: #7a878e;
-}
-.admin-summary strong {
-  font-size: 27px;
-  font-weight: 700;
-  color: #263a35;
-  margin-right: 4px;
-}
-.admin-summary .summary-label {
-  color: #485960;
-  margin-top: 16px;
-}
-.coming-badge {
-  display: inline-flex;
-  font-size: 10px;
-  font-weight: 600;
-  color: #8a7449;
-  background: #f8f3e8;
-  border-radius: 6px;
-  padding: 5px 9px;
-  white-space: nowrap;
-}
 .upload-section,
 .table-section {
   background: white;
@@ -315,16 +257,6 @@ h3 {
   border-radius: 14px;
   padding: 26px;
   margin-top: 22px;
-}
-.section-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-}
-.section-heading .description {
-  font-size: 12px;
-  margin-top: 6px;
 }
 .upload-placeholder {
   margin-top: 23px;
@@ -336,31 +268,6 @@ h3 {
   background: #fbfcfc;
   border: 1px dashed #ccd9d5;
   border-radius: 12px;
-}
-.file-symbol {
-  width: 36px;
-  height: 43px;
-  display: grid;
-  place-items: center;
-  background: #e4f1e9;
-  color: #367d61;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 18px;
-  position: relative;
-  margin-bottom: 18px;
-}
-.file-symbol span {
-  position: absolute;
-  right: -9px;
-  bottom: -3px;
-  border: 2px solid white;
-  width: 21px;
-  height: 21px;
-  border-radius: 50%;
-  background: #72a58b;
-  color: white;
-  font-size: 13px;
 }
 .upload-placeholder p {
   margin-top: 6px;
@@ -486,23 +393,9 @@ th:nth-child(3) {
   .empty-symbol {
     margin-bottom: 15px;
   }
-  .admin-summary > div {
-    padding: 0 14px;
-  }
-  .admin-summary .summary-label {
-    font-size: 11px;
-    line-height: 1.6;
-    margin-top: 10px;
-  }
   .upload-section,
   .table-section {
     padding: 20px 16px;
-  }
-  .section-heading {
-    gap: 10px;
-  }
-  .section-heading h2 {
-    font-size: 15px;
   }
   .page-footer {
     font-size: 9px;
@@ -573,23 +466,6 @@ td .button {
   font-size: 11px;
   font-weight: 600;
 }
-.map-restaurant-info {
-  width: 240px;
-  max-width: 65vw;
-  padding: 18px 24px 16px 16px;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-.map-restaurant-info h3 {
-  margin-bottom: 8px;
-  color: #202b32;
-}
-.map-restaurant-info p {
-  margin-top: 5px;
-  color: #687880;
-  font-size: 12px;
-  line-height: 1.6;
-}
 
 .map-office-info {
   padding: 16px 30px 16px 16px;
@@ -655,7 +531,6 @@ td .button {
   font-size: 12px;
 }
 
-.map-restaurant-info,
 .map-office-info {
   position: relative;
 }

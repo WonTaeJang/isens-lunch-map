@@ -151,20 +151,6 @@
   color: #087f73;
   font-size: 14px;
 }
-.user-stat-track {
-  display: flex;
-  height: 10px;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #e9edef;
-  margin-bottom: 8px;
-}
-.user-stat-track > span {
-  height: 100%;
-}
-.user-stat-progress {
-  background: #128574;
-}
 @media (max-width: 760px) {
   .user-progress {
     padding: 20px;

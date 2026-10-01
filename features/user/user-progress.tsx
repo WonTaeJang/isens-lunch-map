@@ -1,3 +1,4 @@
+import ProgressBar from '@/components/ui/progress-bar';
 import styles from './user.module.css';
 import RecommendationBar from '@/features/reviews/recommendation-bar';
 import type { UserReviewStats } from '@/features/reviews/review-model';
@@ -29,17 +30,11 @@ export default function UserProgress({
           <h2>점심 탐방 진행률</h2>
           <strong>{PERCENT_FORMAT.format(progress)}%</strong>
         </div>
-        <div
-          className={styles['user-stat-track']}
-          role="progressbar"
-          aria-label="점심 탐방 진행률"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={progress}
-          aria-valuetext={`식당 ${stats.active_total}곳 중 리뷰 ${stats.reviewed_active}`}
-        >
-          <span className={styles['user-stat-progress']} style={{ width: `${progress}%` }} />
-        </div>
+        <ProgressBar
+          value={progress}
+          label="점심 탐방 진행률"
+          valueText={`식당 ${stats.active_total}곳 중 리뷰 ${stats.reviewed_active}`}
+        />
         <p className="subtle">
           {stats.active_total ? `리뷰 ${stats.reviewed_active}` : '집계할 식당이 없어요'}
         </p>

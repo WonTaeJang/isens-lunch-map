@@ -1,8 +1,10 @@
 'use client';
+import ReviewCountBadges from '@/features/reviews/review-counts';
+import type { ReviewCounts } from '@/features/reviews/review-model';
 import { formatDistance } from '@/lib/distance';
 import { hasCoordinates } from '@/lib/coordinates';
 import type { MapRestaurant } from '@/lib/restaurant-types';
-export default function RestaurantListItem({row, selected, favorite, onSelect, onFavorite}: {row: MapRestaurant; selected: boolean; favorite: boolean; onSelect: () => void; onFavorite: () => void}) {
+export default function RestaurantListItem({counts, row, selected, favorite, onSelect, onFavorite, onReviews}: {counts: ReviewCounts[string] | null; row: MapRestaurant; selected: boolean; favorite: boolean; onSelect: () => void; onFavorite: () => void; onReviews: () => void}) {
   return (
     <li className="restaurant-list-item">
       <button type="button" className="restaurant-list-favorite" aria-label={`${row.name} 즐겨찾기 ${favorite ? '해제' : '추가'}`} aria-pressed={favorite} onClick={onFavorite}>
@@ -14,6 +16,10 @@ export default function RestaurantListItem({row, selected, favorite, onSelect, o
         <p className="description">{row.address || '주소 확인 필요'}</p>
         {!hasCoordinates(row) && <span className="subtle">위치 확인 중 · 지도 이동 불가</span>}
       </button>
+      <div className="restaurant-list-footer">
+        <ReviewCountBadges counts={counts} />
+      <button type="button" className="restaurant-review-button" aria-label={`${row.name} 리뷰 보기`} onClick={onReviews}>리뷰 보기</button>
+      </div>
     </li>
   );
 }

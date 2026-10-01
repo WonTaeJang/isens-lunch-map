@@ -16,7 +16,7 @@ export function createUserName(): string {
   return randSuffix(name, SUFFIX_OPTIONS);
 }
 
-// Local identity is for display only; it must not authorize server mutations.
+// Toy-project identity: reviews compare this ID without authenticated ownership.
 export function ensureLocalUser(storage: Pick<Storage, 'getItem' | 'setItem'>) {
   const storedId = storage.getItem(LOCAL_USER_KEYS.id);
   const storedName = storage.getItem(LOCAL_USER_KEYS.name);

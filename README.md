@@ -16,6 +16,7 @@ features/
   favorites/                 # 즐겨찾기 저장·변경 알림·구독
   admin/                     # 관리자 화면·수정 흐름·HTTP 요청
   local-user/                # 로컬 사용자 정보 생성
+  reviews/                   # 리뷰 패널·작성 폼·공통 검증
 lib/
   server/                    # 서버 전용 로직
     db.ts                    # DB 연결
@@ -117,12 +118,13 @@ DB 연결 문자열과 관리자 비밀번호 등은 서버 환경 변수로 유
 
 `features/local-user`는 브라우저의 익명 사용자 ID와 이름을 초기화하는 기능입니다.
 즐겨찾기나 지도와 별도 책임으로 분리했습니다. localStorage에 저장한 사용자 ID는
-사용자가 변경할 수 있으므로 서버의 인증·수정 권한을 증명하는 값으로 사용하면 안 됩니다.
+사용자가 변경할 수 있어 인증된 본인 확인을 보장하지 않습니다. 현재 리뷰는 사용자가 선택한
+토이프로젝트 방식으로 이 ID의 일치 여부만 비교하며, 자세한 동작은 아래 리뷰 절을 참고합니다.
 
 ### 기능을 추가하거나 수정할 때의 기준
 
 - 공통 모양과 동작만 가진 UI는 `components/ui`, 특정 기능에 종속된 코드는 해당 `features`에 둡니다.
-- 새로운 리뷰 기능은 `features/reviews`처럼 관련 화면·훅·요청 코드를 함께 모을 수 있습니다.
+- 리뷰처럼 새 기능은 `features/reviews` 아래에 관련 화면·검증 코드를 모읍니다.
 - 계산 로직은 가능한 순수 함수로 분리하고, SDK·브라우저·DB 접근과 구분합니다.
 - 지도 이동은 명시적인 이동 요청으로 처리하며, 렌더링이나 즐겨찾기 변경에 연결하지 않습니다.
 - 이벤트 구독과 SDK 객체를 추가하면 해제·제거 처리도 함께 작성합니다.
@@ -225,3 +227,31 @@ without inserting fixtures (requires a running local dev server).
 
 The CA certificate in `lib/certs` is the public Supabase certificate downloaded
 from its dashboard. It is included in Next.js server deployment traces.
+
+## 식당 리뷰
+
+지도 팝업과 식당 리스트의 `리뷰 보기`에서 리뷰를 조회·작성합니다.
+PC에서는 오른쪽 패널, 모바일에서는 하단 패널을 사용합니다.
+
+- `features/reviews/review-panel.tsx`: 조회·저장 상태와 리뷰 패널
+- `features/reviews/review-form.tsx`: 추천/비추천, 내용, 태그 입력
+- `features/reviews/review-model.ts`: 공통 타입과 입력 검증, 고정 태그 목록
+- `app/api/reviews/route.ts`: GET/POST/PATCH/DELETE 요청 처리
+- `lib/server/reviews.ts`: PostgreSQL 조회와 트랜잭션, 작성자 비교
+
+내용은 앞뒤 공백을 제거한 뒤 1~1,000자로 제한하고, 태그는 최대 3개 선택합니다.
+현재 `public.review.tags`는 `text` 타입이므로 `["tasty","good_value"]`처럼
+태그 코드 배열을 JSON 문자열로 저장합니다. 추가 테이블 변경은 필요하지 않습니다.
+최초 작성은 `updated_at = NULL`, 수정 시에는 서버 시간을 저장해 `수정됨`을 표시합니다.
+리뷰는 최신순 20개씩 조회하며 추천·비추천 집계를 함께 표시합니다.
+
+기존 localStorage의 `user_id`와 `user_name`을 사용하며, 없으면 기존 랜덤 생성 흐름을 사용합니다.
+수정·삭제는 요청의 `user_id`와 DB 작성자 ID가 일치할 때 가능합니다.
+이 방식은 사용자가 선택한 토이프로젝트 방식이며 인증된 본인 확인은 아닙니다.
+ID를 바꾸거나 저장소를 지우면 기존 리뷰 소유권을 잃고, 다른 사람의 ID를 알면 사칭할 수 있습니다.
+조회 응답에는 작성자의 UUID를 포함하지 않고 `is_mine`만 반환합니다.
+
+API를 통한 등록은 식당·사용자 조합당 1개로 제한하고 트랜잭션 잠금으로 동시 중복 요청을 방지합니다.
+DB 직접 입력까지 고유성을 보장하는 제약은 별도로 추가하지 않았습니다.
+수정·삭제는 조회한 수정 시간도 비교해 다른 탭에서 변경된 리뷰를 덮어쓰지 않습니다.
+`npm test`는 입력 제한, 소유자 조건, 중복 등록·롤백을 모의 DB로 검증합니다.

@@ -7,7 +7,8 @@ import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { reviewRequest as request } from './review-api';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from './review-form';
-import { REVIEW_TAGS, type Review, type ReviewPage, type reviewInput } from './review-model';
+import { type Review, type ReviewPage, type reviewInput } from './review-model';
+import { REVIEW_TAGS } from './constants';
 
 import useLocalUser from '@/features/local-user/use-local-user';
 import type { LocalIdentity } from '@/features/local-user/local-user-store';

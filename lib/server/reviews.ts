@@ -3,7 +3,7 @@ import type { Pool } from 'pg';
 import { encodeReviewCursor, type ReviewCursor } from './review-cursor';
 import { decodeTags, ReviewError, reviewInput, uuid, type Review, type ReviewCounts, type UserReview, type ReviewPage, type UserReviewPage } from '@/features/reviews/review-model';
 
-const PAGE_SIZE = 20;
+import { REVIEW_PAGE_SIZE } from '@/features/reviews/constants';
 const FIELDS = 'id, user_name, content, is_recommended, tags, created_at, updated_at';
 type ReviewRow = {
   id: string; user_name: string | null; content: string; is_recommended: boolean | null;
@@ -19,9 +19,9 @@ function present(row: ReviewRow): Review {
     created_at: iso(row.created_at), updated_at: row.updated_at === null ? null : iso(row.updated_at), is_mine: row.is_mine };
 }
 function pageCursor(rows: PagedReviewRow[]) {
-  const last = rows[PAGE_SIZE - 1];
+  const last = rows[REVIEW_PAGE_SIZE - 1];
   // Keep PostgreSQL microseconds: JS Date loses precision at page boundaries.
-  return rows.length > PAGE_SIZE && last ? encodeReviewCursor({ createdAt: last.cursor_time, id: last.id }) : null;
+  return rows.length > REVIEW_PAGE_SIZE && last ? encodeReviewCursor({ createdAt: last.cursor_time, id: last.id }) : null;
 }
 export async function listReviews(db: Pool, restaurant: string, user: string | null, cursor: ReviewCursor | null = null): Promise<ReviewPage> {
   const summary = await db.query<{total: number; recommended: number; not_recommended: number}>(`select count(*)::int total,
@@ -32,9 +32,9 @@ export async function listReviews(db: Pool, restaurant: string, user: string | n
     to_char(created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') cursor_time
     from public.review where restaurant_id=$1
     and ($3::timestamptz is null or (created_at,id)<($3::timestamptz,$4::uuid))
-    order by created_at desc,id desc limit $5`, [restaurant, user, cursor?.createdAt ?? null, cursor?.id ?? null, PAGE_SIZE + 1]);
+    order by created_at desc,id desc limit $5`, [restaurant, user, cursor?.createdAt ?? null, cursor?.id ?? null, REVIEW_PAGE_SIZE + 1]);
   const mine = user ? await db.query<ReviewRow>(`select ${FIELDS}, true is_mine from public.review where restaurant_id=$1 and user_id=$2 order by created_at desc,id desc limit 1`, [restaurant, user]) : { rows: [] };
-  return { ...summary.rows[0], reviews: rows.rows.slice(0, PAGE_SIZE).map(present), mine: mine.rows[0] ? present(mine.rows[0]) : null, hasMore: rows.rows.length > PAGE_SIZE, nextCursor: pageCursor(rows.rows) };
+  return { ...summary.rows[0], reviews: rows.rows.slice(0, REVIEW_PAGE_SIZE).map(present), mine: mine.rows[0] ? present(mine.rows[0]) : null, hasMore: rows.rows.length > REVIEW_PAGE_SIZE, nextCursor: pageCursor(rows.rows) };
 }
 export async function getOwnReview(db: Pool, id: string, user: string): Promise<Review | null> {
   const { rows } = await db.query<ReviewRow>(`select ${FIELDS}, true is_mine from public.review where id=$1 and user_id=$2`, [id, user]);
@@ -109,10 +109,10 @@ export async function listUserReviews(db: Pool, user: string, cursor: ReviewCurs
     s.name restaurant_name, s.active restaurant_active, s.latitude, s.longitude
     from public.review r join public.restaurants s on s.id=r.restaurant_id
     where r.user_id=$1 and ($2::timestamptz is null or (r.created_at,r.id)<($2::timestamptz,$3::uuid))
-    order by r.created_at desc,r.id desc limit $4`, [user, cursor?.createdAt ?? null, cursor?.id ?? null, PAGE_SIZE + 1]);
-  return { ...summary.rows[0], reviews: rows.slice(0, PAGE_SIZE).map(row => ({ ...present(row),
+    order by r.created_at desc,r.id desc limit $4`, [user, cursor?.createdAt ?? null, cursor?.id ?? null, REVIEW_PAGE_SIZE + 1]);
+  return { ...summary.rows[0], reviews: rows.slice(0, REVIEW_PAGE_SIZE).map(row => ({ ...present(row),
     restaurant_id: row.restaurant_id, restaurant_name: row.restaurant_name, restaurant_active: row.restaurant_active,
-    latitude: row.latitude, longitude: row.longitude })), hasMore: rows.length > PAGE_SIZE, nextCursor: pageCursor(rows) };
+    latitude: row.latitude, longitude: row.longitude })), hasMore: rows.length > REVIEW_PAGE_SIZE, nextCursor: pageCursor(rows) };
 }
 
 export async function listReviewedRestaurantIds(db: Pool, user: string): Promise<string[]> {

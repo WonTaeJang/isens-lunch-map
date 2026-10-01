@@ -4,7 +4,8 @@ import { useReducer, useState } from 'react';
 import { createReviewEditor, reviewEditorReducer } from './review-editor';
 import { ApiError } from './review-api';
 import Button from '@/components/ui/button';
-import { MAX_REVIEW_LENGTH, REVIEW_TAG_GROUPS, reviewInput, type Review } from './review-model';
+import { reviewInput, type Review } from './review-model';
+import { MAX_REVIEW_LENGTH, MAX_REVIEW_TAGS, REVIEW_TAG_GROUPS } from './constants';
 
 export default function ReviewForm({ review, name, busy, onSave, onCancel, onReload }: {
   review: Review | null; name: string; busy: boolean;
@@ -43,11 +44,11 @@ export default function ReviewForm({ review, name, busy, onSave, onCancel, onRel
     </div></fieldset>
     <label htmlFor="review-content">리뷰 내용</label>
     <textarea id="review-content" rows={5} value={content} disabled={busy} onChange={event => dispatch({ type: 'content', value: event.target.value })} placeholder="메뉴, 맛, 점심시간에 이용한 경험을 나눠 주세요." aria-describedby="review-length" />
-    <span id="review-length" className="subtle">{length.toLocaleString()} / 1,000자</span>
-    <fieldset disabled={busy}><legend>태그 <span className="subtle">선택 · {tags.length}/3개</span></legend>
+    <span id="review-length" className="subtle">{length.toLocaleString()} / {MAX_REVIEW_LENGTH.toLocaleString()}자</span>
+    <fieldset disabled={busy}><legend>태그 <span className="subtle">선택 · {tags.length}/{MAX_REVIEW_TAGS}개</span></legend>
       <div className="review-tag-groups">{REVIEW_TAG_GROUPS.map(group => <fieldset key={group.value}>
         <legend className="review-tag-group-label">{group.label}</legend>
-        <div className="review-options">{group.tags.map(tag => <button type="button" key={tag.value} aria-pressed={tags.includes(tag.value)} disabled={!tags.includes(tag.value) && tags.length >= 3} onClick={() => dispatch({ type: 'tag', value: tag.value })}>{tag.label}</button>)}</div>
+        <div className="review-options">{group.tags.map(tag => <button type="button" key={tag.value} aria-pressed={tags.includes(tag.value)} disabled={!tags.includes(tag.value) && tags.length >= MAX_REVIEW_TAGS} onClick={() => dispatch({ type: 'tag', value: tag.value })}>{tag.label}</button>)}</div>
       </fieldset>)}</div>
     </fieldset>
     {error && <p role="alert" className="review-error">{error}</p>}

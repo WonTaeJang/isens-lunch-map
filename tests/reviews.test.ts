@@ -119,7 +119,7 @@ test('my reviews are scoped to one user, join restaurant data and include inacti
 });
 
 test('expanded tags preserve existing codes and allow mixed experiences for either recommendation', async () => {
-  const { REVIEW_TAGS, REVIEW_TAG_GROUPS } = await import('../features/reviews/review-model');
+  const { REVIEW_TAGS, REVIEW_TAG_GROUPS } = await import('../features/reviews/constants');
   assert.equal(REVIEW_TAGS.length, 16);
   assert.equal(new Set(REVIEW_TAGS.map(tag => tag.value)).size, 16);
   assert.equal(REVIEW_TAG_GROUPS.flatMap(group => group.tags).length, 16);

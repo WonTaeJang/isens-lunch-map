@@ -219,3 +219,6 @@ td .button { margin: 0; white-space: nowrap; }
 .admin-login form { margin-top: 24px; }
 .admin-login label { display: block; font-size: 13px; }
 .admin-login input, .admin-login .button { width: 100%; }
+
+.restaurant-panel .panel-heading h2 { display: flex; align-items: center; gap: 8px; margin: 0; }
+.restaurant-panel .panel-heading h2 .count { margin-left: 0; line-height: 1.5; }

@@ -44,10 +44,10 @@ export default function LunchExplorer({ restaurants, failed, reviewCounts, initi
   return (
     <div ref={layoutRef} className="map-layout" id="lunch-map-layout">
       <aside className="restaurant-panel" aria-label="식당 목록">
-        <div className="panel-heading"><h2>점심 리스트 <CountBadge>{failed ? '—' : rows.length}</CountBadge></h2><span className="subtle">전체 {restaurants.length}곳</span></div>
+        <div className="panel-heading"><h2>점심 리스트 <CountBadge>{failed ? '—' : rows.length}</CountBadge></h2><span className="subtle">전체: {restaurants.length}</span></div>
         {favoriteError && <p className="favorite-error" role="alert">{favoriteError}</p>}
         <RestaurantFilters
-          {...filters} count={rows.length} failed={failed}
+          {...filters} failed={failed}
           onQueryChange={query => changeFilters({ query })}
           onDistanceChange={maxDistance => changeFilters({ maxDistance })}
           onFavoritesOnlyChange={favoritesOnly => changeFilters({ favoritesOnly })}

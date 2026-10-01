@@ -11,7 +11,6 @@ const DISTANCE_FILTER_OPTIONS = [
 type Props = {
   query: string;
   maxDistance: number | null;
-  count: number;
   failed: boolean;
   favoritesOnly: boolean;
   onFavoritesOnlyChange: (value: boolean) => void;
@@ -22,15 +21,12 @@ type Props = {
 export default function RestaurantFilters({
   query,
   maxDistance,
-  count,
   failed,
   favoritesOnly,
   onFavoritesOnlyChange,
   onQueryChange,
   onDistanceChange,
 }: Props) {
-  const resultMessage = failed ? '목록 조회 실패' : `검색 결과 ${count}곳`;
-
   return (
     <div className="restaurant-filters">
       <label className="search-label" htmlFor="restaurant-search">식당 검색</label>
@@ -59,7 +55,7 @@ export default function RestaurantFilters({
         즐겨찾기만
       </FilterChip>
       </div>
-      <p className="subtle" role="status">{resultMessage}</p>
+      {failed && <p className="subtle" role="alert">목록 조회 실패</p>}
     </div>
   );
 }

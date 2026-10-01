@@ -3,6 +3,7 @@
 import Tabs from '@/components/ui/tabs';
 import { useState } from 'react';
 import styles from './admin-manager.module.css';
+import AdminStatistics from './admin-statistics';
 import ExcelImportSection from './excel-import-section';
 import RestaurantTable from './restaurant-table';
 import AddressErrorSection from './address-error-section';
@@ -93,10 +94,7 @@ export default function AdminManager({
         hidden={tab !== 'statistics'}
         tabIndex={0}
       >
-        <section className="table-section">
-          <h2>통계</h2>
-          <p className="description">통계 기능을 준비 중입니다.</p>
-        </section>
+        {tab === 'statistics' && <AdminStatistics password={password} />}
       </div>
     </>
   );

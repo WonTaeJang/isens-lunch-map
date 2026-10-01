@@ -1,0 +1,123 @@
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+.cards > div {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #eff7f5;
+}
+.cards strong {
+  font-size: 28px;
+  color: #087f73;
+}
+.cards small {
+  color: #74838b;
+}
+.section {
+  margin-top: 28px;
+}
+.section h3 {
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+.track {
+  margin: 8px 0;
+}
+.tags {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+  margin-top: 20px;
+  font-size: 13px;
+}
+@media (max-width: 480px) {
+  .cards,
+  .tags {
+    grid-template-columns: 1fr;
+  }
+}
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+}
+.days li {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+  font-size: 12px;
+}
+.days time {
+  color: #74838b;
+}
+.dayTrack {
+  height: 120px;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  background: #f2f6f5;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.dayTrack span {
+  width: 100%;
+  background: #128574;
+  border-radius: 6px 6px 0 0;
+}
+.ranking {
+  padding: 0;
+  list-style: none;
+}
+.ranking li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eef0f2;
+  font-size: 14px;
+}
+.ranking strong {
+  white-space: nowrap;
+  margin-left: auto;
+}
+.rank {
+  color: #087f73;
+  min-width: 20px;
+}
+.restaurantName {
+  overflow-wrap: anywhere;
+}
+.restaurantName small {
+  color: #74838b;
+}
+.unreviewed summary {
+  cursor: pointer;
+  font-size: 15px;
+  padding: 12px 0;
+}
+.unreviewed summary strong {
+  color: #087f73;
+}
+.unreviewed ul {
+  max-height: 320px;
+  overflow-y: auto;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 2;
+}

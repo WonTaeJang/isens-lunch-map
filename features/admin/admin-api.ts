@@ -48,3 +48,14 @@ export async function loadAdminRestaurants(password: string) {
   if (!response.ok) throw new Error(result.error || '관리자 목록을 불러오지 못했습니다.');
   return result.restaurants as import('@/lib/restaurant-types').RestaurantRow[];
 }
+
+export async function loadAdminStatistics(password: string, signal?: AbortSignal) {
+  const response = await fetch('/api/admin/statistics', {
+    headers: { 'x-admin-password': password },
+    cache: 'no-store',
+    signal,
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || '통계를 불러오지 못했습니다.');
+  return result as import('./statistics-model').AdminStatistics;
+}

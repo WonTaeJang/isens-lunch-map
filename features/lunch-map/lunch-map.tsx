@@ -11,6 +11,7 @@ import type { MapRestaurant } from '@/lib/restaurant-types';
 
 const APP_KEY = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY?.trim();
 type Props = {
+  reviewedIds: ReadonlySet<string> | null;
   reviewCounts: ReviewCounts | null;
   restaurants: MapRestaurant[];
   favorites: ReadonlySet<string>;
@@ -21,7 +22,7 @@ type Props = {
   onFavorite: (id: string) => string | null;
 };
 
-export default function LunchMap({ reviewCounts, restaurants, favorites, selectedId, focusRequest, onSelect, onFavorite, onReviews }: Props) {
+export default function LunchMap({ reviewedIds, reviewCounts, restaurants, favorites, selectedId, focusRequest, onSelect, onFavorite, onReviews }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [sdkReady, setSdkReady] = useState(false);
   const [controller, setController] = useState<MapController | null>(null);
@@ -88,7 +89,7 @@ export default function LunchMap({ reviewCounts, restaurants, favorites, selecte
         </div>
       )}
       {controller && selected && createPortal(
-        <RestaurantMapCard counts={reviewCounts === null ? null : reviewCounts[selected.id] ?? { recommended: 0, not_recommended: 0 }} key={selected.id} restaurant={selected} favorite={favorites.has(selected.id)} onClose={() => onSelect(null)} onReviews={() => onReviews(selected.id)} onFavorite={() => onFavorite(selected.id)} />,
+        <RestaurantMapCard reviewed={reviewedIds?.has(selected.id) ?? false} counts={reviewCounts === null ? null : reviewCounts[selected.id] ?? { recommended: 0, not_recommended: 0 }} key={selected.id} restaurant={selected} favorite={favorites.has(selected.id)} onClose={() => onSelect(null)} onReviews={() => onReviews(selected.id)} onFavorite={() => onFavorite(selected.id)} />,
         controller.host,
       )}
       {APP_KEY && <Script id="kakao-maps-sdk" src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(APP_KEY)}&autoload=false&libraries=services`} strategy="afterInteractive" onReady={() => setSdkReady(true)} onError={() => setError(true)} />}

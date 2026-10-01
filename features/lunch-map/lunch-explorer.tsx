@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import type { ReviewCounts } from '@/features/reviews/review-model';
+import useReviewedRestaurants from '@/features/reviews/use-reviewed-restaurants';
 import ReviewPanel from '@/features/reviews/review-panel';
 import CountBadge from '@/components/ui/count-badge';
 import RestaurantFilters from './restaurant-filters';
@@ -12,12 +13,13 @@ import { toggleStoredFavorite } from '@/features/favorites/favorites-store';
 import { DEFAULT_FILTERS, filterRestaurants } from './filter-restaurants';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 
-export default function LunchExplorer({ restaurants, failed, reviewCounts }: { reviewCounts: ReviewCounts | null; restaurants: MapRestaurant[]; failed: boolean }) {
+export default function LunchExplorer({ restaurants, failed, reviewCounts, initialRestaurantId = null }: { initialRestaurantId?: string | null; reviewCounts: ReviewCounts | null; restaurants: MapRestaurant[]; failed: boolean }) {
+  const reviewedIds = useReviewedRestaurants(reviewCounts);
   const [reviewRestaurant, setReviewRestaurant] = useState<MapRestaurant | null>(null);
   function openReviews(id: string) { setReviewRestaurant(restaurants.find(row => row.id === id) ?? null); }
   const layoutRef = useRef<HTMLDivElement>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [focusRequest, setFocusRequest] = useState<{ id: string } | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialRestaurantId);
+  const [focusRequest, setFocusRequest] = useState<{ id: string } | null>(() => initialRestaurantId ? { id: initialRestaurantId } : null);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const favorites = useFavorites();
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
@@ -53,7 +55,7 @@ export default function LunchExplorer({ restaurants, failed, reviewCounts }: { r
         <RestaurantResults reviewCounts={reviewCounts} rows={rows} total={restaurants.length} failed={failed} favoritesOnly={filters.favoritesOnly} favorites={favorites} selectedId={visibleSelectedId} onSelect={selectFromList} onFavorite={favoriteFromList} onReset={resetFilters} onReviews={openReviews} />
         <div className="panel-note"><span aria-hidden="true">ⓘ</span><p>식당이 등록되면 지도와 리스트에서<br />함께 확인할 수 있어요.</p></div>
       </aside>
-      <LunchMap reviewCounts={reviewCounts} restaurants={rows} favorites={favorites} selectedId={visibleSelectedId} focusRequest={focusRequest} onSelect={setSelectedId} onFavorite={toggleStoredFavorite} onReviews={openReviews} />
+      <LunchMap reviewedIds={reviewedIds} reviewCounts={reviewCounts} restaurants={rows} favorites={favorites} selectedId={visibleSelectedId} focusRequest={focusRequest} onSelect={setSelectedId} onFavorite={toggleStoredFavorite} onReviews={openReviews} />
       {reviewRestaurant && <ReviewPanel key={reviewRestaurant.id} restaurant={reviewRestaurant} onClose={() => setReviewRestaurant(null)} />}
     </div>
   );

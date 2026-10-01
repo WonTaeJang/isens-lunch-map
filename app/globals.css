@@ -196,3 +196,36 @@ td .button { margin: 0; white-space: nowrap; }
 .restaurant-review-counts svg { flex-shrink: 0; }
 .restaurant-card-meta { flex-wrap: wrap; }
 .restaurant-card-meta .restaurant-review-counts { margin-left: auto; }
+
+.user-dashboard { max-width: 780px; margin: 32px auto; }
+.user-profile { display: flex; align-items: center; gap: 20px; padding: 28px; background: white; border: 1px solid #e4e9eb; border-radius: 16px; }
+.user-profile h1 { font-size: 24px; margin: 6px 0 10px; overflow-wrap: anywhere; }
+.user-avatar { flex: 0 0 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; background: #eaf5f1; color: #087f73; }
+.user-tabs { display: flex; gap: 24px; margin-top: 24px; border-bottom: 1px solid #dbe5e2; }
+.user-tabs button { padding: 16px 8px; border: 0; border-bottom: 3px solid transparent; color: #75818a; background: transparent; font: inherit; font-size: 14px; cursor: pointer; }
+.user-tabs button[aria-pressed="true"] { border-bottom-color: #087f73; color: #087f73; font-weight: 700; }
+.user-records { background: white; padding: 24px; border: 1px solid #e4e9eb; border-top: 0; border-radius: 0 0 16px 16px; }
+.user-records .review-list { margin: 0; }
+.user-records .review-item:first-child { border-top: 0; }
+.user-records .review-item-heading h2 { font-size: 16px; overflow-wrap: anywhere; }
+.user-records .review-item-heading a:hover { color: #087f73; text-decoration: underline; }
+.user-records .description { margin-top: 8px; }
+.user-remove-favorite { margin-top: 12px; padding: 6px 0; border: 0; background: transparent; color: #866500; font-size: 12px; cursor: pointer; }
+.user-storage-note { margin-top: 20px; color: #75818a; font-size: 12px; line-height: 1.8; }
+@media (max-width: 760px) {
+  .user-dashboard { margin-top: 20px; }
+  .user-profile { padding: 20px; gap: 14px; }
+  .user-profile h1 { font-size: 20px; }
+  .user-avatar { flex-basis: 48px; height: 48px; }
+  .user-records { padding: 18px; }
+}
+
+.recommendation-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.recommendation-badge svg { flex-shrink: 0; }
+.recommendation-badge.is-recommended { color: #2563eb; }
+.recommendation-badge.is-not-recommended { color: #dc2626; }
+
+.review-tag-groups { display: grid; gap: 16px; }
+.review-form .review-tag-group-label { color: #627078; font-size: 12px; margin-bottom: 8px; }
+
+.restaurant-card-reviewed { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; padding: 3px 6px; border-radius: 4px; color: #087f73; background: #eaf5f1; font-size: 11px; }

@@ -66,3 +66,20 @@ export async function getReviewCounts(db: Pool): Promise<ReviewCounts> {
   `);
   return Object.fromEntries(rows.map(({ restaurant_id, ...counts }) => [restaurant_id, counts]));
 }
+
+export async function listUserReviews(db: Pool, user: string, offset: number) {
+  const summary = await db.query('select count(*)::int total from public.review where user_id=$1', [user]);
+  const { rows } = await db.query(`select r.id, r.user_name, r.content, r.is_recommended, r.tags,
+    r.created_at, r.updated_at, true is_mine, r.restaurant_id,
+    s.name restaurant_name, s.active restaurant_active, s.latitude, s.longitude
+    from public.review r join public.restaurants s on s.id=r.restaurant_id
+    where r.user_id=$1 order by r.created_at desc,r.id desc limit $2 offset $3`, [user, PAGE_SIZE + 1, offset]);
+  return { total: summary.rows[0].total, reviews: rows.slice(0, PAGE_SIZE).map(present), hasMore: rows.length > PAGE_SIZE };
+}
+
+export async function listReviewedRestaurantIds(db: Pool, user: string): Promise<string[]> {
+  const { rows } = await db.query<{ restaurant_id: string }>(
+    'select distinct restaurant_id from public.review where user_id=$1', [user],
+  );
+  return rows.map(row => row.restaurant_id);
+}

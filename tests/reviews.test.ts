@@ -92,3 +92,51 @@ test('list counts use one grouped query and keep recommendations separated by re
   });
   assert.equal(mock.calls.length, 1);
 });
+
+test('my reviews are scoped to one user, join restaurant data and include inactive history', async () => {
+  const { listUserReviews } = await import('../lib/server/reviews');
+  const mock = database((sql, values) => {
+    assert.equal(values[0], user);
+    if (sql.includes('count(*)')) {
+      assert.match(sql, /where user_id=\$1/);
+      return { rows: [{ total: 21 }], rowCount: 1 };
+    }
+    assert.match(sql, /where r.user_id=\$1/);
+    assert.match(sql, /join public.restaurants/);
+    assert.doesNotMatch(sql, /active\s*=\s*true/);
+    assert.deepEqual(values, [user, 21, 20]);
+    return { rows: Array.from({ length: 21 }, (_, i) => ({ id: String(i), restaurant_id: restaurant, restaurant_name: '식당', restaurant_active: false, tags: '["tasty"]' })), rowCount: 21 };
+  });
+  const result = await listUserReviews(mock.db, user, 20);
+  assert.equal(result.total, 21);
+  assert.equal(result.reviews.length, 20);
+  assert.equal(result.hasMore, true);
+  assert.deepEqual(result.reviews[0].tags, ['tasty']);
+});
+
+test('expanded tags preserve existing codes and allow mixed experiences for either recommendation', async () => {
+  const { REVIEW_TAGS, REVIEW_TAG_GROUPS } = await import('../features/reviews/review-model');
+  assert.equal(REVIEW_TAGS.length, 16);
+  assert.equal(new Set(REVIEW_TAGS.map(tag => tag.value)).size, 16);
+  assert.equal(REVIEW_TAG_GROUPS.flatMap(group => group.tags).length, 16);
+  const oldTags = ['tasty', 'generous_portions', 'good_value', 'quick_service', 'solo_friendly', 'group_friendly', 'waiting'];
+  assert.deepEqual(decodeTags(JSON.stringify(oldTags)), oldTags);
+  for (const recommended of [true, false]) {
+    const tags = ['friendly_service', 'small_portions', 'solo_friendly'];
+    assert.deepEqual(reviewInput({ ...input, is_recommended: recommended, tags }).tags, tags);
+    assert.throws(() => reviewInput({ ...input, tags: [...tags, 'noisy_place'] }), ReviewError);
+  }
+});
+
+test('reviewed restaurant lookup returns IDs only in one user-scoped query without pagination', async () => {
+  const { listReviewedRestaurantIds } = await import('../lib/server/reviews');
+  const mock = database((sql, values) => {
+    assert.match(sql, /select distinct restaurant_id/);
+    assert.match(sql, /where user_id=\$1/);
+    assert.doesNotMatch(sql, /limit|content|user_name/);
+    assert.deepEqual(values, [user]);
+    return { rows: [{ restaurant_id: restaurant }, { restaurant_id: id }], rowCount: 2 };
+  });
+  assert.deepEqual(await listReviewedRestaurantIds(mock.db, user), [restaurant, id]);
+  assert.equal(mock.calls.length, 1);
+});

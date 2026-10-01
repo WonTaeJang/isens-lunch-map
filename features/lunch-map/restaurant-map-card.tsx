@@ -7,6 +7,7 @@ import type { MapRestaurant } from '@/lib/restaurant-types';
 import { formatDistance } from '@/lib/distance';
 
 type Props = {
+  reviewed: boolean;
   restaurant: MapRestaurant;
   counts: ReviewCounts[string] | null;
   favorite: boolean;
@@ -15,12 +16,12 @@ type Props = {
   onFavorite: () => string | null;
 };
 
-export default function RestaurantMapCard({ counts, restaurant, favorite, onClose, onFavorite, onReviews }: Props) {
+export default function RestaurantMapCard({ reviewed, counts, restaurant, favorite, onClose, onFavorite, onReviews }: Props) {
   const [message, setMessage] = useState<string | null>(null);
   return (
     <article className="restaurant-map-card" aria-label={`${restaurant.name} 상세 정보`} onKeyDown={event => { if (event.key === 'Escape') onClose(); }}>
       <button type="button" className="restaurant-card-close" aria-label="상세 정보 닫기" onClick={onClose}>×</button>
-      <div className="restaurant-card-header"><h3>{restaurant.name}</h3></div>
+      <div className="restaurant-card-header"><h3>{restaurant.name}</h3>{reviewed && <span className="restaurant-card-reviewed"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m3 8 3 3 7-7" /></svg>내 리뷰 작성됨</span>}</div>
       <p className="restaurant-card-meta">{restaurant.category || '분류 정보 없음'}<span className="distance-badge">{formatDistance(restaurant.distance)}</span><ReviewCountBadges counts={counts} /></p>
       <div className="restaurant-card-details">
         <p>{restaurant.address || '주소 확인 필요'}</p>

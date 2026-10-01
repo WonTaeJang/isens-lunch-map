@@ -1,11 +1,16 @@
 import Link from "next/link";
 
-export default function SiteHeader({ active }: { active: "map" | "admin" }) {
+export default function SiteHeader({ active }: { active: "map" | "admin" | "user" }) {
   return (
     <header className="site-header">
       <Link href="/" className="brand" aria-label="Lunch Map 홈"><span className="brand-icon" aria-hidden="true">L<span>•</span></span><span>Lunch Map<small>오늘의 점심, 가까운 곳에서</small></span></Link>
       <nav className="main-nav" aria-label="주 메뉴">
-        <Link href="/" aria-current={active === "map" ? "page" : undefined}>점심 지도</Link>
+        <Link href="/" className="admin-nav-icon" aria-label="점심 지도" title="점심 지도" aria-current={active === "map" ? "page" : undefined}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 3 6 3 6-3v15l-6 3-6-3-6 3V6l6-3Z" /><path d="M9 3v15M15 6v15" /></svg>
+        </Link>
+        <Link href="/user" className="admin-nav-icon" aria-label="내 페이지" title="내 페이지" aria-current={active === "user" ? "page" : undefined}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg>
+        </Link>
         <Link href="/admin" className="admin-nav-icon" aria-label="리스트 관리" title="리스트 관리" aria-current={active === "admin" ? "page" : undefined}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="m9.5 3-.6 2.2-1.4.8-2.2-.6-2.5 4.2 1.6 1.6v1.6l-1.6 1.6 2.5 4.2 2.2-.6 1.4.8.6 2.2h5l.6-2.2 1.4-.8 2.2.6 2.5-4.2-1.6-1.6v-1.6l1.6-1.6-2.5-4.2-2.2.6-1.4-.8-.6-2.2z" />

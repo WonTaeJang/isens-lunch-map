@@ -3,16 +3,12 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import Button from '@/components/ui/button';
+import { reviewRequest as request } from './review-api';
+import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from './review-form';
 import { REVIEW_TAGS, uuid, type Review, type ReviewPage, type reviewInput } from './review-model';
 
 type Identity = { user_id: string; user_name: string };
-async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { ...init, cache: 'no-store' });
-  const body = await response.json();
-  if (!response.ok) throw new Error(body.error || '리뷰 요청을 처리하지 못했습니다.');
-  return body;
-}
 const DATE_FORMAT = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 
 export default function ReviewPanel({ restaurant, onClose }: { restaurant: { id: string; name: string }; onClose: () => void }) {
@@ -94,8 +90,8 @@ export default function ReviewPanel({ restaurant, onClose }: { restaurant: { id:
       {loading && <p role="status">리뷰를 불러오는 중…</p>}
       {page?.total === 0 && !loading && <p className="review-empty">아직 리뷰가 없어요. 첫 점심 후기를 남겨 주세요.</p>}
       <ul className="review-list">{page?.reviews.map(review => <li key={review.id} className="review-item">
-        <div className="review-item-heading"><strong>{review.user_name || '익명'} {review.is_mine && <small>내 리뷰</small>}</strong><span>{review.is_recommended === true ? '추천' : review.is_recommended === false ? '비추천' : '평가 없음'}</span></div>
-        <p className="subtle">{DATE_FORMAT.format(new Date(review.created_at))}{review.updated_at && ' · 수정됨'}</p>
+        <div className="review-item-heading"><strong>{review.user_name || '익명'} {review.is_mine && <small>내 리뷰</small>}</strong><RecommendationBadge recommended={review.is_recommended} /></div>
+        <p className="subtle">{DATE_FORMAT.format(new Date(review.updated_at ?? review.created_at))}{review.updated_at && ' · 수정됨'}</p>
         <p className="review-content">{review.content}</p>
         <div className="review-tags">{review.tags.map(tag => <span key={tag}>{REVIEW_TAGS.find(option => option.value === tag)?.label}</span>)}</div>
         {review.is_mine && <div className="review-actions">

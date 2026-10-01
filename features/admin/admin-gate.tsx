@@ -71,7 +71,7 @@ export default function AdminGate() {
           }
         }}
       >
-        <label htmlFor="admin-password">관리자 비밀번호</label>
+        <label htmlFor="admin-password">비밀번호</label>
 
         <input
           id="admin-password"

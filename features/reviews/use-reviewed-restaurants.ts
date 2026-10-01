@@ -2,32 +2,25 @@
 
 import { useEffect, useState } from 'react';
 import { reviewRequest } from './review-api';
-import { uuid, type ReviewCounts } from './review-model';
+import { type ReviewCounts } from './review-model';
+import useLocalUser from '@/features/local-user/use-local-user';
 
 // Server counts are refreshed after review mutations; marker selections do not refetch.
 export default function useReviewedRestaurants(reviewCounts: ReviewCounts | null) {
-  const [ids, setIds] = useState<ReadonlySet<string> | null>(null);
+  const { identity } = useLocalUser();
+  const [result, setResult] = useState<{ owner: string; ids: ReadonlySet<string> } | null>(null);
   useEffect(() => {
-    let controller = new AbortController();
+    const controller = new AbortController();
     async function load() {
-      controller.abort();
-      controller = new AbortController();
-      const signal = controller.signal;
+      if (!identity) { setResult(null); return; }
       try {
-        const { ensureLocalUser } = await import('@/features/local-user/local-user');
-        if (signal.aborted) return;
-        const user = ensureLocalUser(window.localStorage);
-        const params = new URLSearchParams({ scope: 'reviewed-restaurants', user_id: uuid(user.user_id) });
-        const result = await reviewRequest<{ restaurantIds: string[] }>(`/api/reviews?${params}`, { signal });
-        if (!signal.aborted) setIds(new Set(result.restaurantIds));
-      } catch { if (!signal.aborted) setIds(null); }
-    }
-    function onStorage(event: StorageEvent) {
-      if (event.key === 'user_id' || event.key === null) { setIds(null); void load(); }
+        const params = new URLSearchParams({ scope: 'reviewed-restaurants', user_id: identity.user_id });
+        const response = await reviewRequest<{ restaurantIds: string[] }>(`/api/reviews?${params}`, { signal: controller.signal });
+        if (!controller.signal.aborted) setResult({ owner: identity.user_id, ids: new Set(response.restaurantIds) });
+      } catch { if (!controller.signal.aborted) setResult(null); }
     }
     void load();
-    window.addEventListener('storage', onStorage);
-    return () => { controller.abort(); window.removeEventListener('storage', onStorage); };
-  }, [reviewCounts]);
-  return ids;
+    return () => controller.abort();
+  }, [reviewCounts, identity]);
+  return result?.owner === identity?.user_id ? result?.ids ?? null : null;
 }

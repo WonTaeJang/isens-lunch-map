@@ -20,8 +20,6 @@ a:focus-visible, button:focus-visible { outline: 3px solid #0c8578; outline-offs
 h1 { font-size: clamp(25px, 2.5vw, 34px); font-weight: 750; letter-spacing: -1.3px; line-height: 1.3; }
 h1 > span { color: #178478; }
 .description { color: #727e86; font-size: 13px; line-height: 1.8; margin-top: 10px; }
-.soft-badge { display: inline-flex; gap: 8px; align-items: center; padding: 9px 13px; background: white; border: 1px solid #e3e9e7; border-radius: 24px; font-size: 11px; color: #547068; white-space: nowrap; }
-.live-dot { width: 6px; height: 6px; background: #138b75; border-radius: 50%; display: inline-block; }
 .map-layout { display: grid; grid-template-columns: 310px minmax(0, 1fr); gap: 18px; }
 .restaurant-panel { display: flex; flex-direction: column; border-radius: 16px; background: white; border: 1px solid #e4e9eb; overflow: hidden; }
 .panel-heading { display: flex; justify-content: space-between; align-items: center; padding: 24px 22px; border-bottom: 1px solid #eef0f2; }
@@ -70,7 +68,7 @@ th:first-child { width: 25%; } th:nth-child(2) { width: 15%; } th:nth-child(3) {
   .site-header { padding: 16px 5%; min-height: 76px; gap: 10px; }
   .brand { font-size: 17px; gap: 8px; } .brand-icon { width: 34px; height: 34px; font-size: 23px; }
   .brand small { display: none; } .main-nav { gap: 2px; font-size: 12px; } .main-nav a { padding: 9px 10px; }
-  .page-heading { padding: 28px 0 23px; } .page-heading > .soft-badge { display: none; }
+  .page-heading { padding: 28px 0 23px; }
   .description { font-size: 12px; } .map-layout { grid-template-columns: 1fr; } .map-panel { grid-row: 1; height: 52vh; min-height: 330px; }
   .list-empty { padding: 28px 15px; } .panel-note { margin-top: 0; } .empty-symbol { margin-bottom: 15px; }
   .admin-summary > div { padding: 0 14px; } .admin-summary .summary-label { font-size: 11px; line-height: 1.6; margin-top: 10px; }

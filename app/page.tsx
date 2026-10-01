@@ -22,9 +22,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
     <>
       <SiteHeader active="map" />
       <main className="page-shell">
-        <PageHeading eyebrow="YOUR LUNCH, ON THE MAP" title={<>오늘 점심, 어디로 갈까요<span>?</span></>} description="우리의 점심 리스트를 한눈에. 가까운 맛집을 지도에서 만나보세요.">
-          <span className="soft-badge"><span className="live-dot" />Lunch Map</span>
-        </PageHeading>
+        <PageHeading eyebrow="YOUR LUNCH, ON THE MAP" title={<>오늘 점심, 어디로 갈까요<span>?</span></>} description="우리의 점심 리스트를 한눈에. 가까운 맛집을 지도에서 만나보세요." />
         <LunchExplorer key={initialRestaurantId ?? 'map'} initialRestaurantId={initialRestaurantId} reviewCounts={reviewCounts} failed={failed} restaurants={restaurants.map(({id,name,category,main_menu,address,distance,latitude,longitude})=>({id,name,category,main_menu,address,distance,latitude,longitude}))} />
         <footer className="page-footer"><span>좋은 점심이 만드는 작은 즐거움.</span><span>i-SENS · Lunch Map</span></footer>
       </main>

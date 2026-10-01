@@ -1,7 +1,6 @@
 'use client';
 
 import EmptyState from '@/components/ui/empty-state';
-import CountBadge from '@/components/ui/count-badge';
 import Button from '@/components/ui/button';
 import type { RestaurantRow } from '@/lib/restaurant-types';
 
@@ -25,10 +24,7 @@ export default function AddressErrorSection({
   saveAddress,
 }: Props) {
   return (
-    <section className="table-section">
-      <h2>
-        주소 오류 식당 <CountBadge>{addressErrors.length}</CountBadge>
-      </h2>
+    <div>
       <p className="description">
         좌표가 없는 식당은 지도에 표시되지 않습니다. 도로명과 건물번호를 입력하고 검색하면 주소와
         좌표를 함께 저장합니다. 활성 상태는 유지됩니다.
@@ -85,6 +81,6 @@ export default function AddressErrorSection({
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
   );
 }

@@ -24,7 +24,7 @@ export default function ExcelImportSection({
 }: Props) {
   return (
     <section className="upload-section">
-      <h2>엑셀로 전체 리스트 업데이트</h2>
+      <h2>엑셀로 업데이트</h2>
       <p className="description">
         가맹점명·주소가 같은 식당은 갱신됩니다. 파일에 없는 기존 식당과 취소선 항목은
         비활성화됩니다. 다음 업로드 시 수동 상태보다 엑셀 상태가 우선합니다.

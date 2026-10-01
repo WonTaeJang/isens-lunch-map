@@ -7,10 +7,10 @@ export default function useAdminRestaurants(
   password: string,
   reload: () => Promise<void>,
 ) {
-  const [activeTab, setActiveTab] = useState<'active' | 'inactive'>('active');
-  const activeCount = restaurants.filter((r) => r.active === true).length;
+  const [activeTab, setActiveTab] = useState<'active' | 'inactive' | 'errors'>('active');
+  const activeCount = restaurants.filter((r) => r.address !== null && r.active === true).length;
   const visibleRestaurants = restaurants.filter(
-    (r) => (r.active === true) === (activeTab === 'active'),
+    (r) => r.address !== null && (r.active === true) === (activeTab === 'active'),
   );
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<Preview | null>(null);

@@ -60,4 +60,8 @@ export type UserReview = Review & {
   restaurant_id: string; restaurant_name: string; restaurant_active: boolean | null;
   latitude: string | null; longitude: string | null;
 };
-export type UserReviewPage = { reviews: UserReview[]; total: number; hasMore: boolean };
+export type UserReviewStats = {
+  active_total: number; reviewed_active: number;
+  recommended_active: number; not_recommended_active: number;
+};
+export type UserReviewPage = UserReviewStats & { reviews: UserReview[]; total: number; hasMore: boolean };

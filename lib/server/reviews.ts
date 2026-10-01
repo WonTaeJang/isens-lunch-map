@@ -68,13 +68,24 @@ export async function getReviewCounts(db: Pool): Promise<ReviewCounts> {
 }
 
 export async function listUserReviews(db: Pool, user: string, offset: number) {
-  const summary = await db.query('select count(*)::int total from public.review where user_id=$1', [user]);
+  const summary = await db.query(`with mine as (
+    select distinct on (restaurant_id) restaurant_id, is_recommended
+    from public.review where user_id=$1
+    order by restaurant_id, created_at desc, id desc
+  )
+  select (select count(*)::int from public.review where user_id=$1) total,
+    count(*)::int active_total,
+    count(mine.restaurant_id)::int reviewed_active,
+    count(*) filter (where mine.is_recommended=true)::int recommended_active,
+    count(*) filter (where mine.is_recommended=false)::int not_recommended_active
+  from public.restaurants s left join mine on mine.restaurant_id=s.id
+  where s.active=true`, [user]);
   const { rows } = await db.query(`select r.id, r.user_name, r.content, r.is_recommended, r.tags,
     r.created_at, r.updated_at, true is_mine, r.restaurant_id,
     s.name restaurant_name, s.active restaurant_active, s.latitude, s.longitude
     from public.review r join public.restaurants s on s.id=r.restaurant_id
     where r.user_id=$1 order by r.created_at desc,r.id desc limit $2 offset $3`, [user, PAGE_SIZE + 1, offset]);
-  return { total: summary.rows[0].total, reviews: rows.slice(0, PAGE_SIZE).map(present), hasMore: rows.length > PAGE_SIZE };
+  return { ...summary.rows[0], reviews: rows.slice(0, PAGE_SIZE).map(present), hasMore: rows.length > PAGE_SIZE };
 }
 
 export async function listReviewedRestaurantIds(db: Pool, user: string): Promise<string[]> {

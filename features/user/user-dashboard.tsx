@@ -1,5 +1,6 @@
 'use client';
 
+import UserProgress from './user-progress';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -86,13 +87,14 @@ export default function UserDashboard({ restaurants, failed }: { restaurants: Re
       <span className="user-avatar" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg></span>
       <div><p className="subtle">나의 점심 기록</p><h1>{identity?.user_name ?? (identityReady ? '사용자 정보를 확인해 주세요' : '불러오는 중…')}</h1><p className="subtle">작성한 리뷰 {page?.total ?? '—'} · 즐겨찾기 {identityReady ? favorites.size : '—'}</p></div>
     </section>
+    <UserProgress stats={page} loading={loading} />
     <div className="user-tabs" aria-label="내 기록 분류">{TABS.map(item => <button type="button" key={item.value} aria-pressed={tab === item.value} disabled={busy || Boolean(editing)} onClick={() => setTab(item.value)}>{item.label}</button>)}</div>
     {tab === 'reviews' ? <section className="user-records" aria-label="내 리뷰">
       {error && <div className="review-error" role="alert">{error} <Button disabled={loading || busy} onClick={() => identity ? void load() : window.location.reload()}>다시 불러오기</Button></div>}
       {notice && <p role="status">{notice}</p>}
       {loading && <p role="status">내 리뷰를 불러오는 중…</p>}
       {page?.total === 0 && !loading && <div className="review-empty">아직 작성한 리뷰가 없어요. <Link href="/" className="text-link">점심 지도에서 식당 찾아보기</Link></div>}
-      <ul className="review-list">{page?.reviews.map(review => <li className="review-item" key={review.id}>
+      <ul className="review-list">{page?.reviews.map(review => <li className={`review-item${review.restaurant_active ? '' : ' user-restaurant-inactive'}`} key={review.id}>
         <div className="review-item-heading"><h2>{review.restaurant_active && hasCoordinates(review) ? <Link href={mapLink(review.restaurant_id)}>{review.restaurant_name} ↗</Link> : review.restaurant_name}</h2><RecommendationBadge recommended={review.is_recommended} /></div>
         {!review.restaurant_active && <p className="subtle">현재 비활성 식당입니다.</p>}
         {review.restaurant_active && !hasCoordinates(review) && <p className="subtle">위치 확인 중 · 지도 이동 불가</p>}
@@ -108,7 +110,7 @@ export default function UserDashboard({ restaurants, failed }: { restaurants: Re
       {favoriteError && <p className="review-error" role="alert">{favoriteError}</p>}
       {failed ? <p role="alert">식당 목록을 불러오지 못했습니다. <Button onClick={() => router.refresh()}>다시 불러오기</Button></p> : <>
         {!savedRestaurants.length && <p className="review-empty">즐겨찾기한 식당이 없어요. <Link href="/" className="text-link">식당 찾아보기</Link></p>}
-        <ul className="review-list">{savedRestaurants.map(row => <li className="review-item" key={row.id}>
+        <ul className="review-list">{savedRestaurants.map(row => <li className={`review-item${row.active ? '' : ' user-restaurant-inactive'}`} key={row.id}>
           <div className="review-item-heading"><h2>{row.active && hasCoordinates(row) ? <Link href={mapLink(row.id)}>{row.name} ↗</Link> : row.name}</h2><span className="distance-badge">{formatDistance(row.distance)}</span></div>
           <p className="description">{row.category} · {row.main_menu}</p><p className="description">{row.address || '주소 확인 필요'}</p>
           {!row.active && <p className="subtle">현재 비활성 식당입니다.</p>}

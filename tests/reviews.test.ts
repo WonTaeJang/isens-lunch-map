@@ -140,3 +140,21 @@ test('reviewed restaurant lookup returns IDs only in one user-scoped query witho
   assert.deepEqual(await listReviewedRestaurantIds(mock.db, user), [restaurant, id]);
   assert.equal(mock.calls.length, 1);
 });
+
+test('user statistics aggregate all active restaurants independently of review pagination', async () => {
+  const { listUserReviews } = await import('../lib/server/reviews');
+  const stats = { total: 45, active_total: 100, reviewed_active: 30, recommended_active: 21, not_recommended_active: 9 };
+  const mock = database((sql, values) => {
+    if (sql.includes('with mine as')) {
+      assert.deepEqual(values, [user]);
+      assert.match(sql, /distinct on \(restaurant_id\)/);
+      assert.match(sql, /where s.active=true/);
+      assert.match(sql, /left join mine/);
+      assert.doesNotMatch(sql, /limit|offset/);
+      return { rows: [stats], rowCount: 1 };
+    }
+    return { rows: [], rowCount: 0 };
+  });
+  const result = await listUserReviews(mock.db, user, 40);
+  assert.deepEqual(result, { ...stats, reviews: [], hasMore: false });
+});

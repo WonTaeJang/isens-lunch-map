@@ -135,8 +135,8 @@ td .button { margin: 0; white-space: nowrap; }
 .restaurant-map-overlay { pointer-events: none; }
 .restaurant-map-card { pointer-events: auto; position: relative; bottom: 58px; width: min(360px, 78vw); padding: 20px; border: 1px solid #d9dfe2; border-radius: 5px; background: white; box-shadow: 0 3px 12px #172c3026; color: #273239; white-space: normal; overflow-wrap: anywhere; }
 .restaurant-map-card::after { pointer-events: none; content: ''; position: absolute; bottom: -7px; left: calc(50% - 6px); width: 12px; height: 12px; background: white; border-right: 1px solid #d9dfe2; border-bottom: 1px solid #d9dfe2; transform: rotate(45deg); }
-.restaurant-card-header { padding-right: 28px; }
-.restaurant-card-header h3 { font-size: 17px; font-weight: 700; line-height: 1.4; }
+.restaurant-card-header { display: flex; align-items: center; gap: 6px; padding-right: 28px; }
+.restaurant-card-header h3 { min-width: 0; margin: 0; font-size: 17px; font-weight: 700; line-height: 1.4; }
 .restaurant-card-close { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; font-size: 27px; line-height: 1; color: #687880; cursor: pointer; }
 .restaurant-card-meta { display: flex; align-items: center; gap: 10px; margin-top: 8px; color: #78838a; font-size: 12px; }
 .restaurant-card-details { margin-top: 14px; font-size: 13px; line-height: 1.65; max-height: 96px; overflow-y: auto; }
@@ -207,4 +207,7 @@ td .button { margin: 0; white-space: nowrap; }
 .review-tag-groups { display: grid; gap: 16px; }
 .review-form .review-tag-group-label { color: #627078; font-size: 12px; margin-bottom: 8px; }
 
-.restaurant-card-reviewed { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; padding: 3px 6px; border-radius: 4px; color: #087f73; background: #eaf5f1; font-size: 11px; }
+.restaurant-card-reviewed { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 20px; height: 20px; border-radius: 4px; color: #087f73; background: #eaf5f1; }
+
+.restaurant-list-name { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.restaurant-list-name h3 { min-width: 0; overflow-wrap: anywhere; }

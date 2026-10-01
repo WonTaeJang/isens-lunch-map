@@ -70,8 +70,8 @@ export default function LunchMap({ reviewedIds, reviewCounts, restaurants, favor
   }, [sdkReady]);
 
   useEffect(() => {
-    controller?.update(restaurants, favorites, selectedId);
-  }, [controller, restaurants, favorites, selectedId]);
+    controller?.update(restaurants, favorites, selectedId, reviewedIds);
+  }, [controller, restaurants, favorites, selectedId, reviewedIds]);
 
   useEffect(() => {
     if (focusRequest) controller?.focus(focusRequest.id);

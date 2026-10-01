@@ -52,7 +52,7 @@ export default function LunchExplorer({ restaurants, failed, reviewCounts, initi
           onDistanceChange={maxDistance => changeFilters({ maxDistance })}
           onFavoritesOnlyChange={favoritesOnly => changeFilters({ favoritesOnly })}
         />
-        <RestaurantResults reviewCounts={reviewCounts} rows={rows} total={restaurants.length} failed={failed} favoritesOnly={filters.favoritesOnly} favorites={favorites} selectedId={visibleSelectedId} onSelect={selectFromList} onFavorite={favoriteFromList} onReset={resetFilters} onReviews={openReviews} />
+        <RestaurantResults reviewedIds={reviewedIds} reviewCounts={reviewCounts} rows={rows} total={restaurants.length} failed={failed} favoritesOnly={filters.favoritesOnly} favorites={favorites} selectedId={visibleSelectedId} onSelect={selectFromList} onFavorite={favoriteFromList} onReset={resetFilters} onReviews={openReviews} />
         <div className="panel-note"><span aria-hidden="true">ⓘ</span><p>식당이 등록되면 지도와 리스트에서<br />함께 확인할 수 있어요.</p></div>
       </aside>
       <LunchMap reviewedIds={reviewedIds} reviewCounts={reviewCounts} restaurants={rows} favorites={favorites} selectedId={visibleSelectedId} focusRequest={focusRequest} onSelect={setSelectedId} onFavorite={toggleStoredFavorite} onReviews={openReviews} />

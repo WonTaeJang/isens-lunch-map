@@ -108,3 +108,20 @@ test('popup double-click is prevented and invalid coordinates never create marke
     assert.equal(f.overlays[0].map, null);
   } finally { f.restore(); }
 });
+
+test('review markers turn green, keep favorites and selection, and revert after review removal without moving map', () => {
+  const f = fixture();
+  try {
+    f.controller.update([row], new Set(), null, new Set([row.id]));
+    const marker = f.markers.find(marker => marker.options.title === row.name)!;
+    assert.equal((marker.image as { src: string }).src, '/restaurant-marker-reviewed.svg');
+    f.controller.update([row], new Set([row.id]), null, new Set([row.id]));
+    assert.equal((marker.image as { src: string }).src, '/restaurant-marker-reviewed-favorite.svg');
+    f.controller.update([row], new Set([row.id]), row.id, new Set([row.id]));
+    assert.equal((marker.image as { src: string }).src, '/restaurant-marker-selected-favorite.svg');
+    f.controller.update([row], new Set([row.id]), null, new Set());
+    assert.equal((marker.image as { src: string }).src, '/restaurant-marker-default-favorite.svg');
+    assert.equal(f.markers.filter(marker => marker.options.title === row.name).length, 1);
+    assert.equal(f.moves, 0);
+  } finally { f.restore(); }
+});

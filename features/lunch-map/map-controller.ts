@@ -28,6 +28,8 @@ export function createMapController(
   const images = {
     normal: image('/restaurant-marker-default.svg', false),
     favorite: image('/restaurant-marker-default-favorite.svg', false),
+    reviewed: image('/restaurant-marker-reviewed.svg', false),
+    reviewedFavorite: image('/restaurant-marker-reviewed-favorite.svg', false),
     selected: image('/restaurant-marker-selected.svg', true),
     selectedFavorite: image('/restaurant-marker-selected-favorite.svg', true),
   };
@@ -64,7 +66,7 @@ export function createMapController(
   }
   return {
     host,
-    update(rows: MapRestaurant[], favorites: ReadonlySet<string>, selectedId: string | null) {
+    update(rows: MapRestaurant[], favorites: ReadonlySet<string>, selectedId: string | null, reviewedIds?: ReadonlySet<string> | null) {
       const visible = new Map(rows.filter(hasCoordinates).map(row => [row.id, row]));
       entries.forEach((entry, id) => {
         const row = visible.get(id);
@@ -84,7 +86,12 @@ export function createMapController(
           entries.set(row.id, entry);
         }
         const selected = row.id === selectedId;
-        const appearance = selected ? (favorites.has(row.id) ? 'selectedFavorite' : 'selected') : (favorites.has(row.id) ? 'favorite' : 'normal');
+        const favorite = favorites.has(row.id);
+        const appearance = selected
+          ? (favorite ? 'selectedFavorite' : 'selected')
+          : reviewedIds?.has(row.id)
+            ? (favorite ? 'reviewedFavorite' : 'reviewed')
+            : (favorite ? 'favorite' : 'normal');
         if (entry.appearance !== appearance) {
           entry.marker.setImage(images[appearance]);
           entry.marker.setZIndex(selected ? 11 : 0);

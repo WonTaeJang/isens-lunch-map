@@ -1,6 +1,10 @@
-import Link from 'next/link';
+'use client';
 
-export default function SiteHeader({ active }: { active: 'map' | 'admin' | 'user' | 'ranking' }) {
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+export default function SiteHeader() {
+  const pathname = usePathname();
   return (
     <header className="site-header">
       <Link href="/" className="brand" aria-label="Lunch Map 홈">
@@ -17,7 +21,7 @@ export default function SiteHeader({ active }: { active: 'map' | 'admin' | 'user
           className="admin-nav-icon"
           aria-label="점심 지도"
           title="점심 지도"
-          aria-current={active === 'map' ? 'page' : undefined}
+          aria-current={pathname === '/' ? 'page' : undefined}
         >
           <svg
             width="22"
@@ -39,7 +43,7 @@ export default function SiteHeader({ active }: { active: 'map' | 'admin' | 'user
           className="admin-nav-icon"
           aria-label="식당 랭킹"
           title="식당 랭킹"
-          aria-current={active === 'ranking' ? 'page' : undefined}
+          aria-current={pathname === '/ranking' ? 'page' : undefined}
         >
           <svg
             width="22"
@@ -60,7 +64,7 @@ export default function SiteHeader({ active }: { active: 'map' | 'admin' | 'user
           className="admin-nav-icon"
           aria-label="내 페이지"
           title="내 페이지"
-          aria-current={active === 'user' ? 'page' : undefined}
+          aria-current={pathname === '/user' ? 'page' : undefined}
         >
           <svg
             width="22"
@@ -82,7 +86,7 @@ export default function SiteHeader({ active }: { active: 'map' | 'admin' | 'user
           className="admin-nav-icon"
           aria-label="리스트 관리"
           title="리스트 관리"
-          aria-current={active === 'admin' ? 'page' : undefined}
+          aria-current={pathname === '/admin' ? 'page' : undefined}
         >
           <svg
             width="22"

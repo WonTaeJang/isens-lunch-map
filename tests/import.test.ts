@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import ExcelJS from 'exceljs';
 import { parseWorkbook, identity } from '../lib/server/import/parser';
-import { plan, revision, synchronize } from '../lib/server/import/sync';
+import { plan, previewChanges, revision, synchronize } from '../lib/server/import/sync';
 import type { Restaurant } from '../lib/server/restaurants';
 
 async function fixture(
@@ -316,4 +316,35 @@ test('service failures and exhausted deadline abort before any database writes',
     if (originalKey === undefined) delete process.env.KAKAO_REST_API_KEY;
     else process.env.KAKAO_REST_API_KEY = originalKey;
   }
+});
+
+test('preview excludes unchanged rows and already inactive missing restaurants', async () => {
+  const rows = await parseWorkbook(await fixture());
+  const current = [existing[0], { ...existing[1], active: false }];
+  assert.deepEqual(previewChanges(rows, current), []);
+  assert.equal(plan(rows, current).updated, 0);
+});
+
+test('preview includes changed fields, additions and missing deactivations', async () => {
+  const rows = await parseWorkbook(await fixture());
+  rows[0].main_menu = '갈비탕';
+  rows[0].distance = 200;
+  rows[0].active = false;
+  rows.push({ ...rows[0], row: 4, name: '새 식당', active: true });
+  const changes = previewChanges(rows, existing);
+  assert.equal(changes.length, 3);
+  assert.deepEqual(changes[0].changes, ['대표메뉴 변경', '거리 변경', '취소선 비활성화']);
+  assert.deepEqual(changes[1].changes, ['신규 등록']);
+  assert.deepEqual(changes[2].changes, ['파일 누락으로 비활성화']);
+  assert.equal(changes[2].row, null);
+  assert.equal(changes[2].active, false);
+});
+
+test('preview includes reactivation and coordinate retry for address-error rows', async () => {
+  const rows = await parseWorkbook(await fixture());
+  const changes = previewChanges(rows, [
+    { ...existing[0], active: false, address: null, latitude: null, longitude: null },
+  ]);
+  assert.deepEqual(changes[0].changes, ['활성화', '주소·좌표 재조회']);
+  assert.equal(plan(rows, [{ ...existing[0], address: null }]).added, 0);
 });

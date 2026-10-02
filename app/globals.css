@@ -342,6 +342,20 @@ th:nth-child(2) {
 th:nth-child(3) {
   width: 40%;
 }
+.import-preview-table th:first-child,
+.import-preview-table td:first-child {
+  width: 52px;
+  padding-left: 10px;
+  padding-right: 10px;
+  white-space: nowrap;
+  text-align: center;
+}
+.import-preview-table th:nth-child(2) {
+  width: 22%;
+}
+.import-preview-table th:nth-child(3) {
+  width: auto;
+}
 .table-empty {
   padding: 42px 20px;
   text-align: center;

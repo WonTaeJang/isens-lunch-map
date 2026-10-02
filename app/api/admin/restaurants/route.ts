@@ -4,6 +4,7 @@ import { ImportError, parseWorkbook } from '@/lib/server/import/parser';
 import {
   authorize,
   plan,
+  previewChanges,
   previewToken,
   revision,
   synchronize,
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
     const rev = revision(existing);
     if (form.get('mode') === 'preview') {
       return Response.json({
-        rows: incoming,
+        rows: previewChanges(incoming, existing),
         summary: plan(incoming, existing),
         revision: rev,
         token: previewToken(buffer, rev),

@@ -62,29 +62,38 @@ export default function ExcelImportSection({
             저장 시 필요한 좌표를 조회합니다. 주소 검색에 실패한 식당은 주소·좌표 없이 저장되며,
             아래 주소 오류 목록에서 수정할 수 있습니다.
           </p>
-          <div className="table-scroll" style={{ maxHeight: 300 }}>
-            <table>
-              <thead>
-                <tr>
-                  <th>행</th>
-                  <th>가맹점명</th>
-                  <th>주소</th>
-                  <th>반영 상태</th>
-                </tr>
-              </thead>
-              <tbody>
-                {preview.rows.map((row) => (
-                  <tr key={row.row}>
-                    <td>{row.row}</td>
-                    <td>{row.name}</td>
-                    <td>{row.address}</td>
-                    <td>{row.active ? '활성' : '비활성'}</td>
+          <p className="description">
+            {preview.rows.length
+              ? `변경 예정 ${preview.rows.length}개 식당만 표시합니다.`
+              : '변경사항이 없습니다.'}
+          </p>
+          {preview.rows.length > 0 && (
+            <div className="table-scroll" style={{ maxHeight: 300 }}>
+              <table className="import-preview-table">
+                <thead>
+                  <tr>
+                    <th>행</th>
+                    <th>가맹점명</th>
+                    <th>주소</th>
+                    <th>반영 상태</th>
+                    <th>변경사항</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <Button loading={busy} onClick={() => upload('commit')}>
+                </thead>
+                <tbody>
+                  {preview.rows.map((row) => (
+                    <tr key={row.key}>
+                      <td>{row.row ?? '—'}</td>
+                      <td>{row.name}</td>
+                      <td>{row.address ?? '주소 확인 필요'}</td>
+                      <td>{row.active ? '활성' : '비활성'}</td>
+                      <td>{row.changes.join(' · ')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <Button loading={busy} disabled={!preview.rows.length} onClick={() => upload('commit')}>
             전체 목록을 DB에 반영
           </Button>
         </div>

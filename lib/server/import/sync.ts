@@ -9,6 +9,7 @@ import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { getDb } from '@/lib/server/db';
 import { identity, ImportError, type ImportRow } from './parser';
 import type { Restaurant } from '@/lib/server/restaurants';
+import type { ImportPreview } from '@/lib/restaurant-types';
 
 export function authorize(request: Request) {
   const expected = process.env.ADMIN_PASSWORD;
@@ -60,14 +61,60 @@ function matchRows(incoming: ImportRow[], existing: Restaurant[]) {
     }),
   );
 }
-export function plan(incoming: ImportRow[], existing: Restaurant[]) {
+export function previewChanges(
+  incoming: ImportRow[],
+  existing: Restaurant[],
+): ImportPreview['rows'] {
   const matches = matchRows(incoming, existing);
   const matchedIds = new Set([...matches.values()].filter((r) => !!r).map((r) => r.id));
+  const changes: ImportPreview['rows'] = [];
+  for (const row of incoming) {
+    const old = matches.get(identity(row));
+    const fields: string[] = [];
+    if (!old) fields.push('신규 등록');
+    else {
+      if (old.name !== row.name) fields.push('식당명 변경');
+      if ((old.category ?? '') !== row.category) fields.push('분류 변경');
+      if ((old.main_menu ?? '') !== row.main_menu) fields.push('대표메뉴 변경');
+      if ((old.distance === null ? null : Number(old.distance)) !== row.distance)
+        fields.push('거리 변경');
+      if (old.active !== row.active) fields.push(row.active ? '활성화' : '취소선 비활성화');
+      // 기존 좌표가 유효하면 저장 시 기존 주소를 유지합니다.
+      if (old.address === null || !validCoordinates(old)) fields.push('주소·좌표 재조회');
+    }
+    if (fields.length)
+      changes.push({
+        key: `row-${row.row}`,
+        name: row.name,
+        address: row.address,
+        active: row.active,
+        row: row.row,
+        changes: fields,
+      });
+  }
+  for (const old of existing) {
+    if (!matchedIds.has(old.id) && old.active !== false) {
+      changes.push({
+        key: old.id,
+        name: old.name,
+        address: old.address,
+        active: false,
+        row: null,
+        changes: ['파일 누락으로 비활성화'],
+      });
+    }
+  }
+  return changes;
+}
+
+export function plan(incoming: ImportRow[], existing: Restaurant[]) {
+  const matches = matchRows(incoming, existing);
+  const changedRows = previewChanges(incoming, existing);
   return {
     added: incoming.filter((r) => !matches.get(identity(r))).length,
-    updated: incoming.filter((r) => matches.get(identity(r))).length,
-    inactive: incoming.filter((r) => !r.active).length,
-    missing: existing.filter((r) => !matchedIds.has(r.id) && r.active !== false).length,
+    updated: changedRows.filter((r) => r.row !== null && !r.changes.includes('신규 등록')).length,
+    inactive: changedRows.filter((r) => r.row !== null && !r.active).length,
+    missing: changedRows.filter((r) => r.row === null).length,
   };
 }
 export async function synchronize(incoming: ImportRow[], existing: Restaurant[], expected: string) {

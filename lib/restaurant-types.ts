@@ -16,7 +16,14 @@ export type RestaurantRow = Omit<Restaurant, 'created_at' | 'updated_at'>;
 export type MapRestaurant = Omit<RestaurantRow, 'active'>;
 export type ImportSummary = { added: number; updated: number; inactive: number; missing: number };
 export type ImportPreview = {
-  rows: { name: string; address: string; active: boolean; row: number }[];
+  rows: {
+    key: string;
+    name: string;
+    address: string | null;
+    active: boolean;
+    row: number | null;
+    changes: string[];
+  }[];
   summary: ImportSummary;
   revision: string;
   token: string;

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import LocalUserInitializer from '@/features/local-user/local-user-initializer';
 import SiteHeader from '@/components/site-header';
+import { version } from '@/package.json';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,6 +27,9 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <LocalUserInitializer />
         <SiteHeader />
         {children}
+        <footer className="app-version" aria-label={`앱 버전 ${version}`}>
+          v{version}
+        </footer>
       </body>
     </html>
   );

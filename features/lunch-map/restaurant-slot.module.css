@@ -1,0 +1,60 @@
+.slot {
+  height: calc(var(--slot-row-height) * 3);
+  overflow: hidden;
+  position: relative;
+  border-radius: 16px;
+  background: #f2f8f5;
+}
+.slot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(#f2f8f5 0%, transparent 35%, transparent 65%, #f2f8f5 100%);
+}
+.selection {
+  position: absolute;
+  inset: var(--slot-row-height) 8px;
+  height: var(--slot-row-height);
+  border: 1px solid #a4d2c4;
+  border-radius: 10px;
+  background: #e4f2ed;
+}
+.reel {
+  position: relative;
+  animation: spin var(--slot-duration) cubic-bezier(0.12, 0.65, 0.16, 1) forwards;
+}
+.item {
+  height: var(--slot-row-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  font-size: 17px;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.placeholder {
+  position: relative;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  text-align: center;
+  font-weight: 600;
+  color: #11796e;
+}
+@keyframes spin {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(var(--slot-offset));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reel {
+    animation-duration: 0s;
+  }
+}

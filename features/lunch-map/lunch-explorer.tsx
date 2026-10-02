@@ -1,10 +1,13 @@
 'use client';
 
+import { DiceIcon } from '@/components/ui/icons';
+
 import { useMemo, useRef, useState } from 'react';
 import type { ReviewCounts } from '@/features/reviews/review-model';
 import useReviewedRestaurants from '@/features/reviews/use-reviewed-restaurants';
 import ReviewPanel from '@/features/reviews/review-panel';
 import CountBadge from '@/components/ui/count-badge';
+import RandomRestaurant from './random-restaurant';
 import RestaurantFilters from './restaurant-filters';
 import RestaurantResults from './restaurant-results';
 import LunchMap from './lunch-map';
@@ -35,6 +38,7 @@ export default function LunchExplorer({
     initialRestaurantId ? { id: initialRestaurantId } : null,
   );
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [randomOpen, setRandomOpen] = useState(false);
   const favorites = useFavorites();
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
   const rows = useMemo(
@@ -70,7 +74,17 @@ export default function LunchExplorer({
           <h2>
             점심 리스트 <CountBadge>{failed ? '—' : rows.length}</CountBadge>
           </h2>
-          <span className="subtle">전체: {restaurants.length}</span>
+          <div className="panel-heading-actions">
+            <button
+              className="random-pick-button"
+              type="button"
+              disabled={failed || !restaurants.length}
+              onClick={() => setRandomOpen(true)}
+            >
+              <DiceIcon size={16} />
+              랜덤 추천
+            </button>
+          </div>
         </div>
         {favoriteError && (
           <p className="favorite-error" role="alert">
@@ -123,6 +137,21 @@ export default function LunchExplorer({
           key={reviewRestaurant.id}
           restaurant={reviewRestaurant}
           onClose={() => setReviewRestaurant(null)}
+        />
+      )}
+      {randomOpen && (
+        <RandomRestaurant
+          restaurants={restaurants}
+          reviewedIds={reviewedIds}
+          reviewCounts={reviewCounts}
+          initialFilters={filters}
+          favorites={favorites}
+          onClose={() => setRandomOpen(false)}
+          onSelect={(id) => {
+            setRandomOpen(false);
+            setFilters(DEFAULT_FILTERS);
+            selectFromList(id);
+          }}
         />
       )}
     </div>

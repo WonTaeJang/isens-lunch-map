@@ -309,3 +309,19 @@ localStorage의 기존 닉네임·ID를 읽고 내 리뷰와 즐겨찾기 탭을
 인증 후 목록을 반환하고, 같은 비밀번호로 변경 요청도 매번 검증합니다.
 비밀번호는 React 메모리에만 유지하며 localStorage나 쿠키에 저장하지 않습니다.
 새로고침 또는 페이지 재진입 시 다시 입력합니다. 저장 후 목록 갱신은 인증된 GET을 사용합니다.
+
+### 링크 공유 미리보기
+
+카카오톡 등 링크 공유용 제목·설명은 `app/layout.tsx`, 이미지는
+`public/og-image.png`에서 관리합니다. 편집 가능한 원본은 `public/og-image.svg`입니다.
+원본을 수정했다면 다음 명령으로 PNG도 갱신하세요.
+
+```bash
+node -e "require('sharp')('public/og-image.svg').png().toFile('public/og-image.png')"
+```
+
+배포 시 `SITE_URL` 환경 변수에 실제 공개 주소를 지정하는 것을 권장합니다
+(예: `https://your-domain.com`). 값을 변경한 후에는 다시 빌드·배포하세요.
+설정이 없으면 Vercel의 `VERCEL_PROJECT_PRODUCTION_URL`, `VERCEL_URL` 순서로 사용하며,
+로컬에서는 `http://localhost:3000`을 사용합니다.
+공유 미리보기 확인에는 외부에서 접근 가능한 배포 주소가 필요합니다.

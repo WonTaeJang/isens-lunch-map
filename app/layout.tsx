@@ -15,9 +15,38 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
+const title = 'Lunch Map | 오늘의 점심 지도';
+const description = '가까운 맛집부터 솔직한 리뷰까지, 우리의 점심 리스트를 지도에서 만나보세요.';
+const deploymentHost = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+
 export const metadata: Metadata = {
-  title: 'Lunch Map | 오늘의 점심 지도',
-  description: '우리의 점심 리스트를 지도에서 한눈에 확인하세요.',
+  metadataBase: new URL(
+    process.env.SITE_URL ||
+      (deploymentHost ? `https://${deploymentHost}` : 'http://localhost:3000'),
+  ),
+  title,
+  description,
+  openGraph: {
+    type: 'website',
+    locale: 'ko_KR',
+    siteName: 'Lunch Map',
+    title,
+    description,
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Lunch Map — 오늘 점심, 어디로 갈까요?',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title,
+    description,
+    images: ['/og-image.png'],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

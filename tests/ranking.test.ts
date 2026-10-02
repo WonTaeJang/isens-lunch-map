@@ -49,3 +49,11 @@ test('recommendation ranking scores all active rated restaurants before limiting
   } as unknown as Pool;
   assert.deepEqual(await getRecommendationRanking(db), []);
 });
+
+test('admin recommendation ranking includes inactive restaurants while public ranking excludes them', async () => {
+  const { recommendationRankingSql } = await import('../lib/server/ranking');
+  assert.match(recommendationRankingSql(), /where s.active=true/);
+  assert.doesNotMatch(recommendationRankingSql(true), /where s.active=true/);
+  assert.match(recommendationRankingSql(true), /active, reviews, recommended, not_recommended/);
+  assert.match(recommendationRankingSql(true), /limit \$1/);
+});

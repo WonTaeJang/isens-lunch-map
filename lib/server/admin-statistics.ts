@@ -1,4 +1,10 @@
 import 'server-only';
+import { recommendationRankingSql } from './ranking';
+import {
+  RANKING_LIMIT,
+  RECOMMENDATION_WEIGHT,
+  RECOMMENDATION_SMOOTHING,
+} from '@/features/ranking/constants';
 import type { Pool } from 'pg';
 import type { AdminStatistics } from '@/features/admin/statistics-model';
 import { REVIEW_TAGS } from '@/features/reviews/constants';
@@ -7,7 +13,8 @@ import { decodeTags } from '@/features/reviews/review-model';
 type Summary = Omit<AdminStatistics, 'tags'> & { tagGroups: { tags: unknown; count: number }[] };
 
 export async function getAdminStatistics(db: Pool): Promise<AdminStatistics> {
-  const { rows } = await db.query<Summary>(`
+  const { rows } = await db.query<Summary>(
+    `
     with days as (
       select (now() at time zone 'Asia/Seoul')::date - offset_day AS review_date
       from generate_series(0, 6) offset_day
@@ -28,15 +35,17 @@ export async function getAdminStatistics(db: Pool): Promise<AdminStatistics> {
         (select tags, count(*)::int count from public.review group by tags) g) "tagGroups",
       (select jsonb_agg(jsonb_build_object('date', to_char(days.review_date, 'YYYY-MM-DD'), 'count', coalesce(daily.count, 0)) order by days.review_date)
         from days left join daily using (review_date)) "recentDays",
-      (select coalesce(jsonb_agg(g order by g.name, g.id), '[]'::jsonb) from
-        (select s.id, s.name from public.restaurants s where s.active=true
-          and not exists (select 1 from public.review r where r.restaurant_id=s.id)) g) "unreviewedRestaurants",
       (select coalesce(jsonb_agg(g order by g.count desc, g.name, g.id), '[]'::jsonb) from
         (select s.id, s.name, s.active, count(*)::int count
           from public.review r join public.restaurants s on s.id=r.restaurant_id
-          group by s.id, s.name, s.active order by count desc, s.name, s.id limit 10) g) "topRestaurants"
+          group by s.id, s.name, s.active order by count desc, s.name, s.id limit $1) g) "topRestaurants",
+      (select coalesce(jsonb_agg(g order by g.rank, g.name, g.id), '[]'::jsonb)
+        from (select id, name, rank, score, active, recommended, not_recommended
+          from (${recommendationRankingSql(true)}) ranking) g) "topRecommendedRestaurants"
     from public.review
-  `);
+  `,
+    [RANKING_LIMIT, RECOMMENDATION_WEIGHT, RECOMMENDATION_SMOOTHING],
+  );
   const { tagGroups, ...summary } = rows[0];
   const counts = new Map<string, number>();
   for (const group of tagGroups) {

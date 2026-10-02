@@ -6,7 +6,15 @@ export type AdminStatistics = {
   recommended: number;
   notRecommended: number;
   recentDays: { date: string; count: number }[];
-  unreviewedRestaurants: { id: string; name: string }[];
   topRestaurants: { id: string; name: string; active: boolean | null; count: number }[];
+  topRecommendedRestaurants: {
+    id: string;
+    name: string;
+    rank: number;
+    score: number;
+    active: boolean | null;
+    recommended: number;
+    not_recommended: number;
+  }[];
   tags: { value: string; label: string; count: number }[];
 };

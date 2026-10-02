@@ -106,18 +106,15 @@
 .restaurantName small {
   color: #74838b;
 }
-.unreviewed summary {
-  cursor: pointer;
-  font-size: 15px;
-  padding: 12px 0;
+
+.scoreDetails {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-left: auto;
+  flex-wrap: wrap;
 }
-.unreviewed summary strong {
-  color: #087f73;
-}
-.unreviewed ul {
-  max-height: 320px;
-  overflow-y: auto;
-  padding-left: 20px;
-  font-size: 14px;
-  line-height: 2;
+.scoreDetails strong {
+  margin-left: 0;
 }

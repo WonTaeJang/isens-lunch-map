@@ -1,3 +1,5 @@
+import ReviewCountBadges from '@/features/reviews/review-counts';
+import { RECOMMENDATION_WEIGHT, RECOMMENDATION_SMOOTHING } from '@/features/ranking/constants';
 import type { AdminStatistics } from './statistics-model';
 import styles from './admin-statistics.module.css';
 
@@ -47,20 +49,37 @@ export default function StatisticsDetails({ data }: { data: AdminStatistics }) {
         )}
       </div>
       <div className={styles.section}>
-        <details className={styles.unreviewed}>
-          <summary>
-            리뷰 없는 활성 식당 <strong>{data.unreviewedRestaurants.length}곳</strong>
-          </summary>
-          {data.unreviewedRestaurants.length ? (
-            <ul>
-              {data.unreviewedRestaurants.map((row) => (
-                <li key={row.id}>{row.name}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className="subtle">리뷰 없는 활성 식당이 없습니다.</p>
-          )}
-        </details>
+        <h3>추천 많은 식당 TOP 10</h3>
+        <p className="subtle">전체 기간 · 비활성 식당 포함 · 추천 점수 순</p>
+        <p className="subtle">
+          추천 점수 = (추천 수 × {RECOMMENDATION_WEIGHT}) ÷ (추천 수 × {RECOMMENDATION_WEIGHT} +
+          비추천 수 + {RECOMMENDATION_SMOOTHING}) × 100
+          <br />
+          추천에 {RECOMMENDATION_WEIGHT}배 가중치를 적용하고, 평가가 적은 식당의 점수가 과도하게
+          높아지지 않도록 보정값 {RECOMMENDATION_SMOOTHING}을 더합니다. 실제 추천 비율이 아닌 순위
+          산정용 점수입니다.
+        </p>
+        {data.topRecommendedRestaurants.length ? (
+          <ol className={styles.ranking}>
+            {data.topRecommendedRestaurants.map((row) => (
+              <li key={row.id} value={row.rank}>
+                <span className={styles.rank}>{row.rank}</span>
+                <span className={styles.restaurantName}>
+                  {row.name}
+                  {!row.active && <small> · 비활성</small>}
+                </span>
+                <div className={styles.scoreDetails}>
+                  <strong aria-label={`추천 점수 ${row.score.toFixed(1)}퍼센트`}>
+                    {row.score.toFixed(1)}%
+                  </strong>
+                  <ReviewCountBadges counts={row} colored />
+                </div>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="subtle">아직 추천·비추천 평가가 있는 식당이 없습니다.</p>
+        )}
       </div>
     </>
   );

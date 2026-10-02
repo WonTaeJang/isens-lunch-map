@@ -2,11 +2,37 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { Pool } from 'pg';
 import { getAdminStatistics } from '../lib/server/admin-statistics';
+import type { AdminStatistics } from '../features/admin/statistics-model';
+import {
+  RANKING_LIMIT,
+  RECOMMENDATION_WEIGHT,
+  RECOMMENDATION_SMOOTHING,
+} from '../features/ranking/constants';
 
 test('statistics uses distinct authors, active restaurant coverage and counts tags once per review', async () => {
   let calls = 0;
+  const topRecommendedRestaurants: AdminStatistics['topRecommendedRestaurants'] = [
+    {
+      id: 'best',
+      name: '추천 식당',
+      rank: 1,
+      score: 60,
+      active: false,
+      recommended: 10,
+      not_recommended: 5,
+    },
+    {
+      id: 'active',
+      name: '활성 식당',
+      rank: 1,
+      score: 60,
+      active: true,
+      recommended: 5,
+      not_recommended: 0,
+    },
+  ];
   const db = {
-    query: async (sql: string) => {
+    query: async (sql: string, values: unknown[]) => {
       calls++;
       assert.match(sql, /count\(distinct user_id\)/);
       assert.match(sql, /s.active=true/);
@@ -16,8 +42,12 @@ test('statistics uses distinct authors, active restaurant coverage and counts ta
       assert.match(sql, /Asia\/Seoul/);
       assert.match(sql, /from days left join daily using \(review_date\)/);
       assert.match(sql, /coalesce\(daily.count, 0\)/);
-      assert.match(sql, /not exists \(select 1 from public.review/);
-      assert.match(sql, /order by count desc, s.name, s.id limit 10/);
+      assert.match(sql, /order by count desc, s.name, s.id limit \$1/);
+      assert.deepEqual(values, [RANKING_LIMIT, RECOMMENDATION_WEIGHT, RECOMMENDATION_SMOOTHING]);
+      assert.match(
+        sql,
+        /from \(select id, name, rank, score, active, recommended, not_recommended\s+from/,
+      );
       return {
         rows: [
           {
@@ -28,8 +58,8 @@ test('statistics uses distinct authors, active restaurant coverage and counts ta
             recommended: 2,
             notRecommended: 1,
             recentDays: [{ date: '2026-10-01', count: 4 }],
-            unreviewedRestaurants: [{ id: 'unreviewed', name: '미방문 식당' }],
             topRestaurants: [{ id: 'top', name: '인기 식당', active: false, count: 4 }],
+            topRecommendedRestaurants,
             tagGroups: [
               { tags: '["tasty","tasty","waiting"]', count: 2 },
               { tags: '["tasty","unknown"]', count: 1 },
@@ -52,8 +82,8 @@ test('statistics uses distinct authors, active restaurant coverage and counts ta
   );
   assert.equal('tagGroups' in result, false);
   assert.equal(result.recentDays[0].count, 4);
-  assert.equal(result.unreviewedRestaurants[0].id, 'unreviewed');
   assert.equal(result.topRestaurants[0].active, false);
+  assert.deepEqual(result.topRecommendedRestaurants, topRecommendedRestaurants);
 });
 
 test('empty statistics includes zero counts for all supported tags', async () => {
@@ -68,8 +98,8 @@ test('empty statistics includes zero counts for all supported tags', async () =>
           recommended: 0,
           notRecommended: 0,
           recentDays: [],
-          unreviewedRestaurants: [],
           topRestaurants: [],
+          topRecommendedRestaurants: [],
           tagGroups: [],
         },
       ],

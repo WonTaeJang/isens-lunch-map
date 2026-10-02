@@ -97,7 +97,7 @@ export default function RandomRestaurant({
           <CloseIcon size={20} />
         </button>
       </div>
-      <p className="subtle">활성 식당 중에서 오늘의 점심을 골라드려요.</p>
+      <p className="subtle">오늘의 점심을 골라드려요.</p>
       <fieldset className={styles.filters} disabled={busy}>
         <legend>거리 조건</legend>
         <DistanceFilter

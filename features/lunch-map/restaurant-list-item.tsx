@@ -1,4 +1,5 @@
 'use client';
+import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
 import ReviewCountBadges from '@/features/reviews/review-counts';
 import type { ReviewCounts } from '@/features/reviews/review-model';
@@ -26,25 +27,12 @@ export default function RestaurantListItem({
 }) {
   return (
     <li className="restaurant-list-item">
-      <button
-        type="button"
+      <FavoriteToggle
+        restaurantName={row.name}
+        selected={favorite}
         className="restaurant-list-favorite"
-        aria-label={`${row.name} 즐겨찾기 ${favorite ? '해제' : '추가'}`}
-        aria-pressed={favorite}
         onClick={onFavorite}
-      >
-        <svg
-          width="18"
-          height="20"
-          viewBox="0 0 18 22"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          aria-hidden="true"
-        >
-          <path d="M3 2h12v18l-6-4-6 4z" />
-        </svg>
-      </button>
+      />
       <button
         type="button"
         className="restaurant-select"

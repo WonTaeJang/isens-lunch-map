@@ -8,6 +8,7 @@ import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
+import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import useFavorites from '@/features/favorites/use-favorites';
 import { toggleStoredFavorite } from '@/features/favorites/favorites-store';
 import ReviewActionIcons from '@/features/reviews/review-action-icons';
@@ -321,25 +322,12 @@ function UserDashboardContent({
                   >
                     <div className="review-item-heading">
                       <div className={styles['favorite-title']}>
-                        <button
-                          type="button"
+                        <FavoriteToggle
+                          restaurantName={row.name}
+                          selected={favorites.has(row.id)}
                           className={styles['user-remove-favorite']}
                           onClick={() => setFavoriteError(toggleStoredFavorite(row.id) ?? '')}
-                          aria-label={`${row.name} 즐겨찾기 해제`}
-                          title="즐겨찾기 해제"
-                        >
-                          <svg
-                            width="18"
-                            height="20"
-                            viewBox="0 0 18 22"
-                            fill="#ffd338"
-                            stroke="currentColor"
-                            strokeWidth="1.6"
-                            aria-hidden="true"
-                          >
-                            <path d="M3 2h12v18l-6-4-6 4z" />
-                          </svg>
-                        </button>
+                        />
                         <h2>
                           {row.active && hasCoordinates(row) ? (
                             <Link href={mapLink(row.id)}>{row.name} ↗</Link>

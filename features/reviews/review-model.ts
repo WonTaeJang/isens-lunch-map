@@ -63,6 +63,11 @@ export function decodeTags(raw: unknown): string[] {
 
 export type ReviewCounts = Record<string, { recommended: number; not_recommended: number }>;
 
+// A failed query stays unknown; a missing restaurant has no reviews.
+export function getReviewCounts(counts: ReviewCounts | null, restaurantId: string) {
+  return counts === null ? null : (counts[restaurantId] ?? { recommended: 0, not_recommended: 0 });
+}
+
 export type UserReview = Review & {
   restaurant_id: string;
   restaurant_name: string;

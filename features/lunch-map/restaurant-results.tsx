@@ -1,3 +1,4 @@
+import { getReviewCounts } from '@/features/reviews/review-model';
 import type { ReviewCounts } from '@/features/reviews/review-model';
 import Link from 'next/link';
 import Button from '@/components/ui/button';
@@ -70,11 +71,7 @@ export default function RestaurantResults({
       {rows.map((row) => (
         <RestaurantListItem
           reviewed={reviewedIds?.has(row.id) ?? false}
-          counts={
-            reviewCounts === null
-              ? null
-              : (reviewCounts[row.id] ?? { recommended: 0, not_recommended: 0 })
-          }
+          counts={getReviewCounts(reviewCounts, row.id)}
           key={row.id}
           row={row}
           favorite={favorites.has(row.id)}

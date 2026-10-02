@@ -1,4 +1,5 @@
 'use client';
+import { getReviewCounts } from '@/features/reviews/review-model';
 
 import LoadingSpinner from '@/components/ui/loading-spinner';
 
@@ -149,11 +150,7 @@ export default function LunchMap({
         createPortal(
           <RestaurantMapCard
             reviewed={reviewedIds?.has(selected.id) ?? false}
-            counts={
-              reviewCounts === null
-                ? null
-                : (reviewCounts[selected.id] ?? { recommended: 0, not_recommended: 0 })
-            }
+            counts={getReviewCounts(reviewCounts, selected.id)}
             key={selected.id}
             restaurant={selected}
             favorite={favorites.has(selected.id)}

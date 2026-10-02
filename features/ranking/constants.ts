@@ -1,0 +1,3 @@
+export const RANKING_LIMIT = 10;
+export const RECOMMENDATION_WEIGHT = 1.5;
+export const RECOMMENDATION_SMOOTHING = 5;

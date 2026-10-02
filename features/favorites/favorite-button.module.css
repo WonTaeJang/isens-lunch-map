@@ -1,0 +1,47 @@
+.container {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid #d9e1e4;
+  border-radius: 6px;
+  background: white;
+  color: #687880;
+  cursor: pointer;
+}
+.button[aria-pressed='true'] {
+  color: #896800;
+  border-color: #ffd338;
+  background: #fff9de;
+}
+.button[aria-pressed='true'] svg {
+  fill: #ffd338;
+}
+.button:hover {
+  background: #f4f7f6;
+}
+.button:focus-visible {
+  outline: 2px solid #127e70;
+  outline-offset: 2px;
+}
+.error {
+  position: absolute;
+  z-index: 1;
+  top: calc(100% + 6px);
+  left: 0;
+  width: min(240px, 65vw);
+  padding: 8px;
+  border: 1px solid #e1e7e7;
+  border-radius: 6px;
+  background: white;
+  color: #b42318;
+  font-size: 12px;
+  box-shadow: 0 3px 12px #162e3926;
+}

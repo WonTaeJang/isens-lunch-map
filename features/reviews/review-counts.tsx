@@ -1,9 +1,15 @@
 import RecommendationIcon from './recommendation-icon';
 import type { ReviewCounts } from './review-model';
 
-export default function ReviewCountBadges({ counts }: { counts: ReviewCounts[string] | null }) {
+export default function ReviewCountBadges({
+  counts,
+  colored = false,
+}: {
+  counts: ReviewCounts[string] | null;
+  colored?: boolean;
+}) {
   return (
-    <span className="restaurant-review-counts">
+    <span className="restaurant-review-counts" data-colored={colored || undefined}>
       <span aria-label={`추천 ${counts?.recommended ?? '집계 불가'}`} title="추천">
         <RecommendationIcon recommended={true} />
         <strong aria-hidden="true">{counts?.recommended ?? '—'}</strong>

@@ -1148,3 +1148,20 @@ td .button {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+.restaurant-review-counts[data-colored] > span:first-child {
+  color: #2563eb;
+}
+.restaurant-review-counts[data-colored] > span:last-child {
+  color: #dc2626;
+}
+.restaurant-review-counts[data-colored] {
+  gap: 14px;
+}
+.restaurant-review-counts[data-colored] > span {
+  gap: 4px;
+}
+.restaurant-review-counts[data-colored] strong {
+  color: inherit;
+  font-weight: 400;
+}

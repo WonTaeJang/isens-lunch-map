@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export default function SiteHeader({ active }: { active: 'map' | 'admin' | 'user' }) {
+export default function SiteHeader({ active }: { active: 'map' | 'admin' | 'user' | 'ranking' }) {
   return (
     <header className="site-header">
       <Link href="/" className="brand" aria-label="Lunch Map 홈">
@@ -32,6 +32,27 @@ export default function SiteHeader({ active }: { active: 'map' | 'admin' | 'user
           >
             <path d="m9 3 6 3 6-3v15l-6 3-6-3-6 3V6l6-3Z" />
             <path d="M9 3v15M15 6v15" />
+          </svg>
+        </Link>
+        <Link
+          href="/ranking"
+          className="admin-nav-icon"
+          aria-label="식당 랭킹"
+          title="식당 랭킹"
+          aria-current={active === 'ranking' ? 'page' : undefined}
+        >
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M8 3h8v5a4 4 0 0 1-8 0V3ZM8 5H4v2a4 4 0 0 0 4 4m8-6h4v2a4 4 0 0 1-4 4M12 12v6m-4 3h8m-7 0v-3h6v3" />
           </svg>
         </Link>
         <Link

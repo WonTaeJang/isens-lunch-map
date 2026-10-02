@@ -1,5 +1,7 @@
 'use client';
 
+import LoadingSpinner from '@/components/ui/loading-spinner';
+
 import type { ReviewCounts } from '@/features/reviews/review-model';
 import Script from 'next/script';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -118,9 +120,13 @@ export default function LunchMap({
       )}
       {!ready && (
         <div className="map-message" role="status">
-          <span className="empty-symbol" aria-hidden="true">
-            ⌖
-          </span>
+          {APP_KEY && !error ? (
+            <LoadingSpinner size={40} />
+          ) : (
+            <span className="empty-symbol" aria-hidden="true">
+              ⌖
+            </span>
+          )}
           <strong>
             {!APP_KEY
               ? '지도 설정이 필요해요'

@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import Button from '@/components/ui/button';
+import LoadingStatus from '@/components/ui/loading-status';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { reviewRequest as request } from './review-api';
 import RecommendationBar from './recommendation-bar';
@@ -223,7 +224,7 @@ function ReviewPanelContent({
             onSave={(input, base) => mutate(base ? 'PATCH' : 'POST', base, input)}
           />
         )}
-        {loading && <p role="status">리뷰를 불러오는 중…</p>}
+        {loading && !page?.hasMore && <LoadingStatus label="리뷰를 불러오는 중…" />}
         {page?.total === 0 && !loading && (
           <p className="review-empty">아직 리뷰가 없어요. 첫 점심 후기를 남겨 주세요.</p>
         )}
@@ -262,7 +263,12 @@ function ReviewPanelContent({
           ))}
         </ul>
         {page?.hasMore && (
-          <Button disabled={loading || busy || Boolean(editing)} onClick={() => void load(true)}>
+          <Button
+            loading={loading}
+            loadingLabel="불러오는 중…"
+            disabled={busy || Boolean(editing)}
+            onClick={() => void load(true)}
+          >
             리뷰 더 보기
           </Button>
         )}

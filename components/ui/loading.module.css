@@ -1,0 +1,30 @@
+.spinner {
+  flex-shrink: 0;
+}
+.delayed {
+  animation: reveal 0s 200ms both;
+}
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 0;
+  color: #74838b;
+  font-size: 13px;
+}
+.page {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  flex-direction: column;
+  gap: 16px;
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

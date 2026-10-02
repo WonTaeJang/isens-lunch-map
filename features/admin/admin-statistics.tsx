@@ -4,6 +4,7 @@ import useAdminStatistics from './use-admin-statistics';
 import StatisticsDetails from './statistics-details';
 import ProgressBar from '@/components/ui/progress-bar';
 import Button from '@/components/ui/button';
+import LoadingStatus from '@/components/ui/loading-status';
 import RecommendationBar from '@/features/reviews/recommendation-bar';
 import styles from './admin-statistics.module.css';
 
@@ -17,7 +18,7 @@ export default function AdminStatistics({ password }: { password: string }) {
     <section className="table-section" aria-label="리뷰 통계" aria-busy={loading}>
       <div className={styles.heading}>
         <h2>통계</h2>
-        <Button variant="secondary" loading={loading} onClick={reload}>
+        <Button variant="secondary" disabled={loading} onClick={reload}>
           새로고침
         </Button>
       </div>
@@ -26,7 +27,7 @@ export default function AdminStatistics({ password }: { password: string }) {
           {error}
         </p>
       )}
-      {loading && !data && <p role="status">통계를 불러오는 중…</p>}
+      {loading && !data && <LoadingStatus label="통계를 불러오는 중…" />}
       {data && (
         <>
           <div className={styles.cards}>

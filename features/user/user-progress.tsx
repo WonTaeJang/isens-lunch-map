@@ -1,4 +1,5 @@
 import ProgressBar from '@/components/ui/progress-bar';
+import LoadingStatus from '@/components/ui/loading-status';
 import styles from './user.module.css';
 import RecommendationBar from '@/features/reviews/recommendation-bar';
 import type { UserReviewStats } from '@/features/reviews/review-model';
@@ -16,9 +17,13 @@ export default function UserProgress({
   if (!stats)
     return (
       <section className={styles['user-progress']} aria-label="점심 통계">
-        <p className="subtle" role="status">
-          {loading ? '점심 통계를 불러오는 중…' : '점심 통계를 불러오지 못했습니다.'}
-        </p>
+        {loading ? (
+          <LoadingStatus label="점심 통계를 불러오는 중…" />
+        ) : (
+          <p className="subtle" role="status">
+            점심 통계를 불러오지 못했습니다.
+          </p>
+        )}
       </section>
     );
   const progress = percent(stats.reviewed_active, stats.active_total);

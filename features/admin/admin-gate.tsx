@@ -15,15 +15,22 @@ export default function AdminGate() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const pending = useRef(false);
+  const reloading = useRef(false);
+  const [reloadBusy, setReloadBusy] = useState(false);
 
   async function reload() {
-    if (!session) return;
+    if (!session || reloading.current) return;
+    reloading.current = true;
+    setReloadBusy(true);
     try {
       const restaurants = await loadAdminRestaurants(session.password);
       setSession((current) => (current ? { ...current, restaurants } : null));
       setError('');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : '목록을 다시 불러오지 못했습니다.');
+    } finally {
+      reloading.current = false;
+      setReloadBusy(false);
     }
   }
 
@@ -43,7 +50,11 @@ export default function AdminGate() {
           onReload={reload}
         />
 
-        {error && <Button onClick={() => void reload()}>목록 다시 불러오기</Button>}
+        {error && (
+          <Button loading={reloadBusy} loadingLabel="불러오는 중…" onClick={() => void reload()}>
+            목록 다시 불러오기
+          </Button>
+        )}
       </>
     );
 

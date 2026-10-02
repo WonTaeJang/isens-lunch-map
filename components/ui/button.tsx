@@ -1,4 +1,5 @@
 import type { ComponentProps } from 'react';
+import LoadingSpinner from './loading-spinner';
 
 type Props = ComponentProps<'button'> & {
   variant?: 'primary' | 'secondary';
@@ -23,6 +24,7 @@ export default function Button({
       disabled={disabled || loading}
       aria-busy={loading || undefined}
     >
+      {loading && <LoadingSpinner size={16} />}
       {loading ? loadingLabel : children}
     </button>
   );

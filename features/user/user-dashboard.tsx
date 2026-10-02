@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button';
+import LoadingStatus from '@/components/ui/loading-status';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import useFavorites from '@/features/favorites/use-favorites';
@@ -215,7 +216,7 @@ function UserDashboardContent({
             </div>
           )}
           {notice && <p role="status">{notice}</p>}
-          {loading && <p role="status">내 리뷰를 불러오는 중…</p>}
+          {loading && !page?.hasMore && <LoadingStatus label="내 리뷰를 불러오는 중…" />}
           {page?.total === 0 && !loading && (
             <div className="review-empty">
               아직 작성한 리뷰가 없어요.{' '}
@@ -287,7 +288,12 @@ function UserDashboardContent({
             ))}
           </ul>
           {page?.hasMore && (
-            <Button disabled={busy || loading || Boolean(editing)} onClick={() => void load(true)}>
+            <Button
+              loading={loading}
+              loadingLabel="불러오는 중…"
+              disabled={busy || Boolean(editing)}
+              onClick={() => void load(true)}
+            >
               더 보기
             </Button>
           )}

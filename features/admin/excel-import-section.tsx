@@ -84,7 +84,7 @@ export default function ExcelImportSection({
               </tbody>
             </table>
           </div>
-          <Button disabled={busy} onClick={() => upload('commit')}>
+          <Button loading={busy} onClick={() => upload('commit')}>
             전체 목록을 DB에 반영
           </Button>
         </div>

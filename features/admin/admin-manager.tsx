@@ -1,6 +1,7 @@
 'use client';
 
 import Tabs from '@/components/ui/tabs';
+import LoadingStatus from '@/components/ui/loading-status';
 import { useState } from 'react';
 import styles from './admin-manager.module.css';
 import AdminStatistics from './admin-statistics';
@@ -64,6 +65,7 @@ export default function AdminManager({
         hidden={tab !== 'restaurants'}
         tabIndex={0}
       >
+        {admin.busy && <LoadingStatus label="식당 정보를 반영하는 중…" />}
         <RestaurantTable
           restaurants={restaurants}
           error={error}

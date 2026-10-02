@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { MapIcon, SettingsIcon, TrophyIcon, UserIcon } from '@/components/ui/icons';
 
 export default function SiteHeader() {
   const pathname = usePathname();
@@ -23,20 +24,7 @@ export default function SiteHeader() {
           title="점심 지도"
           aria-current={pathname === '/' ? 'page' : undefined}
         >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="m9 3 6 3 6-3v15l-6 3-6-3-6 3V6l6-3Z" />
-            <path d="M9 3v15M15 6v15" />
-          </svg>
+          <MapIcon size={22} />
         </Link>
         <Link
           href="/ranking"
@@ -45,19 +33,7 @@ export default function SiteHeader() {
           title="식당 랭킹"
           aria-current={pathname === '/ranking' ? 'page' : undefined}
         >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M8 3h8v5a4 4 0 0 1-8 0V3ZM8 5H4v2a4 4 0 0 0 4 4m8-6h4v2a4 4 0 0 1-4 4M12 12v6m-4 3h8m-7 0v-3h6v3" />
-          </svg>
+          <TrophyIcon size={22} />
         </Link>
         <Link
           href="/user"
@@ -66,20 +42,7 @@ export default function SiteHeader() {
           title="내 페이지"
           aria-current={pathname === '/user' ? 'page' : undefined}
         >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
-          </svg>
+          <UserIcon size={22} />
         </Link>
         <Link
           href="/admin"
@@ -88,20 +51,7 @@ export default function SiteHeader() {
           title="리스트 관리"
           aria-current={pathname === '/admin' ? 'page' : undefined}
         >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="m9.5 3-.6 2.2-1.4.8-2.2-.6-2.5 4.2 1.6 1.6v1.6l-1.6 1.6 2.5 4.2 2.2-.6 1.4.8.6 2.2h5l.6-2.2 1.4-.8 2.2.6 2.5-4.2-1.6-1.6v-1.6l1.6-1.6-2.5-4.2-2.2.6-1.4-.8-.6-2.2z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
+          <SettingsIcon size={22} />
         </Link>
       </nav>
     </header>

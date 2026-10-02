@@ -1,3 +1,5 @@
+import { CheckIcon } from '@/components/ui/icons';
+
 export default function ReviewedBadge() {
   return (
     <span
@@ -6,19 +8,7 @@ export default function ReviewedBadge() {
       aria-label="내 리뷰 작성됨"
       title="내 리뷰 작성됨"
     >
-      <svg
-        width="12"
-        height="12"
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="m3 8 3 3 7-7" />
-      </svg>
+      <CheckIcon size={12} />
     </span>
   );
 }

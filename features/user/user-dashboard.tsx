@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button';
+import { UserIcon } from '@/components/ui/icons';
 import LoadingStatus from '@/components/ui/loading-status';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
@@ -143,17 +144,7 @@ function UserDashboardContent({
         }}
       >
         <span className={styles['user-avatar']} aria-hidden="true">
-          <svg
-            width="30"
-            height="30"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.7"
-          >
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
-          </svg>
+          <UserIcon size={30} strokeWidth="1.7" />
         </span>
         <div>
           <p className="subtle">나의 점심 기록</p>

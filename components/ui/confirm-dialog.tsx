@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef } from 'react';
 import Button from './button';
+import { CalendarCheckIcon } from '@/components/ui/icons';
 import styles from './confirm-dialog.module.css';
 
 type Props = {
@@ -48,19 +49,7 @@ export default function ConfirmDialog({
     >
       {!showCancel && (
         <span className={styles.icon} aria-hidden="true">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x="4" y="5" width="16" height="16" rx="3" />
-            <path d="M8 3v4m8-4v4M4 11h16m-11 5 2 2 4-4" />
-          </svg>
+          <CalendarCheckIcon strokeWidth="1.7" />
         </span>
       )}
       <h2 id={titleId}>{title}</h2>

@@ -1,5 +1,6 @@
 'use client';
 
+import { BookmarkIcon, DirectionsIcon } from '@/components/ui/icons';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
 import ReviewCountBadges from '@/features/reviews/review-counts';
 import type { ReviewCounts } from '@/features/reviews/review-model';
@@ -65,17 +66,7 @@ export default function RestaurantMapCard({
           aria-label={`${restaurant.name} 즐겨찾기 ${favorite ? '해제' : '추가'}`}
           onClick={() => setMessage(onFavorite())}
         >
-          <svg
-            width="18"
-            height="20"
-            viewBox="0 0 18 22"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            aria-hidden="true"
-          >
-            <path d="M3 2h12v18l-6-4-6 4z" />
-          </svg>
+          <BookmarkIcon />
         </button>
         <button type="button" className="restaurant-card-favorite" onClick={onReviews}>
           리뷰 보기
@@ -88,20 +79,7 @@ export default function RestaurantMapCard({
           target="_blank"
           rel="noopener noreferrer"
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="m12 2 10 10-10 10L2 12 12 2Z" />
-            <path d="M8 15v-4h8m-3-3 3 3-3 3" />
-          </svg>
+          <DirectionsIcon size={20} />
         </a>
       </div>
       <p className="restaurant-card-status" role="status">

@@ -1,5 +1,6 @@
 'use client';
 import FilterChip from '@/components/ui/filter-chip';
+import { BookmarkIcon } from '@/components/ui/icons';
 const DISTANCE_FILTER_OPTIONS = [
   { label: '전체', value: null },
   { label: '100m 이내', value: 100 },
@@ -57,17 +58,7 @@ export default function RestaurantFilters({
           selected={favoritesOnly}
           onClick={() => onFavoritesOnlyChange(!favoritesOnly)}
         >
-          <svg
-            width="14"
-            height="16"
-            viewBox="0 0 18 22"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            aria-hidden="true"
-          >
-            <path d="M3 2h12v18l-6-4-6 4z" />
-          </svg>
+          <BookmarkIcon width={14} height={16} />
           즐겨찾기만
         </FilterChip>
       </div>

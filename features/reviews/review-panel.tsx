@@ -1,10 +1,10 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import Button from '@/components/ui/button';
 import LoadingStatus from '@/components/ui/loading-status';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
+import ReviewDeleteDialog from './review-delete-dialog';
 import { reviewRequest as request } from './review-api';
 import RecommendationBar from './recommendation-bar';
 import ReviewActionIcons from './review-action-icons';
@@ -16,6 +16,7 @@ import { REVIEW_TAGS } from '@/lib/reviews/constants';
 import useLocalUser from '@/features/local-user/use-local-user';
 import type { LocalIdentity } from '@/features/local-user/local-user-store';
 import useReviewFeed from './use-review-feed';
+import useReviewActions from './use-review-actions';
 import { getDailyReviewCount, recordDailyReview } from './daily-review-limit';
 import { DAILY_REVIEW_LIMIT } from './constants';
 type Props = { restaurant: { id: string; name: string }; onClose: () => void };
@@ -44,18 +45,19 @@ function ReviewPanelContent({
   identityReady,
   storageError,
 }: Props & { identity: LocalIdentity | null; identityReady: boolean; storageError: string }) {
-  const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const params = new URLSearchParams({ restaurant_id: restaurant.id });
   if (identity) params.set('user_id', identity.user_id);
   const feed = useReviewFeed<ReviewPage>(identityReady ? `/api/reviews?${params}` : null);
   const { page, busy, load } = feed;
   const loading = !identityReady || feed.loading;
-  const [actionError, setError] = useState('');
-  const error = actionError || feed.error;
-  const [editing, setEditing] = useState<Review | 'new' | null>(null);
-  const [deleting, setDeleting] = useState<Review | null>(null);
-  const [notice, setNotice] = useState('');
+  const actions = useReviewActions<Review | 'new'>({
+    identity,
+    feed,
+    extraBody: { user_name: identity?.user_name, restaurant_id: restaurant.id },
+    savedNotice: '리뷰를 저장했습니다.',
+  });
+  const { error, notice, editing, deleting, setError } = actions;
   const [limitReached, setLimitReached] = useState(false);
   useEffect(() => {
     const element = dialog.current;
@@ -71,50 +73,20 @@ function ReviewPanelContent({
     }
     return false;
   }
-  async function mutate(
-    method: 'POST' | 'PATCH' | 'DELETE',
-    review: Review | null,
-    input?: ReturnType<typeof reviewInput>,
-  ) {
-    if (!identity) return;
-    if (method === 'POST' && !canCreateReview()) return;
-    setError('');
-    setNotice('');
-    if (
-      await feed.mutate(
-        method,
-        {
-          ...identity,
-          restaurant_id: restaurant.id,
-          id: review?.id,
-          version: review?.updated_at ?? review?.created_at,
-          ...input,
-        },
-        method === 'POST'
-          ? () => {
-              try {
-                recordDailyReview(window.localStorage);
-              } catch {
-                setError('리뷰는 등록되었지만 작성 횟수를 저장하지 못했습니다.');
-              }
-            }
-          : undefined,
-      )
-    ) {
-      router.refresh();
-      setEditing(null);
-      setDeleting(null);
-      setNotice(method === 'DELETE' ? '' : '리뷰를 저장했습니다.');
-    }
+  async function save(input: ReturnType<typeof reviewInput>, base: Review | null) {
+    if (base) return actions.mutate('PATCH', base, input);
+    if (!identity || !canCreateReview()) return;
+    await actions.mutate('POST', null, input, () => {
+      try {
+        recordDailyReview(window.localStorage);
+      } catch {
+        setError('리뷰는 등록되었지만 작성 횟수를 저장하지 못했습니다.');
+      }
+    });
   }
   async function reloadEditing() {
     if (!identity) return null;
-    if (editing && editing !== 'new') {
-      const result = await request<{ review: Review | null }>(
-        `/api/reviews?${new URLSearchParams({ scope: 'review', review_id: editing.id, user_id: identity.user_id })}`,
-      );
-      return result.review;
-    }
+    if (editing && editing !== 'new') return actions.loadOwnReview(editing.id);
     const result = await request<ReviewPage>(`/api/reviews?${params}`);
     return result.mine;
   }
@@ -146,18 +118,11 @@ function ReviewPanelContent({
         />
       )}
       {deleting && (
-        <ConfirmDialog
-          title="리뷰를 삭제할까요?"
-          description="삭제한 리뷰는 복구할 수 없습니다."
-          confirmLabel="삭제"
+        <ReviewDeleteDialog
           busy={busy}
           error={error}
-          onCancel={() => setDeleting(null)}
-          onConfirm={() =>
-            void mutate('DELETE', deleting).catch((cause) =>
-              setError(cause instanceof Error ? cause.message : '삭제하지 못했습니다.'),
-            )
-          }
+          onCancel={actions.cancelDelete}
+          onConfirm={actions.confirmDelete}
         />
       )}
       <header className="review-panel-header">
@@ -206,8 +171,7 @@ function ReviewPanelContent({
             disabled={busy || loading}
             onClick={() => {
               if (!page.mine && !canCreateReview()) return;
-              setEditing(page.mine ?? 'new');
-              setDeleting(null);
+              actions.startEdit(page.mine ?? 'new');
             }}
           >
             {page.mine ? '내 리뷰 수정' : '리뷰 작성'}
@@ -220,8 +184,8 @@ function ReviewPanelContent({
             name={identity?.user_name ?? ''}
             busy={busy || loading}
             onReload={reloadEditing}
-            onCancel={() => setEditing(null)}
-            onSave={(input, base) => mutate(base ? 'PATCH' : 'POST', base, input)}
+            onCancel={() => actions.setEditing(null)}
+            onSave={save}
           />
         )}
         {loading && !page?.hasMore && <LoadingStatus label="리뷰를 불러오는 중…" />}
@@ -240,11 +204,8 @@ function ReviewPanelContent({
                   {review.is_mine && (
                     <ReviewActionIcons
                       disabled={busy || loading || Boolean(editing)}
-                      onEdit={() => setEditing(review)}
-                      onDelete={() => {
-                        setError('');
-                        setDeleting(review);
-                      }}
+                      onEdit={() => actions.startEdit(review)}
+                      onDelete={() => actions.startDelete(review)}
                     />
                   )}
                 </div>

@@ -5,24 +5,18 @@ import IdentityEditor from './identity-editor';
 import UserProgress from './user-progress';
 import Link from 'next/link';
 import { useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button';
 import { UserIcon } from '@/components/ui/icons';
 import LoadingStatus from '@/components/ui/loading-status';
-import ConfirmDialog from '@/components/ui/confirm-dialog';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import useFavorites from '@/features/favorites/use-favorites';
 import { toggleStoredFavorite } from '@/features/favorites/favorites-store';
 import ReviewActionIcons from '@/features/reviews/review-action-icons';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from '@/features/reviews/review-form';
-import { reviewRequest } from '@/features/reviews/review-api';
-import {
-  type Review,
-  type UserReview,
-  type UserReviewPage,
-  type reviewInput,
-} from '@/lib/reviews/model';
+import ReviewDeleteDialog from '@/features/reviews/review-delete-dialog';
+import useReviewActions from '@/features/reviews/use-review-actions';
+import type { UserReview, UserReviewPage } from '@/lib/reviews/model';
 import { REVIEW_TAGS } from '@/lib/reviews/constants';
 import type { RestaurantRow } from '@/lib/restaurant-types';
 import { hasCoordinates } from '@/lib/coordinates';
@@ -63,7 +57,6 @@ function UserDashboardContent({
   identityReady,
   identityError,
 }: Props & { identity: LocalIdentity | null; identityReady: boolean; identityError: string }) {
-  const router = useRouter();
   const [identityEditorOpen, setIdentityEditorOpen] = useState(false);
   const profileClicks = useRef({ start: 0, count: 0 });
   function clickProfile() {
@@ -88,46 +81,18 @@ function UserDashboardContent({
   );
   const { page, busy, load } = feed;
   const loading = !identityReady || feed.loading;
-  const [actionError, setError] = useState('');
-  const error = identityError || actionError || feed.error;
+  const actions = useReviewActions<UserReview>({
+    identity,
+    feed,
+    savedNotice: '리뷰를 수정했습니다.',
+  });
+  const { notice, editing, deleting, setError } = actions;
+  const error = identityError || actions.error;
   const [tab, setTab] = useState<'reviews' | 'favorites'>('reviews');
   const [favoriteError, setFavoriteError] = useState('');
-  const [notice, setNotice] = useState('');
-  const [editing, setEditing] = useState<UserReview | null>(null);
-  const [deleting, setDeleting] = useState<Review | null>(null);
   const savedRestaurants = restaurants
     .filter((row) => favorites.has(row.id))
     .sort((a, b) => Number(Boolean(b.active)) - Number(Boolean(a.active)));
-  async function mutate(
-    method: 'PATCH' | 'DELETE',
-    review: Review,
-    input?: ReturnType<typeof reviewInput>,
-  ) {
-    if (!identity) return;
-    setError('');
-    setNotice('');
-    if (
-      await feed.mutate(method, {
-        user_id: identity.user_id,
-        id: review.id,
-        version: review.updated_at ?? review.created_at,
-        ...input,
-      })
-    ) {
-      setEditing(null);
-      setDeleting(null);
-      setNotice(method === 'DELETE' ? '' : '리뷰를 수정했습니다.');
-      router.refresh();
-    }
-  }
-  async function reloadEditing() {
-    if (!identity || !editing) return null;
-    const result = await reviewRequest<{ review: Review | null }>(
-      `/api/reviews?${new URLSearchParams({ scope: 'review', review_id: editing.id, user_id: identity.user_id })}`,
-    );
-    return result.review;
-  }
-
   return (
     <div className={styles['user-dashboard']}>
       <section
@@ -160,18 +125,11 @@ function UserDashboardContent({
         <IdentityEditor identity={identity} onClose={() => setIdentityEditorOpen(false)} />
       )}
       {deleting && (
-        <ConfirmDialog
-          title="리뷰를 삭제할까요?"
-          description="삭제한 리뷰는 복구할 수 없습니다."
-          confirmLabel="삭제"
+        <ReviewDeleteDialog
           busy={busy}
           error={error}
-          onCancel={() => setDeleting(null)}
-          onConfirm={() =>
-            void mutate('DELETE', deleting).catch((cause) =>
-              setError(cause instanceof Error ? cause.message : '삭제하지 못했습니다.'),
-            )
-          }
+          onCancel={actions.cancelDelete}
+          onConfirm={actions.confirmDelete}
         />
       )}
       <UserProgress stats={page} loading={loading} />
@@ -233,14 +191,8 @@ function UserDashboardContent({
                     <RecommendationBadge recommended={review.is_recommended} />
                     <ReviewActionIcons
                       disabled={busy || loading || Boolean(editing)}
-                      onEdit={() => {
-                        setEditing(review);
-                        setDeleting(null);
-                      }}
-                      onDelete={() => {
-                        setError('');
-                        setDeleting(review);
-                      }}
+                      onEdit={() => actions.startEdit(review)}
+                      onDelete={() => actions.startDelete(review)}
                     />
                   </div>
                 </div>
@@ -258,9 +210,9 @@ function UserDashboardContent({
                     review={editing}
                     name={identity?.user_name ?? ''}
                     busy={busy || loading}
-                    onReload={reloadEditing}
-                    onCancel={() => setEditing(null)}
-                    onSave={(input, base) => mutate('PATCH', base ?? editing, input)}
+                    onReload={() => actions.loadOwnReview(editing.id)}
+                    onCancel={() => actions.setEditing(null)}
+                    onSave={(input, base) => actions.mutate('PATCH', base ?? editing, input)}
                   />
                 ) : (
                   <>

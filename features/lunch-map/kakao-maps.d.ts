@@ -8,6 +8,7 @@ export type KakaoMaps = {
     setCenter: (position: object) => void;
     panBy: (x: number, y: number) => void;
     setMaxLevel: (level: number) => void;
+    getLevel: () => number;
     addControl: (control: object, position: number) => void;
   };
   ZoomControl: new () => object;

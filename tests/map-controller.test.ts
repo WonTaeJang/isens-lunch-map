@@ -20,8 +20,11 @@ function fixture() {
     className = '';
     textContent = '';
     onclick: unknown;
+    children: Element[] = [];
     setAttribute() {}
-    append() {}
+    append(...children: Element[]) {
+      this.children.push(...children);
+    }
   }
   const original = Object.getOwnPropertyDescriptor(globalThis, 'document');
   Object.defineProperty(globalThis, 'document', {
@@ -35,7 +38,7 @@ function fixture() {
     map: object | null;
     image: unknown;
     zIndex = 0;
-    constructor(public options: { map: object; title: string }) {
+    constructor(public options: { map: object; title: string; position: unknown }) {
       this.map = options.map;
       markers.push(this);
     }
@@ -52,7 +55,8 @@ function fixture() {
   class Overlay {
     map: object | null = null;
     position: unknown;
-    constructor() {
+    constructor(public options: { content: Element; position: unknown }) {
+      this.position = options.position;
       overlays.push(this);
     }
     setMap(map: object | null) {
@@ -92,8 +96,10 @@ function fixture() {
     },
   } as unknown as KakaoMaps;
   let moves = 0;
+  let level = 4;
   let selection: string | null = null;
   const map = {
+    getLevel: () => level,
     setCenter() {
       moves++;
     },
@@ -123,6 +129,12 @@ function fixture() {
     get selection() {
       return selection;
     },
+    /** Simulates the user zooming the map; Kakao then fires zoom_changed. */
+    zoom(next: number) {
+      level = next;
+      listeners.get(map)?.get('zoom_changed')?.();
+    },
+    map,
     restore() {
       controller.dispose();
       if (original) Object.defineProperty(globalThis, 'document', original);
@@ -205,6 +217,55 @@ test('review markers turn green, keep favorites and selection, and revert after 
     assert.equal((marker.image as { src: string }).src, '/restaurant-marker-default-favorite.svg');
     assert.equal(f.markers.filter((marker) => marker.options.title === row.name).length, 1);
     assert.equal(f.moves, 0);
+  } finally {
+    f.restore();
+  }
+});
+
+test('restaurant names show above markers only at zoom levels 1-2, except the selected one', () => {
+  const f = fixture();
+  const other = { ...row, id: 'b', name: '다른 식당' };
+  const labels = () =>
+    f.overlays
+      .slice(1) // The first overlay is the selected restaurant popup.
+      .filter((overlay) => overlay.map)
+      .map((overlay) => overlay.options.content.children[0].textContent);
+  try {
+    f.controller.update([row, other], new Set(), null);
+    assert.deepEqual(labels(), []); // Starts at level 4.
+    f.zoom(2);
+    assert.deepEqual(labels(), ['식당', '다른 식당']);
+    const created = f.overlays.length;
+    f.zoom(1);
+    assert.equal(f.overlays.length, created); // Zooming within 1-2 reuses labels.
+    f.controller.update([row, other], new Set(), 'a');
+    assert.deepEqual(labels(), ['다른 식당']); // The popup already names the selection.
+    f.zoom(3);
+    assert.deepEqual(labels(), []);
+    f.zoom(2);
+    f.controller.update([other], new Set(), null);
+    assert.deepEqual(labels(), ['다른 식당']); // Filtered-out restaurants lose their label.
+    assert.equal(f.overlays.length, created);
+  } finally {
+    f.restore();
+  }
+  assert.deepEqual(labels(), []);
+  assert.equal(f.listeners.get(f.map)?.has('zoom_changed'), false);
+});
+
+test('labels created while zoomed in appear immediately for new restaurants', () => {
+  const f = fixture();
+  try {
+    f.zoom(1);
+    f.controller.update([row], new Set(), null);
+    const label = f.overlays.at(-1)!;
+    // The overlay content is a zero-size anchor so Kakao's wrapper never covers the marker.
+    assert.equal(label.options.content.className, 'restaurant-map-label-anchor');
+    assert.equal(label.options.content.textContent, '');
+    assert.equal(label.options.content.children[0].className, 'restaurant-map-label');
+    assert.equal(label.options.content.children[0].textContent, '식당');
+    assert.ok(label.map);
+    assert.equal(label.position, f.markers[1].options.position);
   } finally {
     f.restore();
   }

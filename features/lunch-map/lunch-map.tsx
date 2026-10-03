@@ -10,6 +10,7 @@ import { createPortal } from 'react-dom';
 import Button from '@/components/ui/button';
 import RestaurantMapCard from './restaurant-map-card';
 import { createMapController, OFFICE_ADDRESS, type MapController } from './map-controller';
+import labelStyles from './map-label.module.css';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 
 const APP_KEY = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY?.trim();
@@ -69,8 +70,13 @@ export default function LunchMap({
               const map = new maps.Map(containerRef.current, { center, level: 4 });
               map.setMaxLevel(5);
               map.addControl(new maps.ZoomControl(), maps.ControlPosition.RIGHT);
-              instance = createMapController(maps, map, center, containerRef.current, (id) =>
-                onSelectRef.current(id),
+              instance = createMapController(
+                maps,
+                map,
+                center,
+                containerRef.current,
+                (id) => onSelectRef.current(id),
+                { anchor: labelStyles.anchor, label: labelStyles.label },
               );
               setController(instance);
               setError(false);

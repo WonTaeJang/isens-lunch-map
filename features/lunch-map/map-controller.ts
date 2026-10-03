@@ -3,13 +3,17 @@ import type { MapRestaurant } from '@/lib/restaurant-types';
 import { hasCoordinates } from '@/lib/coordinates';
 
 export const OFFICE_ADDRESS = '서울 서초구 반포대로28길 43';
+// Restaurant names are shown above markers only at this zoom level or closer (1 = closest).
+export const NAME_LABEL_MAX_LEVEL = 2;
 type MapInstance = InstanceType<KakaoMaps['Map']>;
+type Overlay = InstanceType<KakaoMaps['CustomOverlay']>;
 type MarkerEntry = {
   row: MapRestaurant;
   marker: InstanceType<KakaoMaps['Marker']>;
   position: object;
   onClick: () => void;
   appearance: string;
+  label: Overlay | null;
 };
 
 // Owns SDK objects only. Selection and card content belong to React.
@@ -19,8 +23,42 @@ export function createMapController(
   center: object,
   container: HTMLElement,
   onSelect: (id: string | null) => void,
+  labelClassNames = { anchor: 'restaurant-map-label-anchor', label: 'restaurant-map-label' },
 ) {
   const entries = new Map<string, MarkerEntry>();
+  let selectedId: string | null = null;
+  let showLabels = map.getLevel() <= NAME_LABEL_MAX_LEVEL;
+  // Labels are created lazily the first time they are needed, then only toggled.
+  function syncLabel(entry: MarkerEntry) {
+    const visible = showLabels && entry.row.id !== selectedId; // The popup already shows its name.
+    if (visible && !entry.label) {
+      // Kakao wraps overlay content in a box sized like the content and placed at the anchor,
+      // which is exactly over the marker. A zero-size anchor keeps that box from swallowing
+      // marker clicks; the visible label is positioned above it and ignores pointer events.
+      const content = document.createElement('div');
+      content.className = labelClassNames.anchor;
+      content.setAttribute('aria-hidden', 'true'); // The marker title already names it.
+      const label = document.createElement('div');
+      label.className = labelClassNames.label;
+      label.textContent = entry.row.name;
+      content.append(label);
+      entry.label = new maps.CustomOverlay({
+        content,
+        position: entry.position,
+        xAnchor: 0.5,
+        yAnchor: 1,
+        zIndex: 1,
+      });
+    }
+    entry.label?.setMap(visible ? map : null);
+  }
+  const onZoom = () => {
+    const next = map.getLevel() <= NAME_LABEL_MAX_LEVEL;
+    if (next === showLabels) return;
+    showLabels = next;
+    entries.forEach(syncLabel);
+  };
+  maps.event.addListener(map, 'zoom_changed', onZoom);
   const image = (file: string, selected: boolean) =>
     new maps.MarkerImage(file, new maps.Size(selected ? 40 : 24, selected ? 50 : 30), {
       offset: new maps.Point(selected ? 20 : 12, selected ? 48 : 28.8),
@@ -85,15 +123,17 @@ export function createMapController(
   function remove(entry: MarkerEntry) {
     maps.event.removeListener(entry.marker, 'click', entry.onClick);
     entry.marker.setMap(null);
+    entry.label?.setMap(null);
   }
   return {
     host,
     update(
       rows: MapRestaurant[],
       favorites: ReadonlySet<string>,
-      selectedId: string | null,
+      nextSelectedId: string | null,
       reviewedIds?: ReadonlySet<string> | null,
     ) {
+      selectedId = nextSelectedId;
       const visible = new Map(rows.filter(hasCoordinates).map((row) => [row.id, row]));
       entries.forEach((entry, id) => {
         const row = visible.get(id);
@@ -120,7 +160,7 @@ export function createMapController(
           });
           const onClick = () => onSelect(row.id);
           maps.event.addListener(marker, 'click', onClick);
-          entry = { row, marker, position, onClick, appearance: '' };
+          entry = { row, marker, position, onClick, appearance: '', label: null };
           entries.set(row.id, entry);
         }
         const selected = row.id === selectedId;
@@ -141,6 +181,7 @@ export function createMapController(
           entry.marker.setZIndex(selected ? 11 : 0);
           entry.appearance = appearance;
         }
+        syncLabel(entry);
       });
       const selected = selectedId ? entries.get(selectedId) : undefined;
       if (selected) {
@@ -165,6 +206,7 @@ export function createMapController(
       officeInfo.close();
       officeMarker.setMap(null);
       maps.event.removeListener(map, 'click', close);
+      maps.event.removeListener(map, 'zoom_changed', onZoom);
       maps.event.removeListener(officeMarker, 'click', openOffice);
       blockedEvents.forEach((name) => host.removeEventListener(name, stop));
       host.removeEventListener('dblclick', stopDoubleClick);

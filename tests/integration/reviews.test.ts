@@ -37,7 +37,8 @@ test(
         `create table public.restaurants (id uuid primary key, name text, active boolean, latitude text, longitude text)`,
       );
       await db.query(`create table public.review (id uuid primary key default gen_random_uuid(), restaurant_id uuid references public.restaurants(id),
-      user_id uuid, user_name text, content text, is_recommended boolean, tags text, created_at timestamptz not null default clock_timestamp(), updated_at timestamptz)`);
+      user_id uuid, user_name text, content text, is_recommended boolean, tags text, created_at timestamptz not null default clock_timestamp(), updated_at timestamptz,
+      enabled boolean not null default true)`);
       await db.query(
         "insert into public.restaurants(id,name,active) values ($1,'active',true),($2,'inactive',false),($3,'unrated',true)",
         [restaurant, inactive, nullRated],
@@ -100,6 +101,26 @@ test(
       await mutateReview(db, 'PATCH', { ...edit, content: 'updated' });
       await assert.rejects(mutateReview(db, 'PATCH', edit));
       assert.equal((await getOwnReview(db, mine.id, newUser))?.content, 'updated');
+
+      // Deleting is logical: the row and its content stay, but every read hides it.
+      const updated = (await getOwnReview(db, mine.id, newUser))!;
+      await mutateReview(db, 'DELETE', {
+        ...input,
+        id: mine.id,
+        version: updated.updated_at ?? updated.created_at,
+      });
+      assert.equal(await getOwnReview(db, mine.id, newUser), null);
+      assert.equal((await listReviews(db, restaurant, newUser)).mine, null);
+      const kept = await db.query('select content, enabled from public.review where id=$1', [
+        mine.id,
+      ]);
+      assert.deepEqual(kept.rows[0], { content: 'updated', enabled: false });
+      await assert.rejects(
+        mutateReview(db, 'PATCH', { ...edit, version: updated.updated_at, content: 'again' }),
+      );
+      // The same restaurant can be reviewed again after deleting.
+      await mutateReview(db, 'POST', { ...input, content: 'rewritten' });
+      assert.equal((await listReviews(db, restaurant, newUser)).mine?.content, 'rewritten');
     } finally {
       await pool.query(`drop schema if exists "${schema}" cascade`);
       await pool.end();

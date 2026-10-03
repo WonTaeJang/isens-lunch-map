@@ -15,7 +15,7 @@ select s.id, s.name, s.category, s.latitude, s.longitude, s.active,
       count(*)::int reviews,
       count(*) filter (where r.is_recommended=true)::int recommended,
       count(*) filter (where r.is_recommended=false)::int not_recommended
-    from public.restaurants s join public.review r on r.restaurant_id=s.id
+    from public.restaurants s join public.review r on r.restaurant_id=s.id and r.enabled=true
     ${includeInactive ? '' : 'where s.active=true'}
     group by s.id, s.name, s.category, s.latitude, s.longitude, s.active
 `;

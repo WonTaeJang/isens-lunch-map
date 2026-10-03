@@ -37,6 +37,8 @@ test('statistics uses distinct authors, active restaurant coverage and counts ta
       assert.match(sql, /count\(distinct user_id\)/);
       assert.match(sql, /s.active=true/);
       assert.match(sql, /exists \(select 1 from public.review/);
+      // Deleted reviews are excluded everywhere: daily, coverage, tags, top lists, totals, ranking.
+      assert.equal(sql.match(/enabled=true/g)?.length, 6);
       assert.match(sql, /group by tags/);
       assert.match(sql, /generate_series\(0, 6\)/);
       assert.match(sql, /Asia\/Seoul/);

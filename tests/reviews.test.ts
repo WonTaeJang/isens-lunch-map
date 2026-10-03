@@ -94,6 +94,15 @@ test('new reviews lock author/restaurant, preserve false, store text JSON and st
   assert.equal(mock.calls.at(-1)?.sql, 'commit');
   assert.equal(mock.released(), true);
 });
+test('duplicate check ignores deleted reviews so the same restaurant can be reviewed again', async () => {
+  const mock = database((sql) => ({
+    rows: [],
+    rowCount: sql.includes('public.restaurants') ? 1 : 0,
+  }));
+  await mutateReview(mock.db, 'POST', input);
+  const duplicate = mock.calls.find((call) => call.sql.includes('select id from public.review'))!;
+  assert.match(duplicate.sql, /enabled=true/);
+});
 test('duplicates, inactive restaurants and failed inserts roll back without commit', async () => {
   for (const scenario of ['duplicate', 'inactive', 'failure']) {
     const mock = database((sql) => {
@@ -126,7 +135,12 @@ test('edit and delete scope writes to supplied owner and timestamp; stale or wro
       /date_trunc\('milliseconds',coalesce\(updated_at,created_at\)\)=\$3/,
     );
     assert.deepEqual(mock.calls[0].values.slice(0, 3), [id, user, version]);
+    assert.match(mock.calls[0].sql, /enabled=true/);
     if (method === 'PATCH') assert.match(mock.calls[0].sql, /updated_at=now\(\)/);
+    else {
+      assert.match(mock.calls[0].sql, /^update public.review set enabled=false where/);
+      assert.doesNotMatch(mock.calls[0].sql, /delete from/);
+    }
     const missing = database(() => ({ rows: [], rowCount: 0 }));
     await assert.rejects(
       mutateReview(missing.db, method, { ...input, id, version }),
@@ -166,6 +180,7 @@ test('list paginates and exposes ownership flag without selecting author UUIDs',
   assert.deepEqual(result.reviews[0].tags, ['tasty']);
 
   assert.ok(mock.calls.every((call) => !/select[^]*, user_id,/.test(call.sql)));
+  assert.ok(mock.calls.every((call) => /enabled=true/.test(call.sql)));
 });
 
 test('list counts use one grouped query and keep recommendations separated by restaurant', async () => {
@@ -186,6 +201,7 @@ test('list counts use one grouped query and keep recommendations separated by re
     [id]: { recommended: 0, not_recommended: 3 },
   });
   assert.equal(mock.calls.length, 1);
+  assert.match(mock.calls[0].sql, /where enabled=true group by restaurant_id/);
 });
 
 test('my reviews are scoped to one user, join restaurant data and include inactive history', async () => {
@@ -196,7 +212,7 @@ test('my reviews are scoped to one user, join restaurant data and include inacti
       assert.match(sql, /where user_id=\$1/);
       return { rows: [{ total: 21 }], rowCount: 1 };
     }
-    assert.match(sql, /where r.user_id=\$1/);
+    assert.match(sql, /where r.user_id=\$1 and r.enabled=true/);
     assert.match(sql, /join public.restaurants/);
     assert.doesNotMatch(sql, /active\s*=\s*true/);
     assert.deepEqual(values, [user, cursor.createdAt, cursor.id, 21, true]);
@@ -252,6 +268,7 @@ test('reviewed restaurant lookup returns IDs only in one user-scoped query witho
     assert.match(sql, /select distinct restaurant_id/);
     assert.match(sql, /where user_id=\$1/);
     assert.doesNotMatch(sql, /limit|content|user_name/);
+    assert.match(sql, /enabled=true/);
     assert.deepEqual(values, [user]);
     return { rows: [{ restaurant_id: restaurant }, { restaurant_id: id }], rowCount: 2 };
   });
@@ -272,6 +289,7 @@ test('user statistics aggregate all active restaurants independently of review p
     if (sql.includes('with mine as')) {
       assert.deepEqual(values, [user]);
       assert.match(sql, /distinct on \(restaurant_id\)/);
+      assert.equal(sql.match(/enabled=true/g)?.length, 2);
       assert.match(sql, /where s.active=true/);
       assert.match(sql, /left join mine/);
       assert.doesNotMatch(sql, /limit|offset/);
@@ -285,7 +303,8 @@ test('user statistics aggregate all active restaurants independently of review p
 
 test('review response serializes dates and never leaks DB fields or author identifiers', async () => {
   const { getOwnReview } = await import('../lib/server/reviews');
-  const mock = database((_sql, values) => {
+  const mock = database((sql, values) => {
+    assert.match(sql, /enabled=true/);
     assert.deepEqual(values, [id, user]);
     return { rows: [{ ...row, user_id: user, internal: 'private', is_mine: true }], rowCount: 1 };
   });

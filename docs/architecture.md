@@ -244,10 +244,24 @@ alter table public.review add constraint review_content_length_check check (
 ID를 바꾸거나 저장소를 지우면 기존 리뷰 소유권을 잃고, 다른 사람의 ID를 알면 사칭할 수 있습니다.
 조회 응답에는 작성자의 UUID를 포함하지 않고 `is_mine`만 반환합니다.
 
-API를 통한 등록은 식당·사용자 조합당 1개로 제한하고 트랜잭션 잠금으로 동시 중복 요청을 방지합니다.
+API를 통한 등록은 식당·사용자 조합당 살아 있는 리뷰 1개로 제한합니다.
 DB 직접 입력까지 고유성을 보장하는 제약은 별도로 추가하지 않았습니다.
 수정·삭제는 조회한 수정 시간도 비교해 다른 탭에서 변경된 리뷰를 덮어쓰지 않습니다.
-`npm test`는 입력 제한, 소유자 조건, 중복 등록·롤백을 모의 DB로 검증합니다.
+
+### 논리 삭제
+
+- 삭제는 논리 삭제입니다. `public.review.enabled`를 `false`로 바꾸고 행과 내용은 그대로 보존합니다.
+  리뷰 목록·내 리뷰·추천 집계·랭킹·관리자 통계 등 모든 조회는 `enabled=true`만 사용하고,
+  삭제된 리뷰는 수정·재삭제할 수 없습니다. 삭제 후 같은 식당에 다시 작성할 수 있습니다.
+
+필요한 DB 변경(적용 완료):
+
+```sql
+alter table public.review add column enabled boolean not null default true;
+create index if not exists review_user_created_idx on public.review (user_id, created_at);
+```
+
+`npm test`는 입력 제한, 소유자 조건, 중복 등록·롤백, 논리 삭제를 모의 DB로 검증합니다.
 
 ## 사용자 페이지 (`/user`)
 
@@ -293,7 +307,7 @@ localStorage의 기존 닉네임·ID를 읽고 내 리뷰와 즐겨찾기 탭을
 일반 `DATABASE_URL`은 사용하지 않습니다. 테스트는 임의 이름의 스키마를 생성하고
 해당 스키마에서만 실행한 후 삭제하므로 테스트 DB 계정에 스키마 생성 권한이 필요합니다.
 검증 항목은 페이지 사이 삭제·삽입, 마이크로초 커서, NULL 평가·중복 리뷰 집계,
-동시 리뷰 등록, 이전 버전 수정 거절입니다.
+동시 리뷰 등록, 이전 버전 수정 거절, 논리 삭제와 재작성, 랭킹의 삭제 리뷰 제외입니다.
 
 관리자 페이지는 먼저 비밀번호 입력 화면만 렌더링합니다. 인증 전에는 식당 목록을
 서버 페이지에서 전달하지 않습니다. 비밀번호를 제출하면 기존 관리자 API의 GET에서

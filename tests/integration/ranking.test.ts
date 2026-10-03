@@ -25,7 +25,9 @@ test(
       await db.query(
         'create table public.restaurants (id uuid primary key, name text, category text, latitude text, longitude text, active boolean)',
       );
-      await db.query('create table public.review (restaurant_id uuid, is_recommended boolean)');
+      await db.query(
+        'create table public.review (restaurant_id uuid, is_recommended boolean, enabled boolean not null default true)',
+      );
       assert.deepEqual(await getRecommendationRanking(db), []);
       async function seed(
         name: string,
@@ -59,6 +61,11 @@ test(
       await seed('inactive', 100, 0, false);
       await seed('unrated', 0, 0, true, 100);
       await seed('empty', 0, 0);
+      // Deleted (enabled=false) reviews must not count toward either ranking.
+      await seed('deleted', 200, 0);
+      await db.query(
+        "update public.review set enabled=false where restaurant_id=(select id from public.restaurants where name='deleted')",
+      );
       const ranked = await getRecommendationRanking(db);
       assert.deepEqual(
         ranked.map((row) => [row.name, row.rank]),
@@ -72,7 +79,7 @@ test(
       assert.ok(ranked.every((row) => !('score' in row)));
       const reviewRanking = await getRestaurantRanking(db);
       assert.equal(reviewRanking[0].name, 'unrated');
-      assert.ok(reviewRanking.every((row) => row.name !== 'inactive' && row.name !== 'empty'));
+      assert.ok(reviewRanking.every((row) => !['inactive', 'empty', 'deleted'].includes(row.name)));
       for (let i = 0; i < 12; i++) await seed(`low-${String(i).padStart(2, '0')}`, 0, 1);
       const limited = await getRecommendationRanking(db);
       assert.equal(limited.length, 10);

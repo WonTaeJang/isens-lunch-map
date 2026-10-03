@@ -21,7 +21,8 @@ export async function getAdminStatistics(db: Pool): Promise<AdminStatistics> {
     ), daily as (
       select (created_at at time zone 'Asia/Seoul')::date AS review_date, count(*)::int count
       from public.review
-      where created_at >= (((now() at time zone 'Asia/Seoul')::date - 6)::timestamp at time zone 'Asia/Seoul')
+      where enabled=true
+        and created_at >= (((now() at time zone 'Asia/Seoul')::date - 6)::timestamp at time zone 'Asia/Seoul')
         and created_at < (((now() at time zone 'Asia/Seoul')::date + 1)::timestamp at time zone 'Asia/Seoul')
       group by 1
     )
@@ -30,19 +31,20 @@ export async function getAdminStatistics(db: Pool): Promise<AdminStatistics> {
       count(*) filter (where is_recommended=false)::int "notRecommended",
       (select count(*)::int from public.restaurants where active=true) "activeRestaurants",
       (select count(*)::int from public.restaurants s where s.active=true
-        and exists (select 1 from public.review r where r.restaurant_id=s.id)) "reviewedRestaurants",
+        and exists (select 1 from public.review r where r.restaurant_id=s.id and r.enabled=true)) "reviewedRestaurants",
       (select coalesce(jsonb_agg(g), '[]'::jsonb) from
-        (select tags, count(*)::int count from public.review group by tags) g) "tagGroups",
+        (select tags, count(*)::int count from public.review where enabled=true group by tags) g) "tagGroups",
       (select jsonb_agg(jsonb_build_object('date', to_char(days.review_date, 'YYYY-MM-DD'), 'count', coalesce(daily.count, 0)) order by days.review_date)
         from days left join daily using (review_date)) "recentDays",
       (select coalesce(jsonb_agg(g order by g.count desc, g.name, g.id), '[]'::jsonb) from
         (select s.id, s.name, s.active, count(*)::int count
           from public.review r join public.restaurants s on s.id=r.restaurant_id
+          where r.enabled=true
           group by s.id, s.name, s.active order by count desc, s.name, s.id limit $1) g) "topRestaurants",
       (select coalesce(jsonb_agg(g order by g.rank, g.name, g.id), '[]'::jsonb)
         from (select id, name, rank, score, active, recommended, not_recommended
           from (${recommendationRankingSql(true)}) ranking) g) "topRecommendedRestaurants"
-    from public.review
+    from public.review where enabled=true
   `,
     [RANKING_LIMIT, RECOMMENDATION_WEIGHT, RECOMMENDATION_SMOOTHING],
   );

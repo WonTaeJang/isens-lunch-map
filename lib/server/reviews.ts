@@ -67,20 +67,20 @@ export async function listReviews(
     `select count(*)::int total,
     count(*) filter (where is_recommended=true)::int recommended,
     count(*) filter (where is_recommended=false)::int not_recommended
-    from public.review where restaurant_id=$1`,
+    from public.review where restaurant_id=$1 and enabled=true`,
     [restaurant],
   );
   const rows = await db.query<PagedReviewRow>(
     `select ${FIELDS}, coalesce(user_id=$2::uuid,false) is_mine,
     to_char(created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') cursor_time
-    from public.review where restaurant_id=$1
+    from public.review where restaurant_id=$1 and enabled=true
     and ($3::timestamptz is null or (created_at,id)<($3::timestamptz,$4::uuid))
     order by created_at desc,id desc limit $5`,
     [restaurant, user, cursor?.createdAt ?? null, cursor?.id ?? null, REVIEW_PAGE_SIZE + 1],
   );
   const mine = user
     ? await db.query<ReviewRow>(
-        `select ${FIELDS}, true is_mine from public.review where restaurant_id=$1 and user_id=$2 order by created_at desc,id desc limit 1`,
+        `select ${FIELDS}, true is_mine from public.review where restaurant_id=$1 and user_id=$2 and enabled=true order by created_at desc,id desc limit 1`,
         [restaurant, user],
       )
     : { rows: [] };
@@ -94,7 +94,7 @@ export async function listReviews(
 }
 export async function getOwnReview(db: Pool, id: string, user: string): Promise<Review | null> {
   const { rows } = await db.query<ReviewRow>(
-    `select ${FIELDS}, true is_mine from public.review where id=$1 and user_id=$2`,
+    `select ${FIELDS}, true is_mine from public.review where id=$1 and user_id=$2 and enabled=true`,
     [id, user],
   );
   return rows[0] ? present(rows[0]) : null;
@@ -115,7 +115,7 @@ export async function mutateReview(db: Pool, method: string, body: Record<string
         `${restaurant}:${user}`,
       ]);
       const exists = await client.query(
-        'select id from public.review where restaurant_id=$1 and user_id=$2 limit 1',
+        'select id from public.review where restaurant_id=$1 and user_id=$2 and enabled=true limit 1',
         [restaurant, user],
       );
       if (exists.rowCount)
@@ -145,14 +145,14 @@ export async function mutateReview(db: Pool, method: string, body: Record<string
     throw new ReviewError('리뷰를 새로 불러온 뒤 다시 시도해 주세요.');
   // Ownership is intentionally based on the supplied localStorage ID, not authentication.
   const condition =
-    "id=$1 and user_id=$2 and date_trunc('milliseconds',coalesce(updated_at,created_at))=$3::timestamptz";
+    "id=$1 and user_id=$2 and enabled=true and date_trunc('milliseconds',coalesce(updated_at,created_at))=$3::timestamptz";
   let result;
+  // Deletion is logical: the row (and its content) is kept and hidden with enabled=false.
   if (method === 'DELETE')
-    result = await db.query(`delete from public.review where ${condition} returning id`, [
-      id,
-      user,
-      version,
-    ]);
+    result = await db.query(
+      `update public.review set enabled=false where ${condition} returning id`,
+      [id, user, version],
+    );
   else {
     const input = reviewInput(body);
     result = await db.query(
@@ -174,7 +174,7 @@ export async function getReviewCounts(db: Pool): Promise<ReviewCounts> {
     select restaurant_id,
       count(*) filter (where is_recommended=true)::int recommended,
       count(*) filter (where is_recommended=false)::int not_recommended
-    from public.review group by restaurant_id
+    from public.review where enabled=true group by restaurant_id
   `);
   return Object.fromEntries(rows.map(({ restaurant_id, ...counts }) => [restaurant_id, counts]));
 }
@@ -187,10 +187,10 @@ export async function listUserReviews(
   const summary = await db.query<Omit<UserReviewPage, 'reviews' | 'hasMore' | 'nextCursor'>>(
     `with mine as (
     select distinct on (restaurant_id) restaurant_id, is_recommended
-    from public.review where user_id=$1
+    from public.review where user_id=$1 and enabled=true
     order by restaurant_id, created_at desc, id desc
   )
-  select (select count(*)::int from public.review where user_id=$1) total,
+  select (select count(*)::int from public.review where user_id=$1 and enabled=true) total,
     count(*)::int active_total,
     count(mine.restaurant_id)::int reviewed_active,
     count(*) filter (where mine.is_recommended=true)::int recommended_active,
@@ -205,7 +205,7 @@ export async function listUserReviews(
     to_char(r.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') cursor_time,
     s.name restaurant_name, s.active restaurant_active, s.latitude, s.longitude
     from public.review r join public.restaurants s on s.id=r.restaurant_id
-    where r.user_id=$1 and ($2::timestamptz is null or (coalesce(s.active,false),r.created_at,r.id)<($5::boolean,$2::timestamptz,$3::uuid))
+    where r.user_id=$1 and r.enabled=true and ($2::timestamptz is null or (coalesce(s.active,false),r.created_at,r.id)<($5::boolean,$2::timestamptz,$3::uuid))
     order by coalesce(s.active,false) desc,r.created_at desc,r.id desc limit $4`,
     [
       user,
@@ -232,7 +232,7 @@ export async function listUserReviews(
 
 export async function listReviewedRestaurantIds(db: Pool, user: string): Promise<string[]> {
   const { rows } = await db.query<{ restaurant_id: string }>(
-    'select distinct restaurant_id from public.review where user_id=$1',
+    'select distinct restaurant_id from public.review where user_id=$1 and enabled=true',
     [user],
   );
   return rows.map((row) => row.restaurant_id);

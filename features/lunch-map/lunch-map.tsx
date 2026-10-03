@@ -1,9 +1,9 @@
 'use client';
-import { getReviewCounts } from '@/features/reviews/review-model';
+import { getReviewCounts } from '@/lib/reviews/model';
 
 import LoadingSpinner from '@/components/ui/loading-spinner';
 
-import type { ReviewCounts } from '@/features/reviews/review-model';
+import type { ReviewCounts } from '@/lib/reviews/model';
 import Script from 'next/script';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';

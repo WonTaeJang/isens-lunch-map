@@ -2,12 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { Pool } from 'pg';
 import { getAdminStatistics } from '../lib/server/admin-statistics';
-import type { AdminStatistics } from '../features/admin/statistics-model';
+import type { AdminStatistics } from '../lib/admin/statistics-types';
 import {
   RANKING_LIMIT,
   RECOMMENDATION_WEIGHT,
   RECOMMENDATION_SMOOTHING,
-} from '../features/ranking/constants';
+} from '../lib/ranking/constants';
 
 test('statistics uses distinct authors, active restaurant coverage and counts tags once per review', async () => {
   let calls = 0;

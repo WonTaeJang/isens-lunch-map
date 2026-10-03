@@ -4,11 +4,11 @@ import {
   RANKING_LIMIT,
   RECOMMENDATION_WEIGHT,
   RECOMMENDATION_SMOOTHING,
-} from '@/features/ranking/constants';
+} from '@/lib/ranking/constants';
 import type { Pool } from 'pg';
-import type { AdminStatistics } from '@/features/admin/statistics-model';
-import { REVIEW_TAGS } from '@/features/reviews/constants';
-import { decodeTags } from '@/features/reviews/review-model';
+import type { AdminStatistics } from '@/lib/admin/statistics-types';
+import { REVIEW_TAGS } from '@/lib/reviews/constants';
+import { decodeTags } from '@/lib/reviews/model';
 
 type Summary = Omit<AdminStatistics, 'tags'> & { tagGroups: { tags: unknown; count: number }[] };
 

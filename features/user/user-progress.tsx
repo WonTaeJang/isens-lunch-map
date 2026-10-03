@@ -2,7 +2,7 @@ import ProgressBar from '@/components/ui/progress-bar';
 import LoadingStatus from '@/components/ui/loading-status';
 import styles from './user.module.css';
 import RecommendationBar from '@/features/reviews/recommendation-bar';
-import type { UserReviewStats } from '@/features/reviews/review-model';
+import type { UserReviewStats } from '@/lib/reviews/model';
 
 import { percent } from './progress-model';
 const PERCENT_FORMAT = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 1 });

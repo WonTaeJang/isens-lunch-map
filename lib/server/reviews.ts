@@ -11,9 +11,9 @@ import {
   type UserReview,
   type ReviewPage,
   type UserReviewPage,
-} from '@/features/reviews/review-model';
+} from '@/lib/reviews/model';
 
-import { REVIEW_PAGE_SIZE } from '@/features/reviews/constants';
+import { REVIEW_PAGE_SIZE } from '@/lib/reviews/constants';
 const FIELDS = 'id, user_name, content, is_recommended, tags, created_at, updated_at';
 type ReviewRow = {
   id: string;

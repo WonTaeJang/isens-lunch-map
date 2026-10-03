@@ -1,4 +1,4 @@
-import type { Review } from './review-model';
+import type { Review } from '@/lib/reviews/model';
 export function createReviewEditor(review: Review | null) {
   return {
     base: review,

@@ -57,5 +57,5 @@ export async function loadAdminStatistics(password: string, signal?: AbortSignal
   });
   const result = await response.json();
   if (!response.ok) throw new Error(result.error || '통계를 불러오지 못했습니다.');
-  return result as import('./statistics-model').AdminStatistics;
+  return result as import('@/lib/admin/statistics-types').AdminStatistics;
 }

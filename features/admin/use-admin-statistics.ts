@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { AdminStatistics } from './statistics-model';
+import type { AdminStatistics } from '@/lib/admin/statistics-types';
 import { loadAdminStatistics } from './admin-api';
 
 export default function useAdminStatistics(password: string) {

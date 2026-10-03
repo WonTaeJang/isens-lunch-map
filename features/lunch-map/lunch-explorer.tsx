@@ -3,7 +3,7 @@
 import { DiceIcon } from '@/components/ui/icons';
 
 import { useMemo, useRef, useState } from 'react';
-import type { ReviewCounts } from '@/features/reviews/review-model';
+import type { ReviewCounts } from '@/lib/reviews/model';
 import useReviewedRestaurants from '@/features/reviews/use-reviewed-restaurants';
 import ReviewPanel from '@/features/reviews/review-panel';
 import CountBadge from '@/components/ui/count-badge';

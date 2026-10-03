@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { Pool } from 'pg';
-import { reviewInput, decodeTags, ReviewError } from '../features/reviews/review-model';
+import { reviewInput, decodeTags, ReviewError } from '../lib/reviews/model';
 import { getReviewCounts, listReviews, mutateReview } from '../lib/server/reviews';
 
 const user = '11111111-1111-4111-8111-111111111111';
@@ -224,7 +224,7 @@ test('my reviews are scoped to one user, join restaurant data and include inacti
 });
 
 test('expanded tags preserve existing codes and allow mixed experiences for either recommendation', async () => {
-  const { REVIEW_TAGS, REVIEW_TAG_GROUPS } = await import('../features/reviews/constants');
+  const { REVIEW_TAGS, REVIEW_TAG_GROUPS } = await import('../lib/reviews/constants');
   assert.equal(REVIEW_TAGS.length, 16);
   assert.equal(new Set(REVIEW_TAGS.map((tag) => tag.value)).size, 16);
   assert.equal(REVIEW_TAG_GROUPS.flatMap((group) => group.tags).length, 16);

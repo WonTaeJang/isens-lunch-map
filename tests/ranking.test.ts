@@ -19,7 +19,7 @@ test('ranking includes only active restaurants with reviews, sorts by count and 
 });
 
 test('equal review counts share a rank and the next rank skips tied positions', async () => {
-  const { withReviewRanks } = await import('../features/ranking/ranking-model');
+  const { withReviewRanks } = await import('../lib/ranking/model');
   const rows = [9, 9, 6, 4, 4, 4, 1].map((reviews) => ({ reviews }));
   assert.deepEqual(
     withReviewRanks(rows).map((row) => row.rank),

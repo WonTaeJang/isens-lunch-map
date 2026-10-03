@@ -7,7 +7,7 @@ import {
   listReviewedRestaurantIds,
   mutateReview,
 } from '@/lib/server/reviews';
-import { ReviewError, uuid } from '@/features/reviews/review-model';
+import { ReviewError, uuid } from '@/lib/reviews/model';
 
 export const runtime = 'nodejs';
 function failure(error: unknown) {

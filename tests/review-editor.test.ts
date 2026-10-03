@@ -4,7 +4,7 @@ import {
   createReviewEditor,
   reviewEditorReducer as reduce,
 } from '../features/reviews/review-editor';
-import type { Review } from '../features/reviews/review-model';
+import type { Review } from '../lib/reviews/model';
 const review: Review = {
   id: 'one',
   user_name: 'name',

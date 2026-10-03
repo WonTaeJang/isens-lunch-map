@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import RankingList from '@/features/ranking/ranking-list';
-import { RANKING_LIMIT } from '@/features/ranking/constants';
+import { RANKING_LIMIT } from '@/lib/ranking/constants';
 import { connection } from 'next/server';
 import PageHeading from '@/components/ui/page-heading';
 import { getDb } from '@/lib/server/db';

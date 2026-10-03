@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { pickRestaurant } from '../features/lunch-map/random-model';
 import { filterRestaurants, DEFAULT_FILTERS } from '../features/lunch-map/filter-restaurants';
 import type { MapRestaurant } from '../lib/restaurant-types';
-import { getReviewCounts } from '../features/reviews/review-model';
+import { getReviewCounts } from '../lib/reviews/model';
 
 test('review counts distinguish unavailable data from a restaurant without reviews', () => {
   assert.equal(getReviewCounts(null, 'a'), null);

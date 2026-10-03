@@ -1,14 +1,13 @@
 import 'server-only';
 import type { Pool } from 'pg';
-import { withReviewRanks } from '@/features/ranking/ranking-model';
+import { withReviewRanks } from '@/lib/ranking/model';
 import {
   RANKING_LIMIT,
   RECOMMENDATION_WEIGHT,
   RECOMMENDATION_SMOOTHING,
-} from '@/features/ranking/constants';
+} from '@/lib/ranking/constants';
 
-export type { RankedRestaurant } from '@/features/ranking/ranking-model';
-import type { RankedRestaurant } from '@/features/ranking/ranking-model';
+import type { RankedRestaurant } from '@/lib/ranking/model';
 
 function restaurantCountsSql(includeInactive = false) {
   return `
@@ -36,7 +35,7 @@ export async function getRestaurantRanking(db: Pool): Promise<RankedRestaurant[]
 // 추천 점수 = (추천 × 가중치 1.5) / (추천 × 가중치 1.5 + 비추천 + 보정값 5) × 100.
 // 실제 추천률이 아닌 정렬용 보정 점수이며, 반올림 전 점수가 같으면 공동 순위입니다.
 // 관리자 통계에서는 점수와 산정 방식을 표시하며, 공개 랭킹에서는 표시하지 않습니다.
-// 정책값은 features/ranking/constants.ts에서 관리하고, 공개 랭킹 쿼리는 점수를 반환하지 않습니다.
+// 정책값은 lib/ranking/constants.ts에서 관리하고, 공개 랭킹 쿼리는 점수를 반환하지 않습니다.
 export function recommendationRankingSql(includeInactive = false) {
   return `
     with counts as (

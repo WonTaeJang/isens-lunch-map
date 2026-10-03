@@ -1,5 +1,5 @@
-import { getReviewCounts } from '@/features/reviews/review-model';
-import type { ReviewCounts } from '@/features/reviews/review-model';
+import { getReviewCounts } from '@/lib/reviews/model';
+import type { ReviewCounts } from '@/lib/reviews/model';
 import Link from 'next/link';
 import Button from '@/components/ui/button';
 import EmptyState from '@/components/ui/empty-state';

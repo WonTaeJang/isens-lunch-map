@@ -1,6 +1,6 @@
 import ReviewCountBadges from '@/features/reviews/review-counts';
-import { RECOMMENDATION_WEIGHT, RECOMMENDATION_SMOOTHING } from '@/features/ranking/constants';
-import type { AdminStatistics } from './statistics-model';
+import { RECOMMENDATION_WEIGHT, RECOMMENDATION_SMOOTHING } from '@/lib/ranking/constants';
+import type { AdminStatistics } from '@/lib/admin/statistics-types';
 import styles from './admin-statistics.module.css';
 
 export default function StatisticsDetails({ data }: { data: AdminStatistics }) {

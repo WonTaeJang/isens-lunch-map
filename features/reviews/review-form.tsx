@@ -4,8 +4,8 @@ import { useReducer, useState } from 'react';
 import { createReviewEditor, reviewEditorReducer } from './review-editor';
 import { ApiError } from './review-api';
 import Button from '@/components/ui/button';
-import { reviewInput, type Review } from './review-model';
-import { MAX_REVIEW_LENGTH, MAX_REVIEW_TAGS, REVIEW_TAG_GROUPS } from './constants';
+import { reviewInput, type Review } from '@/lib/reviews/model';
+import { MAX_REVIEW_LENGTH, MAX_REVIEW_TAGS, REVIEW_TAG_GROUPS } from '@/lib/reviews/constants';
 
 export default function ReviewForm({
   review,

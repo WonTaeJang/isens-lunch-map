@@ -10,8 +10,8 @@ import RecommendationBar from './recommendation-bar';
 import ReviewActionIcons from './review-action-icons';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from './review-form';
-import { type Review, type ReviewPage, type reviewInput } from './review-model';
-import { REVIEW_TAGS } from './constants';
+import { type Review, type ReviewPage, type reviewInput } from '@/lib/reviews/model';
+import { REVIEW_TAGS } from '@/lib/reviews/constants';
 
 import useLocalUser from '@/features/local-user/use-local-user';
 import type { LocalIdentity } from '@/features/local-user/local-user-store';

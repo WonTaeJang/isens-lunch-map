@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { reviewRequest } from './review-api';
-import { type ReviewCounts } from './review-model';
+import { type ReviewCounts } from '@/lib/reviews/model';
 import useLocalUser from '@/features/local-user/use-local-user';
 
 // Server counts are refreshed after review mutations; marker selections do not refetch.

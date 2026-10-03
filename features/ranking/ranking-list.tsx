@@ -2,7 +2,7 @@ import Link from 'next/link';
 import FavoriteButton from '@/features/favorites/favorite-button';
 import ReviewCountBadges from '@/features/reviews/review-counts';
 import { hasCoordinates } from '@/lib/coordinates';
-import type { RankedRestaurant } from './ranking-model';
+import type { RankedRestaurant } from '@/lib/ranking/model';
 import styles from './ranking.module.css';
 
 export default function RankingList({ rows }: { rows: RankedRestaurant[] }) {

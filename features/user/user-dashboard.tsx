@@ -22,8 +22,8 @@ import {
   type UserReview,
   type UserReviewPage,
   type reviewInput,
-} from '@/features/reviews/review-model';
-import { REVIEW_TAGS } from '@/features/reviews/constants';
+} from '@/lib/reviews/model';
+import { REVIEW_TAGS } from '@/lib/reviews/constants';
 import type { RestaurantRow } from '@/lib/restaurant-types';
 import { hasCoordinates } from '@/lib/coordinates';
 import { formatDistance } from '@/lib/distance';

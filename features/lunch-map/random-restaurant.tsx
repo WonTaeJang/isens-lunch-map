@@ -7,14 +7,14 @@ import Button from '@/components/ui/button';
 import ReviewCountBadges from '@/features/reviews/review-counts';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
 import FavoriteButton from '@/features/favorites/favorite-button';
-import type { ReviewCounts } from '@/features/reviews/review-model';
+import type { ReviewCounts } from '@/lib/reviews/model';
 import { hasCoordinates } from '@/lib/coordinates';
 import { formatDistance } from '@/lib/distance';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 import { filterRestaurants, type RestaurantFilters } from './filter-restaurants';
 import { DistanceFilter, FavoritesFilter } from './restaurant-filter-controls';
 import RestaurantSlot, { createSlotNames } from './restaurant-slot';
-import { getReviewCounts } from '@/features/reviews/review-model';
+import { getReviewCounts } from '@/lib/reviews/model';
 import { pickRestaurant } from './random-model';
 import styles from './random-restaurant.module.css';
 

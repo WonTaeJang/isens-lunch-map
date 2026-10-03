@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import { createReviewFeed } from './review-feed';
-import type { ReviewPage, UserReviewPage } from './review-model';
+import type { ReviewPage, UserReviewPage } from '@/lib/reviews/model';
 
 export default function useReviewFeed<P extends ReviewPage | UserReviewPage>(url: string | null) {
   const feed = useMemo(() => createReviewFeed<P>(url), [url]);

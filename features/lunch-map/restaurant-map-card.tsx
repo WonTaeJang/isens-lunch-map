@@ -3,7 +3,7 @@
 import { BookmarkIcon, DirectionsIcon } from '@/components/ui/icons';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
 import ReviewCountBadges from '@/features/reviews/review-counts';
-import type { ReviewCounts } from '@/features/reviews/review-model';
+import type { ReviewCounts } from '@/lib/reviews/model';
 import { useState } from 'react';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 import { formatDistance } from '@/lib/distance';

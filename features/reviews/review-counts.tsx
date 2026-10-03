@@ -1,5 +1,5 @@
 import RecommendationIcon from './recommendation-icon';
-import type { ReviewCounts } from './review-model';
+import type { ReviewCounts } from '@/lib/reviews/model';
 
 export default function ReviewCountBadges({
   counts,

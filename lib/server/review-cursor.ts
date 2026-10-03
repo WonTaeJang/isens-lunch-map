@@ -1,5 +1,5 @@
 import 'server-only';
-import { ReviewError, uuid } from '@/features/reviews/review-model';
+import { ReviewError, uuid } from '@/lib/reviews/model';
 
 export type ReviewCursor = {
   createdAt: string;

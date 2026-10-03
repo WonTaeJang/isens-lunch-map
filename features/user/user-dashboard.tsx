@@ -31,7 +31,7 @@ import { formatDistance } from '@/lib/distance';
 import useLocalUser from '@/features/local-user/use-local-user';
 import type { LocalIdentity } from '@/features/local-user/local-user-store';
 import useReviewFeed from '@/features/reviews/use-review-feed';
-type Props = { restaurants: RestaurantRow[]; failed: boolean };
+type Props = { restaurants: RestaurantRow[] };
 const DATE_FORMAT = new Intl.DateTimeFormat('ko-KR', {
   year: 'numeric',
   month: 'long',
@@ -59,7 +59,6 @@ export default function UserDashboard(props: Props) {
 }
 function UserDashboardContent({
   restaurants,
-  failed,
   identity,
   identityReady,
   identityError,
@@ -296,55 +295,46 @@ function UserDashboardContent({
               {favoriteError}
             </p>
           )}
-          {failed ? (
-            <p role="alert">
-              식당 목록을 불러오지 못했습니다.{' '}
-              <Button onClick={() => router.refresh()}>다시 불러오기</Button>
+          {!savedRestaurants.length && (
+            <p className="review-empty">
+              즐겨찾기한 식당이 없어요.{' '}
+              <Link href="/" className="text-link">
+                식당 찾아보기
+              </Link>
             </p>
-          ) : (
-            <>
-              {!savedRestaurants.length && (
-                <p className="review-empty">
-                  즐겨찾기한 식당이 없어요.{' '}
-                  <Link href="/" className="text-link">
-                    식당 찾아보기
-                  </Link>
-                </p>
-              )}
-              <ul className="review-list">
-                {savedRestaurants.map((row) => (
-                  <li
-                    className={`review-item${row.active ? '' : ` ${styles['user-restaurant-inactive']}`}`}
-                    key={row.id}
-                  >
-                    <div className="review-item-heading">
-                      <div className={styles['favorite-title']}>
-                        <FavoriteToggle
-                          restaurantName={row.name}
-                          selected={favorites.has(row.id)}
-                          className={styles['user-remove-favorite']}
-                          onClick={() => setFavoriteError(toggleStoredFavorite(row.id) ?? '')}
-                        />
-                        <h2>
-                          {row.active && hasCoordinates(row) ? (
-                            <Link href={mapLink(row.id)}>{row.name} ↗</Link>
-                          ) : (
-                            row.name
-                          )}
-                        </h2>
-                      </div>
-                      <span className="distance-badge">{formatDistance(row.distance)}</span>
-                    </div>
-                    <p className="description">
-                      {row.category} · {row.main_menu}
-                    </p>
-                    <p className="description">{row.address || '주소 확인 필요'}</p>
-                    {!row.active && <p className="subtle">현재 비활성 식당입니다.</p>}
-                  </li>
-                ))}
-              </ul>
-            </>
           )}
+          <ul className="review-list">
+            {savedRestaurants.map((row) => (
+              <li
+                className={`review-item${row.active ? '' : ` ${styles['user-restaurant-inactive']}`}`}
+                key={row.id}
+              >
+                <div className="review-item-heading">
+                  <div className={styles['favorite-title']}>
+                    <FavoriteToggle
+                      restaurantName={row.name}
+                      selected={favorites.has(row.id)}
+                      className={styles['user-remove-favorite']}
+                      onClick={() => setFavoriteError(toggleStoredFavorite(row.id) ?? '')}
+                    />
+                    <h2>
+                      {row.active && hasCoordinates(row) ? (
+                        <Link href={mapLink(row.id)}>{row.name} ↗</Link>
+                      ) : (
+                        row.name
+                      )}
+                    </h2>
+                  </div>
+                  <span className="distance-badge">{formatDistance(row.distance)}</span>
+                </div>
+                <p className="description">
+                  {row.category} · {row.main_menu}
+                </p>
+                <p className="description">{row.address || '주소 확인 필요'}</p>
+                {!row.active && <p className="subtle">현재 비활성 식당입니다.</p>}
+              </li>
+            ))}
+          </ul>
         </section>
       )}
       <p className={styles['user-storage-note']}>

@@ -1,7 +1,7 @@
 import { getDb } from '@/lib/server/db';
 import { getReviewCounts } from '@/lib/server/reviews';
 import { connection } from 'next/server';
-import { getRestaurants, type Restaurant } from '@/lib/server/restaurants';
+import { getRestaurants } from '@/lib/server/restaurants';
 import LunchExplorer from '@/features/lunch-map/lunch-explorer';
 import PageHeading from '@/components/ui/page-heading';
 
@@ -12,16 +12,15 @@ export default async function Home({
 }) {
   const requestedId = (await searchParams).restaurant;
   await connection();
-  let restaurants: Restaurant[] = [];
-  let failed = false;
-  const [restaurantResult, countResult] = await Promise.allSettled([
+  // Review counts are optional; a restaurant failure is handled by app/error.tsx.
+  const [allRestaurants, reviewCounts] = await Promise.all([
     getRestaurants(),
-    Promise.resolve().then(() => getReviewCounts(getDb())),
+    // getDb() can throw synchronously; keep it inside the promise chain.
+    Promise.resolve()
+      .then(() => getReviewCounts(getDb()))
+      .catch(() => null),
   ]);
-  if (restaurantResult.status === 'fulfilled')
-    restaurants = restaurantResult.value.filter((row) => row.active);
-  else failed = true;
-  const reviewCounts = countResult.status === 'fulfilled' ? countResult.value : null;
+  const restaurants = allRestaurants.filter((row) => row.active);
   const initialRestaurantId =
     typeof requestedId === 'string' && restaurants.some((row) => row.id === requestedId)
       ? requestedId
@@ -41,7 +40,6 @@ export default async function Home({
         key={initialRestaurantId ?? 'map'}
         initialRestaurantId={initialRestaurantId}
         reviewCounts={reviewCounts}
-        failed={failed}
         restaurants={restaurants.map(
           ({ id, name, category, main_menu, address, distance, latitude, longitude }) => ({
             id,

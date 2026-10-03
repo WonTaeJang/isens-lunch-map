@@ -1,20 +1,13 @@
 import { connection } from 'next/server';
 import UserDashboard from '@/features/user/user-dashboard';
-import { getRestaurants, type Restaurant } from '@/lib/server/restaurants';
+import { getRestaurants } from '@/lib/server/restaurants';
 
 export default async function UserPage() {
   await connection();
-  let restaurants: Restaurant[] = [];
-  let failed = false;
-  try {
-    restaurants = await getRestaurants();
-  } catch {
-    failed = true;
-  }
+  const restaurants = await getRestaurants();
   return (
     <main className="page-shell">
       <UserDashboard
-        failed={failed}
         restaurants={restaurants.map(
           ({ id, name, category, main_menu, address, distance, latitude, longitude, active }) => ({
             id,

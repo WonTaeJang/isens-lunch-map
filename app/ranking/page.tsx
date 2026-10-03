@@ -4,11 +4,7 @@ import { RANKING_LIMIT } from '@/features/ranking/constants';
 import { connection } from 'next/server';
 import PageHeading from '@/components/ui/page-heading';
 import { getDb } from '@/lib/server/db';
-import {
-  getRestaurantRanking,
-  getRecommendationRanking,
-  type RankedRestaurant,
-} from '@/lib/server/ranking';
+import { getRestaurantRanking, getRecommendationRanking } from '@/lib/server/ranking';
 import styles from '@/features/ranking/ranking.module.css';
 
 export const metadata = { title: '식당 랭킹 | Lunch Map' };
@@ -19,17 +15,10 @@ export default async function RankingPage({
   searchParams: Promise<{ type?: string | string[] }>;
 }) {
   const recommendation = (await searchParams).type === 'recommendation';
-  const rankingUrl = recommendation ? '/ranking?type=recommendation' : '/ranking';
   await connection();
-  let rows: RankedRestaurant[] = [];
-  let failed = false;
-  try {
-    rows = await (recommendation
-      ? getRecommendationRanking(getDb())
-      : getRestaurantRanking(getDb()));
-  } catch {
-    failed = true;
-  }
+  const rows = await (recommendation
+    ? getRecommendationRanking(getDb())
+    : getRestaurantRanking(getDb()));
   return (
     <main className="page-shell">
       <PageHeading
@@ -57,14 +46,7 @@ export default async function RankingPage({
             {recommendation ? '추천' : '리뷰'} TOP {RANKING_LIMIT}
           </h2>
         </div>
-        {failed ? (
-          <p role="alert" className={styles.empty}>
-            랭킹을 불러오지 못했습니다.{' '}
-            <Link href={rankingUrl} className="text-link">
-              다시 시도
-            </Link>
-          </p>
-        ) : rows.length ? (
+        {rows.length ? (
           <RankingList rows={rows} />
         ) : (
           <p className={styles.empty}>

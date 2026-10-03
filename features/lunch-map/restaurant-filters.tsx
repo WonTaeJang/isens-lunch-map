@@ -4,7 +4,6 @@ import { DistanceFilter, FavoritesFilter } from './restaurant-filter-controls';
 type Props = {
   query: string;
   maxDistance: number | null;
-  failed: boolean;
   favoritesOnly: boolean;
   onFavoritesOnlyChange: (value: boolean) => void;
   onQueryChange: (value: string) => void;
@@ -14,7 +13,6 @@ type Props = {
 export default function RestaurantFilters({
   query,
   maxDistance,
-  failed,
   favoritesOnly,
   onFavoritesOnlyChange,
   onQueryChange,
@@ -41,11 +39,6 @@ export default function RestaurantFilters({
         />
         <FavoritesFilter selected={favoritesOnly} onChange={onFavoritesOnlyChange} />
       </div>
-      {failed && (
-        <p className="subtle" role="alert">
-          목록 조회 실패
-        </p>
-      )}
     </div>
   );
 }

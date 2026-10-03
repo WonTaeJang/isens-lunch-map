@@ -11,7 +11,6 @@ type Props = {
   reviewCounts: ReviewCounts | null;
   rows: MapRestaurant[];
   total: number;
-  failed: boolean;
   favoritesOnly: boolean;
   favorites: ReadonlySet<string>;
   selectedId: string | null;
@@ -26,7 +25,6 @@ export default function RestaurantResults({
   reviewCounts,
   rows,
   total,
-  failed,
   favoritesOnly,
   favorites,
   selectedId,
@@ -35,12 +33,6 @@ export default function RestaurantResults({
   onReviews,
   onReset,
 }: Props) {
-  if (failed)
-    return (
-      <EmptyState role="alert">
-        식당 목록을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.
-      </EmptyState>
-    );
   if (!total)
     return (
       <EmptyState

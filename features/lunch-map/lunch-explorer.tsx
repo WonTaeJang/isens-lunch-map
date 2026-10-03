@@ -18,14 +18,12 @@ import type { MapRestaurant } from '@/lib/restaurant-types';
 
 export default function LunchExplorer({
   restaurants,
-  failed,
   reviewCounts,
   initialRestaurantId = null,
 }: {
   initialRestaurantId?: string | null;
   reviewCounts: ReviewCounts | null;
   restaurants: MapRestaurant[];
-  failed: boolean;
 }) {
   const reviewedIds = useReviewedRestaurants(reviewCounts);
   const [reviewRestaurant, setReviewRestaurant] = useState<MapRestaurant | null>(null);
@@ -72,13 +70,13 @@ export default function LunchExplorer({
       <aside className="restaurant-panel" aria-label="식당 목록">
         <div className="panel-heading">
           <h2>
-            점심 리스트 <CountBadge>{failed ? '—' : rows.length}</CountBadge>
+            점심 리스트 <CountBadge>{rows.length}</CountBadge>
           </h2>
           <div className="panel-heading-actions">
             <button
               className="random-pick-button"
               type="button"
-              disabled={failed || !restaurants.length}
+              disabled={!restaurants.length}
               onClick={() => setRandomOpen(true)}
             >
               <DiceIcon size={16} />
@@ -93,7 +91,6 @@ export default function LunchExplorer({
         )}
         <RestaurantFilters
           {...filters}
-          failed={failed}
           onQueryChange={(query) => changeFilters({ query })}
           onDistanceChange={(maxDistance) => changeFilters({ maxDistance })}
           onFavoritesOnlyChange={(favoritesOnly) => changeFilters({ favoritesOnly })}
@@ -103,7 +100,6 @@ export default function LunchExplorer({
           reviewCounts={reviewCounts}
           rows={rows}
           total={restaurants.length}
-          failed={failed}
           favoritesOnly={filters.favoritesOnly}
           favorites={favorites}
           selectedId={visibleSelectedId}

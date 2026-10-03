@@ -684,7 +684,7 @@ td .button {
   z-index: 10;
   bottom: 8px;
   right: 12px;
-  display: inline-flex;
+  /* display: inline-flex; */
   align-items: center;
   justify-content: center;
   box-sizing: border-box;

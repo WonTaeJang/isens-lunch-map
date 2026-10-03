@@ -10,7 +10,20 @@ import {
 import { ReviewError, uuid } from '@/lib/reviews/model';
 
 export const runtime = 'nodejs';
+// Log only PostgreSQL error metadata: messages can contain connection details or user input.
+function logUnexpected(error: unknown) {
+  const pg = (error ?? {}) as Record<string, unknown>;
+  const pick = (key: string) => (typeof pg[key] === 'string' ? pg[key] : undefined);
+  console.error('Review request failed', {
+    name: error instanceof Error ? error.name : typeof error,
+    code: pick('code'),
+    table: pick('table'),
+    column: pick('column'),
+    constraint: pick('constraint'),
+  });
+}
 function failure(error: unknown) {
+  if (!(error instanceof ReviewError)) logUnexpected(error);
   return Response.json(
     {
       error:

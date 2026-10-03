@@ -37,8 +37,9 @@ export function uuid(value: unknown): string {
 }
 export function reviewInput(value: Record<string, unknown>) {
   const content = typeof value.content === 'string' ? value.content.trim() : '';
-  if (!content || Array.from(content).length > MAX_REVIEW_LENGTH)
-    throw new ReviewError(`리뷰는 1~${MAX_REVIEW_LENGTH.toLocaleString()}자로 입력해 주세요.`);
+  // 내용은 선택 입력: 비워 두면 추천/비추천과 태그만 등록
+  if (Array.from(content).length > MAX_REVIEW_LENGTH)
+    throw new ReviewError(`리뷰는 ${MAX_REVIEW_LENGTH.toLocaleString()}자 이하로 입력해 주세요.`);
   if (typeof value.is_recommended !== 'boolean')
     throw new ReviewError('추천 또는 비추천을 선택해 주세요.');
   if (

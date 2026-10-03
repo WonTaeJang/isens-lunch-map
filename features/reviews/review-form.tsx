@@ -77,7 +77,7 @@ export default function ReviewForm({
           )}
           {latest && (
             <>
-              <p>현재 저장된 내용: {latest.content}</p>
+              <p>현재 저장된 내용: {latest.content || '없음'}</p>
               <p>
                 평가:{' '}
                 {latest.is_recommended === null
@@ -121,7 +121,9 @@ export default function ReviewForm({
           </button>
         </div>
       </fieldset>
-      <label htmlFor="review-content">리뷰 내용</label>
+      <label htmlFor="review-content">
+        리뷰 내용 <span className="subtle">선택</span>
+      </label>
       <textarea
         id="review-content"
         rows={5}
@@ -171,7 +173,7 @@ export default function ReviewForm({
         <Button
           type="submit"
           loading={busy || checking}
-          disabled={conflict || !length || length > MAX_REVIEW_LENGTH || recommended === null}
+          disabled={conflict || length > MAX_REVIEW_LENGTH || recommended === null}
         >
           {base ? '수정' : '등록'}
         </Button>

@@ -54,8 +54,9 @@ function database(
 test('review validation counts Unicode code points and accepts false recommendation', () => {
   assert.equal(reviewInput({ ...input, content: '🍚'.repeat(1000) }).content.length, 2000);
   assert.equal(reviewInput(input).is_recommended, false);
+  assert.equal(reviewInput({ ...input, content: ' '.repeat(4) }).content, '');
+  assert.equal(reviewInput({ ...input, content: undefined }).content, '');
   for (const change of [
-    { content: ' '.repeat(4) },
     { content: '가'.repeat(1001) },
     { is_recommended: null },
     { tags: ['tasty', 'tasty'] },

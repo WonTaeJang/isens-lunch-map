@@ -214,7 +214,7 @@ function ReviewPanelContent({
                 {DATE_FORMAT.format(new Date(review.updated_at ?? review.created_at))}
                 {review.updated_at && ' · 수정됨'}
               </p>
-              <p className="review-content">{review.content}</p>
+              {review.content && <p className="review-content">{review.content}</p>}
               <div className="review-tags">
                 {review.tags.map((tag) => (
                   <span key={tag}>{REVIEW_TAGS.find((option) => option.value === tag)?.label}</span>

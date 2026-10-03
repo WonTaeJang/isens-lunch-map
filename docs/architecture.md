@@ -216,15 +216,25 @@ from its dashboard. It is included in Next.js server deployment traces.
 PC에서는 오른쪽 패널, 모바일에서는 하단 패널을 사용합니다.
 
 - `features/reviews/review-panel.tsx`: 조회·저장 상태와 리뷰 패널
-- `features/reviews/review-form.tsx`: 추천/비추천, 내용, 태그 입력
+- `features/reviews/review-form.tsx`: 추천/비추천, 내용(선택), 태그 입력
 - `lib/reviews/model.ts`, `lib/reviews/constants.ts`: 공통 타입과 입력 검증, 고정 태그 목록
 - `features/reviews/use-review-actions.ts`: 리뷰 패널과 사용자 페이지가 공유하는 수정·삭제 흐름
 - `app/api/reviews/route.ts`: GET/POST/PATCH/DELETE 요청 처리
 - `lib/server/reviews.ts`: PostgreSQL 조회와 트랜잭션, 작성자 비교
 
-내용은 앞뒤 공백을 제거한 뒤 1~1,000자로 제한하고, 태그는 최대 3개 선택합니다.
+추천/비추천은 필수입니다. 내용은 선택 입력으로, 앞뒤 공백을 제거한 뒤 1,000자 이하로 제한하고, 태그는 최대 3개 선택합니다.
 현재 `public.review.tags`는 `text` 타입이므로 `["tasty","good_value"]`처럼
-태그 코드 배열을 JSON 문자열로 저장합니다. 추가 테이블 변경은 필요하지 않습니다.
+태그 코드 배열을 JSON 문자열로 저장합니다. 태그 저장에는 추가 테이블 변경이 필요하지 않습니다.
+내용을 비우면 `''`로 저장하므로, `public.review`의 `review_content_length_check` 제약은
+빈 문자열을 허용해야 합니다. 1자 이상을 요구하던 기존 제약은 아래 SQL로 변경했습니다.
+
+```sql
+alter table public.review drop constraint review_content_length_check;
+alter table public.review add constraint review_content_length_check check (
+  char_length(content) <= 1000 and (content = '' or content ~ '[^[:space:]]')
+);
+```
+
 최초 작성은 `updated_at = NULL`, 수정 시에는 서버 시간을 저장해 `수정됨`을 표시합니다.
 리뷰는 최신순 20개씩 조회하며 추천·비추천 집계를 함께 표시합니다.
 

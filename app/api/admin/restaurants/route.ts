@@ -1,4 +1,4 @@
-import { getRestaurants } from '@/lib/server/restaurants';
+import { getRestaurantRows, getRestaurants } from '@/lib/server/restaurants';
 import { getDb } from '@/lib/server/db';
 import { ImportError, parseWorkbook } from '@/lib/server/import/parser';
 import {
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       throw new ImportError('3MB 이하의 .xlsx 파일만 지원합니다. .xls는 .xlsx로 저장해 주세요.');
     const buffer = Buffer.from(await file.arrayBuffer());
     const incoming = await parseWorkbook(buffer);
-    const existing = await getRestaurants();
+    const existing = await getRestaurants(getDb());
     const rev = revision(existing);
     if (form.get('mode') === 'preview') {
       return Response.json({
@@ -103,25 +103,7 @@ export async function GET(request: Request) {
     );
   }
   try {
-    const restaurants = await getRestaurants();
-    return Response.json(
-      {
-        restaurants: restaurants.map(
-          ({ id, name, category, main_menu, address, active, distance, latitude, longitude }) => ({
-            id,
-            name,
-            category,
-            main_menu,
-            address,
-            active,
-            distance,
-            latitude,
-            longitude,
-          }),
-        ),
-      },
-      { headers },
-    );
+    return Response.json({ restaurants: await getRestaurantRows(getDb()) }, { headers });
   } catch {
     return Response.json(
       { error: '식당 목록을 불러오지 못했습니다. 다시 시도해 주세요.' },

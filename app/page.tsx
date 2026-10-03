@@ -1,7 +1,7 @@
 import { getDb } from '@/lib/server/db';
 import { getReviewCounts } from '@/lib/server/reviews';
 import { connection } from 'next/server';
-import { getRestaurants } from '@/lib/server/restaurants';
+import { getActiveMapRestaurants } from '@/lib/server/restaurants';
 import LunchExplorer from '@/features/lunch-map/lunch-explorer';
 import PageHeading from '@/components/ui/page-heading';
 
@@ -12,15 +12,12 @@ export default async function Home({
 }) {
   const requestedId = (await searchParams).restaurant;
   await connection();
+  const db = getDb();
   // Review counts are optional; a restaurant failure is handled by app/error.tsx.
-  const [allRestaurants, reviewCounts] = await Promise.all([
-    getRestaurants(),
-    // getDb() can throw synchronously; keep it inside the promise chain.
-    Promise.resolve()
-      .then(() => getReviewCounts(getDb()))
-      .catch(() => null),
+  const [restaurants, reviewCounts] = await Promise.all([
+    getActiveMapRestaurants(db),
+    getReviewCounts(db).catch(() => null),
   ]);
-  const restaurants = allRestaurants.filter((row) => row.active);
   const initialRestaurantId =
     typeof requestedId === 'string' && restaurants.some((row) => row.id === requestedId)
       ? requestedId
@@ -40,18 +37,7 @@ export default async function Home({
         key={initialRestaurantId ?? 'map'}
         initialRestaurantId={initialRestaurantId}
         reviewCounts={reviewCounts}
-        restaurants={restaurants.map(
-          ({ id, name, category, main_menu, address, distance, latitude, longitude }) => ({
-            id,
-            name,
-            category,
-            main_menu,
-            address,
-            distance,
-            latitude,
-            longitude,
-          }),
-        )}
+        restaurants={restaurants}
       />
       <footer className="page-footer">
         <span>좋은 점심이 만드는 작은 즐거움.</span>

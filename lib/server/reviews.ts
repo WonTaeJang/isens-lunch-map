@@ -13,7 +13,7 @@ import {
   type UserReviewPage,
 } from '@/lib/reviews/model';
 
-import { REVIEW_PAGE_SIZE } from '@/lib/reviews/constants';
+import { DAILY_REVIEW_LIMIT, REVIEW_PAGE_SIZE } from '@/lib/reviews/constants';
 const FIELDS = 'id, user_name, content, is_recommended, tags, created_at, updated_at';
 type ReviewRow = {
   id: string;
@@ -110,9 +110,10 @@ export async function mutateReview(db: Pool, method: string, body: Record<string
     const client = await db.connect();
     try {
       await client.query('begin');
-      // Serialize API submissions for the same author/restaurant without changing the existing schema.
+      // Serialize all submissions by the same author so the duplicate and daily-limit checks
+      // cannot both pass for concurrent requests.
       await client.query('select pg_advisory_xact_lock(hashtextextended($1,0))', [
-        `${restaurant}:${user}`,
+        `review:${user}`,
       ]);
       const exists = await client.query(
         'select id from public.review where restaurant_id=$1 and user_id=$2 and enabled=true limit 1',
@@ -125,6 +126,18 @@ export async function mutateReview(db: Pool, method: string, body: Record<string
         [restaurant],
       );
       if (!available.rowCount) throw new ReviewError('현재 리뷰를 작성할 수 없는 식당입니다.', 404);
+      // Deleted (enabled=false) reviews still count, so deleting never frees a daily slot.
+      const today = await client.query<{ count: number }>(
+        `select count(*)::int count from public.review
+        where user_id=$1
+          and created_at >= ((now() at time zone 'Asia/Seoul')::date::timestamp at time zone 'Asia/Seoul')`,
+        [user],
+      );
+      if ((today.rows[0]?.count ?? 0) >= DAILY_REVIEW_LIMIT)
+        throw new ReviewError(
+          `하루에 작성할 수 있는 리뷰 ${DAILY_REVIEW_LIMIT}개를 모두 사용했어요.`,
+          429,
+        );
       await client.query(
         `insert into public.review (restaurant_id,user_id,user_name,content,is_recommended,tags,updated_at)
         values ($1,$2,$3,$4,$5,$6,null)`,

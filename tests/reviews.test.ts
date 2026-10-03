@@ -69,7 +69,7 @@ test('review validation counts Unicode code points and accepts false recommendat
   assert.deepEqual(decodeTags(null), []);
   assert.deepEqual(decodeTags('invalid'), []);
 });
-test('new reviews lock author/restaurant, preserve false, store text JSON and start without updated_at', async () => {
+test('new reviews lock per author, preserve false, store text JSON and start without updated_at', async () => {
   const mock = database((sql) => ({
     rows: [],
     rowCount: sql.includes('public.restaurants') ? 1 : 0,
@@ -87,12 +87,39 @@ test('new reviews lock author/restaurant, preserve false, store text JSON and st
   assert.match(insert.sql, /\$6,null/);
   assert.ok(
     mock.calls.some(
-      (call) =>
-        call.sql.includes('pg_advisory_xact_lock') && call.values[0] === `${restaurant}:${user}`,
+      (call) => call.sql.includes('pg_advisory_xact_lock') && call.values[0] === `review:${user}`,
     ),
   );
   assert.equal(mock.calls.at(-1)?.sql, 'commit');
   assert.equal(mock.released(), true);
+});
+test('daily limit counts every review created today, including deleted ones', async () => {
+  for (const [count, allowed] of [
+    [4, true],
+    [5, false],
+  ] as const) {
+    const mock = database((sql) => {
+      if (sql.includes('count(*)')) return { rows: [{ count }], rowCount: 1 };
+      return { rows: [], rowCount: sql.includes('public.restaurants') ? 1 : 0 };
+    });
+    const saving = mutateReview(mock.db, 'POST', input);
+    if (allowed) await saving;
+    else
+      await assert.rejects(
+        saving,
+        (error: unknown) => error instanceof ReviewError && error.status === 429,
+      );
+    const counted = mock.calls.find((call) => call.sql.includes('count(*)'))!;
+    assert.deepEqual(counted.values, [user]);
+    assert.doesNotMatch(counted.sql, /enabled/);
+    assert.match(counted.sql, /Asia\/Seoul/);
+    assert.equal(
+      mock.calls.some((call) => call.sql.startsWith('insert')),
+      allowed,
+    );
+    assert.equal(mock.calls.at(-1)?.sql, allowed ? 'commit' : 'rollback');
+    assert.equal(mock.released(), true);
+  }
 });
 test('duplicate check ignores deleted reviews so the same restaurant can be reviewed again', async () => {
   const mock = database((sql) => ({

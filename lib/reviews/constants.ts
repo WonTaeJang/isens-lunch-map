@@ -30,3 +30,5 @@ export const REVIEW_TAG_GROUPS = TAG_GROUP_LABELS.map((group) => ({
   tags: REVIEW_TAGS.filter((tag) => tag.group === group.value),
 }));
 export const MAX_REVIEW_LENGTH = 1000;
+// 한국 시간 하루에 새로 작성할 수 있는 리뷰 수 (삭제한 리뷰도 포함해서 셈)
+export const DAILY_REVIEW_LIMIT = 5;

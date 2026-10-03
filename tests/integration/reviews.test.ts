@@ -121,6 +121,42 @@ test(
       // The same restaurant can be reviewed again after deleting.
       await mutateReview(db, 'POST', { ...input, content: 'rewritten' });
       assert.equal((await listReviews(db, restaurant, newUser)).mine?.content, 'rewritten');
+
+      // Daily limit: five reviews per Korean calendar day, deleted ones included,
+      // yesterday's reviews excluded, and concurrent requests cannot exceed it.
+      const limited = crypto.randomUUID();
+      const places = Array.from({ length: 7 }, () => crypto.randomUUID());
+      for (const place of places)
+        await db.query("insert into public.restaurants(id,name,active) values ($1,'p',true)", [
+          place,
+        ]);
+      const write = (place: string) =>
+        mutateReview(db, 'POST', { ...input, user_id: limited, restaurant_id: place });
+      await db.query(
+        `insert into public.review(restaurant_id,user_id,content,is_recommended,created_at)
+        values ($1,$2,'yesterday',true,
+          ((now() at time zone 'Asia/Seoul')::date::timestamp at time zone 'Asia/Seoul') - interval '1 second')`,
+        [places[6], limited],
+      );
+      for (const place of places.slice(0, 3)) await write(place);
+      const deleted = (await listReviews(db, places[0], limited)).mine!;
+      await mutateReview(db, 'DELETE', {
+        ...input,
+        user_id: limited,
+        id: deleted.id,
+        version: deleted.created_at,
+      });
+      await write(places[3]);
+      const racing = await Promise.allSettled([write(places[4]), write(places[5])]);
+      assert.equal(racing.filter((result) => result.status === 'fulfilled').length, 1);
+      const rejected = racing.find((result) => result.status === 'rejected');
+      assert.equal((rejected as PromiseRejectedResult).reason.status, 429);
+      const today = await db.query(
+        `select count(*)::int count from public.review where user_id=$1
+        and created_at >= ((now() at time zone 'Asia/Seoul')::date::timestamp at time zone 'Asia/Seoul')`,
+        [limited],
+      );
+      assert.equal(today.rows[0].count, 5);
     } finally {
       await pool.query(`drop schema if exists "${schema}" cascade`);
       await pool.end();

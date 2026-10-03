@@ -5,20 +5,18 @@ import Button from '@/components/ui/button';
 import LoadingStatus from '@/components/ui/loading-status';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import ReviewDeleteDialog from './review-delete-dialog';
-import { reviewRequest as request } from './review-api';
+import { ApiError, reviewRequest as request } from './review-api';
 import RecommendationBar from './recommendation-bar';
 import ReviewActionIcons from './review-action-icons';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from './review-form';
 import { type Review, type ReviewPage, type reviewInput } from '@/lib/reviews/model';
-import { REVIEW_TAGS } from '@/lib/reviews/constants';
+import { DAILY_REVIEW_LIMIT, REVIEW_TAGS } from '@/lib/reviews/constants';
 
 import useLocalUser from '@/features/local-user/use-local-user';
 import type { LocalIdentity } from '@/features/local-user/local-user-store';
 import useReviewFeed from './use-review-feed';
 import useReviewActions from './use-review-actions';
-import { getDailyReviewCount, recordDailyReview } from './daily-review-limit';
-import { DAILY_REVIEW_LIMIT } from './constants';
 type Props = { restaurant: { id: string; name: string }; onClose: () => void };
 const DATE_FORMAT = new Intl.DateTimeFormat('ko-KR', {
   year: 'numeric',
@@ -64,25 +62,19 @@ function ReviewPanelContent({
     element?.showModal();
     return () => element?.close();
   }, []);
-  function canCreateReview() {
-    try {
-      if (getDailyReviewCount(window.localStorage) < DAILY_REVIEW_LIMIT) return true;
-      setLimitReached(true);
-    } catch {
-      setError('리뷰 작성 횟수를 확인할 수 없습니다. 브라우저 저장소 설정을 확인해 주세요.');
-    }
-    return false;
-  }
   async function save(input: ReturnType<typeof reviewInput>, base: Review | null) {
     if (base) return actions.mutate('PATCH', base, input);
-    if (!identity || !canCreateReview()) return;
-    await actions.mutate('POST', null, input, () => {
-      try {
-        recordDailyReview(window.localStorage);
-      } catch {
-        setError('리뷰는 등록되었지만 작성 횟수를 저장하지 못했습니다.');
+    if (!identity) return;
+    try {
+      await actions.mutate('POST', null, input);
+    } catch (cause) {
+      // The server enforces the daily limit; keep the form (and the draft) open behind the dialog.
+      if (cause instanceof ApiError && cause.status === 429) {
+        setLimitReached(true);
+        return;
       }
-    });
+      throw cause;
+    }
   }
   async function reloadEditing() {
     if (!identity) return null;
@@ -167,13 +159,7 @@ function ReviewPanelContent({
           </div>
         )}
         {page && identity && !editing && (
-          <Button
-            disabled={busy || loading}
-            onClick={() => {
-              if (!page.mine && !canCreateReview()) return;
-              actions.startEdit(page.mine ?? 'new');
-            }}
-          >
+          <Button disabled={busy || loading} onClick={() => actions.startEdit(page.mine ?? 'new')}>
             {page.mine ? '내 리뷰 수정' : '리뷰 작성'}
           </Button>
         )}

@@ -196,7 +196,7 @@ function UserDashboardContent({
                 <div className="review-item-heading">
                   <h2>
                     {review.restaurant_active && hasCoordinates(review) ? (
-                      <Link href={mapLink(review.restaurant_id)}>{review.restaurant_name} ↗</Link>
+                      <Link href={mapLink(review.restaurant_id)}>{review.restaurant_name}</Link>
                     ) : (
                       review.restaurant_name
                     )}
@@ -284,7 +284,7 @@ function UserDashboardContent({
                     />
                     <h2>
                       {row.active && hasCoordinates(row) ? (
-                        <Link href={mapLink(row.id)}>{row.name} ↗</Link>
+                        <Link href={mapLink(row.id)}>{row.name}</Link>
                       ) : (
                         row.name
                       )}

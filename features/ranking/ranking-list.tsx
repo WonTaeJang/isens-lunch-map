@@ -21,7 +21,7 @@ export default function RankingList({
               <h3>
                 {hasCoordinates(row) ? (
                   <Link href={`/?restaurant=${encodeURIComponent(row.id)}#lunch-map-layout`}>
-                    {row.name} ↗
+                    {row.name}
                   </Link>
                 ) : (
                   row.name

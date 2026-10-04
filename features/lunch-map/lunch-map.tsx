@@ -10,7 +10,12 @@ import { createPortal } from 'react-dom';
 import Button from '@/components/ui/button';
 import useTodayLunchAction from '@/features/lunch-visits/use-today-lunch-action';
 import RestaurantMapCard from './restaurant-map-card';
-import { createMapController, OFFICE_ADDRESS, type MapController } from './map-controller';
+import {
+  createMapController,
+  OFFICE_ADDRESS,
+  OFFICE_POSITION,
+  type MapController,
+} from './map-controller';
 import labelStyles from './map-label.module.css';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 
@@ -57,35 +62,23 @@ export default function LunchMap({
     const maps = window.kakao?.maps;
     if (sdkReady && maps) {
       maps.load(() => {
-        if (disposed) return;
+        window.clearTimeout(timer);
+        if (disposed || !containerRef.current) return;
         try {
-          new maps.services.Geocoder().addressSearch(OFFICE_ADDRESS, (results, status) => {
-            if (disposed || !containerRef.current) return;
-            window.clearTimeout(timer);
-            const location = results[0];
-            if (status !== maps.services.Status.OK || !location) {
-              setError(true);
-              return;
-            }
-            try {
-              const center = new maps.LatLng(Number(location.y), Number(location.x));
-              const map = new maps.Map(containerRef.current, { center, level: 4 });
-              map.setMaxLevel(5);
-              map.addControl(new maps.ZoomControl(), maps.ControlPosition.RIGHT);
-              instance = createMapController(
-                maps,
-                map,
-                center,
-                containerRef.current,
-                (id) => onSelectRef.current(id),
-                { anchor: labelStyles.anchor, label: labelStyles.label },
-              );
-              setController(instance);
-              setError(false);
-            } catch {
-              setError(true);
-            }
-          });
+          const center = new maps.LatLng(OFFICE_POSITION.latitude, OFFICE_POSITION.longitude);
+          const map = new maps.Map(containerRef.current, { center, level: 4 });
+          map.setMaxLevel(5);
+          map.addControl(new maps.ZoomControl(), maps.ControlPosition.RIGHT);
+          instance = createMapController(
+            maps,
+            map,
+            center,
+            containerRef.current,
+            (id) => onSelectRef.current(id),
+            { anchor: labelStyles.anchor, label: labelStyles.label },
+          );
+          setController(instance);
+          setError(false);
         } catch {
           setError(true);
         }
@@ -176,7 +169,7 @@ export default function LunchMap({
       {APP_KEY && (
         <Script
           id="kakao-maps-sdk"
-          src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(APP_KEY)}&autoload=false&libraries=services`}
+          src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(APP_KEY)}&autoload=false`}
           strategy="afterInteractive"
           onReady={() => setSdkReady(true)}
           onError={() => setError(true)}

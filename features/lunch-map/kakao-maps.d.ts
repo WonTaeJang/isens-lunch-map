@@ -44,15 +44,6 @@ export type KakaoMaps = {
     addListener: (target: object, type: string, callback: () => void) => void;
     removeListener: (target: object, type: string, callback: () => void) => void;
   };
-  services: {
-    Status: { OK: string };
-    Geocoder: new () => {
-      addressSearch: (
-        address: string,
-        callback: (results: { x: string; y: string }[], status: string) => void,
-      ) => void;
-    };
-  };
 };
 
 declare global {

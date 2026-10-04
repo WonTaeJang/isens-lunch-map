@@ -3,6 +3,9 @@ import type { MapRestaurant } from '@/lib/restaurant-types';
 import { hasCoordinates } from '@/lib/coordinates';
 
 export const OFFICE_ADDRESS = '서울 서초구 반포대로28길 43';
+// Kakao geocoding result for OFFICE_ADDRESS (아이센스빌딩). Fixed so the map skips a lookup on
+// every visit; update both together if the office moves.
+export const OFFICE_POSITION = { latitude: 37.4913646856421, longitude: 127.010698629502 };
 // Restaurant names are shown above markers only at this zoom level or closer (1 = closest).
 const NAME_LABEL_MAX_LEVEL = 2;
 type MapInstance = InstanceType<KakaoMaps['Map']>;

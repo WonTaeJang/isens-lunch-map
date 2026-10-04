@@ -10,15 +10,21 @@ import {
 
 import type { LunchRankedRestaurant, RankedRestaurant } from '@/lib/ranking/model';
 
+// Review, recommend and not-recommend counts per restaurant. Deleted (enabled=false) reviews never count.
+const REVIEW_COUNTS_SQL = `
+  select restaurant_id, count(*)::int reviews,
+    count(*) filter (where is_recommended=true)::int recommended,
+    count(*) filter (where is_recommended=false)::int not_recommended
+  from public.review where enabled=true
+  group by restaurant_id
+`;
+
 function restaurantCountsSql(includeInactive = false) {
   return `
-select s.id, s.name, s.category, s.latitude, s.longitude, s.active,
-      count(*)::int reviews,
-      count(*) filter (where r.is_recommended=true)::int recommended,
-      count(*) filter (where r.is_recommended=false)::int not_recommended
-    from public.restaurants s join public.review r on r.restaurant_id=s.id and r.enabled=true
+    select s.id, s.name, s.category, s.latitude, s.longitude, s.active,
+      c.reviews, c.recommended, c.not_recommended
+    from public.restaurants s join (${REVIEW_COUNTS_SQL}) c on c.restaurant_id=s.id
     ${includeInactive ? '' : 'where s.active=true'}
-    group by s.id, s.name, s.category, s.latitude, s.longitude, s.active
 `;
 }
 
@@ -91,13 +97,7 @@ export async function getLunchRanking(db: Pool): Promise<LunchRankedRestaurant[]
       coalesce(r.reviews, 0) reviews, coalesce(r.recommended, 0) recommended,
       coalesce(r.not_recommended, 0) not_recommended
     from (${lunchRankingSql()}) l
-    left join (
-      select restaurant_id, count(*)::int reviews,
-        count(*) filter (where is_recommended=true)::int recommended,
-        count(*) filter (where is_recommended=false)::int not_recommended
-      from public.review where enabled=true
-      group by restaurant_id
-    ) r on r.restaurant_id=l.id
+    left join (${REVIEW_COUNTS_SQL}) r on r.restaurant_id=l.id
     order by l.position
   `,
     [RANKING_LIMIT, LUNCH_RANKING_DAYS],

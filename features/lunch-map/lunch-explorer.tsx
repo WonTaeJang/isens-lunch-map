@@ -15,6 +15,7 @@ import useFavorites from '@/features/favorites/use-favorites';
 import { toggleStoredFavorite } from '@/features/favorites/favorites-store';
 import { DEFAULT_FILTERS, filterRestaurants } from './filter-restaurants';
 import type { MapRestaurant } from '@/lib/restaurant-types';
+import { LUNCH_MAP_ANCHOR } from '@/lib/map-link';
 
 export default function LunchExplorer({
   restaurants,
@@ -66,7 +67,7 @@ export default function LunchExplorer({
   }
 
   return (
-    <div ref={layoutRef} className="map-layout" id="lunch-map-layout">
+    <div ref={layoutRef} className="map-layout" id={LUNCH_MAP_ANCHOR}>
       <aside className="restaurant-panel" aria-label="식당 목록">
         <div className="panel-heading">
           <h2>

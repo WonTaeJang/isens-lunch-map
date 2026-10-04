@@ -7,7 +7,8 @@ test('ranking includes only active restaurants with reviews, sorts by count and 
   const db = {
     query: async (sql: string, values: unknown[]) => {
       assert.match(sql, /where s.active=true/);
-      assert.match(sql, /join public.review r on r.restaurant_id=s.id and r.enabled=true/);
+      assert.match(sql, /from public\.review where enabled=true\s+group by restaurant_id/);
+      assert.match(sql, /\) c on c\.restaurant_id=s\.id/);
       assert.match(sql, /order by reviews desc, s.name, s.id/);
       assert.match(sql, /limit \$1/);
       assert.deepEqual(values, [10]);

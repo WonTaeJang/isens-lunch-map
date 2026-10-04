@@ -2,6 +2,7 @@ import Link from 'next/link';
 import FavoriteButton from '@/features/favorites/favorite-button';
 import ReviewCountBadges from '@/features/reviews/review-counts';
 import { hasCoordinates } from '@/lib/coordinates';
+import { restaurantMapHref } from '@/lib/map-link';
 import type { LunchRankedRestaurant, RankedRestaurant } from '@/lib/ranking/model';
 import styles from './ranking.module.css';
 
@@ -20,9 +21,7 @@ export default function RankingList({
               <FavoriteButton restaurantId={row.id} restaurantName={row.name} />
               <h3>
                 {hasCoordinates(row) ? (
-                  <Link href={`/?restaurant=${encodeURIComponent(row.id)}#lunch-map-layout`}>
-                    {row.name}
-                  </Link>
+                  <Link href={restaurantMapHref(row.id)}>{row.name}</Link>
                 ) : (
                   row.name
                 )}

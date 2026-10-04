@@ -20,6 +20,7 @@ import type { UserReview, UserReviewPage } from '@/lib/reviews/model';
 import { REVIEW_TAGS } from '@/lib/reviews/constants';
 import type { RestaurantRow } from '@/lib/restaurant-types';
 import { hasCoordinates } from '@/lib/coordinates';
+import { restaurantMapHref } from '@/lib/map-link';
 import { formatDistance } from '@/lib/distance';
 
 import useLocalUser from '@/features/local-user/use-local-user';
@@ -37,9 +38,6 @@ const TABS = [
   { value: 'reviews', label: '내 리뷰' },
   { value: 'favorites', label: '즐겨찾기' },
 ] as const;
-function mapLink(id: string) {
-  return `/?restaurant=${encodeURIComponent(id)}#lunch-map-layout`;
-}
 
 export default function UserDashboard(props: Props) {
   const user = useLocalUser();
@@ -196,7 +194,9 @@ function UserDashboardContent({
                 <div className="review-item-heading">
                   <h2>
                     {review.restaurant_active && hasCoordinates(review) ? (
-                      <Link href={mapLink(review.restaurant_id)}>{review.restaurant_name}</Link>
+                      <Link href={restaurantMapHref(review.restaurant_id)}>
+                        {review.restaurant_name}
+                      </Link>
                     ) : (
                       review.restaurant_name
                     )}
@@ -284,7 +284,7 @@ function UserDashboardContent({
                     />
                     <h2>
                       {row.active && hasCoordinates(row) ? (
-                        <Link href={mapLink(row.id)}>{row.name}</Link>
+                        <Link href={restaurantMapHref(row.id)}>{row.name}</Link>
                       ) : (
                         row.name
                       )}

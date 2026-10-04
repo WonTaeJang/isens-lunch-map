@@ -8,22 +8,11 @@ import {
   mutateReview,
 } from '@/lib/server/reviews';
 import { ReviewError, uuid } from '@/lib/reviews/model';
+import { logUnexpectedError, readJsonObject } from '@/lib/server/api-route';
 
 export const runtime = 'nodejs';
-// Log only PostgreSQL error metadata: messages can contain connection details or user input.
-function logUnexpected(error: unknown) {
-  const pg = (error ?? {}) as Record<string, unknown>;
-  const pick = (key: string) => (typeof pg[key] === 'string' ? pg[key] : undefined);
-  console.error('Review request failed', {
-    name: error instanceof Error ? error.name : typeof error,
-    code: pick('code'),
-    table: pick('table'),
-    column: pick('column'),
-    constraint: pick('constraint'),
-  });
-}
 function failure(error: unknown) {
-  if (!(error instanceof ReviewError)) logUnexpected(error);
+  if (!(error instanceof ReviewError)) logUnexpectedError('Review request failed', error);
   return Response.json(
     {
       error:
@@ -71,19 +60,11 @@ export async function GET(request: Request) {
 }
 async function write(request: Request) {
   try {
-    const origin = request.headers.get('origin');
-    if (origin && origin !== new URL(request.url).origin)
-      throw new ReviewError('허용되지 않은 요청입니다.', 403);
-    const text = await request.text();
-    if (text.length > 16000) throw new ReviewError('입력 내용이 너무 큽니다.', 413);
-    let body;
-    try {
-      body = JSON.parse(text);
-    } catch {
-      throw new ReviewError('요청 형식이 올바르지 않습니다.');
-    }
-    if (!body || typeof body !== 'object' || Array.isArray(body))
-      throw new ReviewError('요청 형식이 올바르지 않습니다.');
+    const body = await readJsonObject(
+      request,
+      16000,
+      (message, status) => new ReviewError(message, status),
+    );
     await mutateReview(getDb(), request.method, body);
     return Response.json({ ok: true }, { status: request.method === 'POST' ? 201 : 200 });
   } catch (error) {

@@ -4,6 +4,7 @@ import type { Pool } from 'pg';
 import { getAdminStatistics } from '../lib/server/admin-statistics';
 import type { AdminStatistics } from '../lib/admin/statistics-types';
 import {
+  LUNCH_RANKING_DAYS,
   RANKING_LIMIT,
   RECOMMENDATION_WEIGHT,
   RECOMMENDATION_SMOOTHING,
@@ -45,7 +46,16 @@ test('statistics uses distinct authors, active restaurant coverage and counts ta
       assert.match(sql, /from days left join daily using \(review_date\)/);
       assert.match(sql, /coalesce\(daily.count, 0\)/);
       assert.match(sql, /order by count desc, s.name, s.id limit \$1/);
-      assert.deepEqual(values, [RANKING_LIMIT, RECOMMENDATION_WEIGHT, RECOMMENDATION_SMOOTHING]);
+      assert.deepEqual(values, [
+        RANKING_LIMIT,
+        RECOMMENDATION_WEIGHT,
+        RECOMMENDATION_SMOOTHING,
+        LUNCH_RANKING_DAYS,
+      ]);
+      // Lunch TOP 10: last 30 Korean days, inactive restaurants included, shown in rank order.
+      assert.match(sql, /::date - \$4::int/);
+      assert.match(sql, /join public\.restaurants s on s\.id=v\.restaurant_id\n/);
+      assert.match(sql, /order by position\), '\[\]'::jsonb\)/);
       assert.match(
         sql,
         /from \(select id, name, rank, score, active, recommended, not_recommended\s+from/,
@@ -62,6 +72,9 @@ test('statistics uses distinct authors, active restaurant coverage and counts ta
             recentDays: [{ date: '2026-10-01', count: 4 }],
             topRestaurants: [{ id: 'top', name: '인기 식당', active: false, count: 4 }],
             topRecommendedRestaurants,
+            topLunchRestaurants: [
+              { id: 'lunch', name: '점심 식당', active: false, visits: 3, people: 2, rank: 1 },
+            ],
             tagGroups: [
               { tags: '["tasty","tasty","waiting"]', count: 2 },
               { tags: '["tasty","unknown"]', count: 1 },
@@ -86,6 +99,9 @@ test('statistics uses distinct authors, active restaurant coverage and counts ta
   assert.equal(result.recentDays[0].count, 4);
   assert.equal(result.topRestaurants[0].active, false);
   assert.deepEqual(result.topRecommendedRestaurants, topRecommendedRestaurants);
+  assert.deepEqual(result.topLunchRestaurants, [
+    { id: 'lunch', name: '점심 식당', active: false, visits: 3, people: 2, rank: 1 },
+  ]);
 });
 
 test('empty statistics includes zero counts for all supported tags', async () => {
@@ -102,6 +118,7 @@ test('empty statistics includes zero counts for all supported tags', async () =>
           recentDays: [],
           topRestaurants: [],
           topRecommendedRestaurants: [],
+          topLunchRestaurants: [],
           tagGroups: [],
         },
       ],

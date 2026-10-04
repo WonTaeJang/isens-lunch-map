@@ -16,5 +16,14 @@ export type AdminStatistics = {
     recommended: number;
     not_recommended: number;
   }[];
+  /** Today's-lunch picks over the last LUNCH_RANKING_DAYS days, inactive restaurants included. */
+  topLunchRestaurants: {
+    id: string;
+    name: string;
+    active: boolean | null;
+    visits: number;
+    people: number;
+    rank: number;
+  }[];
   tags: { value: string; label: string; count: number }[];
 };

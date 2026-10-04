@@ -1,6 +1,7 @@
 import 'server-only';
-import { recommendationRankingSql } from './ranking';
+import { lunchRankingSql, recommendationRankingSql } from './ranking';
 import {
+  LUNCH_RANKING_DAYS,
   RANKING_LIMIT,
   RECOMMENDATION_WEIGHT,
   RECOMMENDATION_SMOOTHING,
@@ -43,10 +44,13 @@ export async function getAdminStatistics(db: Pool): Promise<AdminStatistics> {
           group by s.id, s.name, s.active order by count desc, s.name, s.id limit $1) g) "topRestaurants",
       (select coalesce(jsonb_agg(g order by g.rank, g.name, g.id), '[]'::jsonb)
         from (select id, name, rank, score, active, recommended, not_recommended
-          from (${recommendationRankingSql(true)}) ranking) g) "topRecommendedRestaurants"
+          from (${recommendationRankingSql(true)}) ranking) g) "topRecommendedRestaurants",
+      (select coalesce(jsonb_agg(jsonb_build_object('id', id, 'name', name, 'active', active,
+          'visits', visits, 'people', people, 'rank', rank) order by position), '[]'::jsonb)
+        from (${lunchRankingSql(true, { limit: '$1', days: '$4' })}) lunch) "topLunchRestaurants"
     from public.review where enabled=true
   `,
-    [RANKING_LIMIT, RECOMMENDATION_WEIGHT, RECOMMENDATION_SMOOTHING],
+    [RANKING_LIMIT, RECOMMENDATION_WEIGHT, RECOMMENDATION_SMOOTHING, LUNCH_RANKING_DAYS],
   );
   const { tagGroups, ...summary } = rows[0];
   const counts = new Map<string, number>();

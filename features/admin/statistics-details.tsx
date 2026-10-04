@@ -1,5 +1,9 @@
 import ReviewCountBadges from '@/features/reviews/review-counts';
-import { RECOMMENDATION_WEIGHT, RECOMMENDATION_SMOOTHING } from '@/lib/ranking/constants';
+import {
+  LUNCH_RANKING_DAYS,
+  RECOMMENDATION_WEIGHT,
+  RECOMMENDATION_SMOOTHING,
+} from '@/lib/ranking/constants';
 import type { AdminStatistics } from '@/lib/admin/statistics-types';
 import styles from './admin-statistics.module.css';
 
@@ -79,6 +83,31 @@ export default function StatisticsDetails({ data }: { data: AdminStatistics }) {
           </ol>
         ) : (
           <p className="subtle">아직 추천·비추천 평가가 있는 식당이 없습니다.</p>
+        )}
+      </div>
+      <div className={styles.section}>
+        <h3>오늘의 점심 TOP 10</h3>
+        <p className="subtle">
+          최근 {LUNCH_RANKING_DAYS}일 · 한국 시간 · 오늘 포함 · 비활성 식당 포함 · 같은 횟수는 고른
+          사람 수 순
+        </p>
+        {data.topLunchRestaurants.length ? (
+          <ol className={styles.ranking}>
+            {data.topLunchRestaurants.map((row) => (
+              <li key={row.id} value={row.rank}>
+                <span className={styles.rank}>{row.rank}</span>
+                <span className={styles.restaurantName}>
+                  {row.name}
+                  {!row.active && <small> · 비활성</small>}
+                </span>
+                <strong>
+                  {row.visits.toLocaleString()}회 · {row.people.toLocaleString()}명
+                </strong>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="subtle">최근 {LUNCH_RANKING_DAYS}일 동안 오늘의 점심 기록이 없습니다.</p>
         )}
       </div>
     </>

@@ -4,7 +4,7 @@ import { hasCoordinates } from '@/lib/coordinates';
 
 export const OFFICE_ADDRESS = '서울 서초구 반포대로28길 43';
 // Restaurant names are shown above markers only at this zoom level or closer (1 = closest).
-export const NAME_LABEL_MAX_LEVEL = 2;
+const NAME_LABEL_MAX_LEVEL = 2;
 type MapInstance = InstanceType<KakaoMaps['Map']>;
 type Overlay = InstanceType<KakaoMaps['CustomOverlay']>;
 type MarkerEntry = {

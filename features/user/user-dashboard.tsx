@@ -266,7 +266,6 @@ function UserDashboardContent({
                     <FavoriteToggle
                       restaurantName={row.name}
                       selected={favorites.has(row.id)}
-                      className={styles['user-remove-favorite']}
                       onClick={() => setFavoriteError(toggleStoredFavorite(row.id) ?? '')}
                     />
                     <h2>

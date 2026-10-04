@@ -73,20 +73,6 @@
 .user-records :global(.description) {
   margin-top: 8px;
 }
-.user-remove-favorite {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: 1px solid #e8c44d;
-  border-radius: 4px;
-  background: #fff9df;
-  color: #866500;
-  cursor: pointer;
-}
 .user-storage-note {
   margin-top: 20px;
   color: #75818a;

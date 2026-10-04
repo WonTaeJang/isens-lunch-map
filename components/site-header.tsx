@@ -29,8 +29,8 @@ export default function SiteHeader() {
         <Link
           href="/ranking"
           className="admin-nav-icon"
-          aria-label="식당 랭킹"
-          title="식당 랭킹"
+          aria-label="점심 랭킹"
+          title="점심 랭킹"
           aria-current={pathname === '/ranking' ? 'page' : undefined}
         >
           <TrophyIcon size={22} />

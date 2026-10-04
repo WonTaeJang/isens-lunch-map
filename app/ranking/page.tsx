@@ -12,7 +12,7 @@ import {
 } from '@/lib/server/ranking';
 import styles from '@/features/ranking/ranking.module.css';
 
-export const metadata = { title: '식당 랭킹 | Lunch Map' };
+export const metadata = { title: '점심 랭킹 | Lunch Map' };
 
 const TABS = [
   { type: 'lunch', href: '/ranking', title: '점심' },
@@ -40,8 +40,8 @@ export default async function RankingPage({
     <main className="page-shell">
       <PageHeading
         eyebrow="LUNCH MAP RANKING"
-        title="식당 랭킹"
-        description="점심 기록과 리뷰, 추천으로 인기 식당을 만나보세요."
+        title="점심 랭킹"
+        description="인기 식당을 만나보세요."
       />
       <nav className={styles.tabs} aria-label="랭킹 분류">
         {TABS.map((tab) => (

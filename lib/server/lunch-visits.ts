@@ -1,11 +1,6 @@
 import 'server-only';
 import type { Pool } from 'pg';
-import {
-  LUNCH_VISIT_PAGE_SIZE,
-  LunchVisitError,
-  type LunchVisit,
-  type LunchVisitPage,
-} from '@/lib/lunch-visits/model';
+import { LunchVisitError, type LunchVisit } from '@/lib/lunch-visits/model';
 
 // The visit date is always decided by the server in Korean time, never by the browser.
 const TODAY = "(now() at time zone 'Asia/Seoul')::date";
@@ -75,24 +70,6 @@ export async function cancelTodayVisit(db: Pool, user: string): Promise<boolean>
     [user],
   );
   return Boolean(result.rowCount);
-}
-
-export async function listUserVisits(
-  db: Pool,
-  user: string,
-  before: string | null = null,
-): Promise<LunchVisitPage> {
-  const { rows } = await db.query<VisitRow>(
-    `select ${FIELDS}
-    from public.lunch_visit v join public.restaurants s on s.id = v.restaurant_id
-    where v.user_id = $1 and ($2::date is null or v.visit_date < $2::date)
-    order by v.visit_date desc
-    limit $3`,
-    [user, before, LUNCH_VISIT_PAGE_SIZE + 1],
-  );
-  const visits = rows.slice(0, LUNCH_VISIT_PAGE_SIZE).map(present);
-  const hasMore = rows.length > LUNCH_VISIT_PAGE_SIZE;
-  return { visits, hasMore, nextCursor: hasMore ? (visits.at(-1)?.visit_date ?? null) : null };
 }
 
 /** Every visit in one month (YYYY-MM), oldest first. At most one per day, so at most 31 rows. */

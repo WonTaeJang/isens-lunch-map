@@ -3,16 +3,9 @@ import {
   cancelTodayVisit,
   getTodayVisit,
   listMonthVisits,
-  listUserVisits,
   setTodayVisit,
 } from '@/lib/server/lunch-visits';
-import {
-  LunchVisitError,
-  visitCursor,
-  visitMonth,
-  visitUserName,
-  visitUuid,
-} from '@/lib/lunch-visits/model';
+import { LunchVisitError, visitMonth, visitUserName, visitUuid } from '@/lib/lunch-visits/model';
 import { logUnexpectedError, readJsonObject } from '@/lib/server/api-route';
 
 export const runtime = 'nodejs';
@@ -35,7 +28,6 @@ function failure(error: unknown) {
 /**
  * GET ?user_id=… → today's visit
  * GET ?user_id=…&scope=month&month=YYYY-MM → that month's visits
- * GET ?user_id=…&scope=history[&cursor=YYYY-MM-DD] → history pages
  */
 export async function GET(request: Request) {
   try {
@@ -44,10 +36,6 @@ export async function GET(request: Request) {
     if (params.get('scope') === 'month') {
       const visits = await listMonthVisits(getDb(), user, visitMonth(params.get('month')));
       return Response.json({ visits }, { headers: PRIVATE });
-    }
-    if (params.get('scope') === 'history') {
-      const cursor = visitCursor(params.get('cursor'));
-      return Response.json(await listUserVisits(getDb(), user, cursor), { headers: PRIVATE });
     }
     return Response.json({ visit: await getTodayVisit(getDb(), user) }, { headers: PRIVATE });
   } catch (error) {

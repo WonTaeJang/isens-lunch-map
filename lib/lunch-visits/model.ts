@@ -1,6 +1,4 @@
 // 오늘의 점심 기록: 서버 검증과 화면에서 함께 쓰는 타입과 입력 검증
-export const LUNCH_VISIT_PAGE_SIZE = 30;
-
 export type LunchVisit = {
   id: string;
   restaurant_id: string;
@@ -11,11 +9,6 @@ export type LunchVisit = {
   visit_date: string;
   created_at: string;
   updated_at: string | null;
-};
-export type LunchVisitPage = {
-  visits: LunchVisit[];
-  hasMore: boolean;
-  nextCursor: string | null;
 };
 
 export class LunchVisitError extends Error {
@@ -38,13 +31,6 @@ export function visitUserName(value: unknown): string {
   if (!name || Array.from(name).length > 60)
     throw new LunchVisitError('닉네임 정보를 확인해 주세요.');
   return name;
-}
-/** History pages continue from the last returned visit_date (exclusive). */
-export function visitCursor(raw: string | null): string | null {
-  if (raw === null || raw === '') return null;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw) || !Number.isFinite(Date.parse(`${raw}T00:00:00Z`)))
-    throw new LunchVisitError('페이지를 새로고침한 뒤 다시 조회해 주세요.');
-  return raw;
 }
 
 /** Calendar month, YYYY-MM (Korean dates). */

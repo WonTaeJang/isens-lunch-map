@@ -5,7 +5,6 @@ import {
   koreanToday,
   LunchVisitError,
   todayLunchAction,
-  visitCursor,
   visitMonth,
   visitUserName,
   visitUuid,
@@ -51,18 +50,14 @@ const json = (method: string, body: unknown, headers: Record<string, string> = {
     body: typeof body === 'string' ? body : JSON.stringify(body),
   });
 
-test('input validation accepts UUIDs, 1-60 char names and YYYY-MM-DD cursors only', () => {
+test('input validation accepts UUIDs, and 1-60 char names only', () => {
   assert.equal(visitUuid(user.toUpperCase()), user);
   assert.equal(visitUserName('  즐거운만두#0123 '), '즐거운만두#0123');
-  assert.equal(visitCursor(null), null);
-  assert.equal(visitCursor('2026-10-03'), '2026-10-03');
   for (const fail of [
     () => visitUuid('nope'),
     () => visitUuid(undefined),
     () => visitUserName('   '),
     () => visitUserName('가'.repeat(61)),
-    () => visitCursor('2026-13-45'),
-    () => visitCursor('yesterday'),
   ])
     assert.throws(fail, LunchVisitError);
 });
@@ -76,7 +71,6 @@ test('invalid requests are rejected before any DB access', async () => {
       for (const query of [
         '',
         'user_id=bad',
-        `user_id=${user}&scope=history&cursor=broken`,
         `user_id=${user}&scope=month`,
         `user_id=${user}&scope=month&month=2026-13`,
       ]) {
@@ -170,29 +164,6 @@ test("cancel deletes only the caller's visit for today and is idempotent", async
       },
     );
   }
-});
-
-test('history pages newest first and continues from the last visit date', async () => {
-  const days = Array.from({ length: 31 }, (_, i) => ({
-    ...row,
-    visit_date: `2026-09-${String(30 - i).padStart(2, '0')}`.replace('-09-00', '-08-31'),
-  }));
-  await withDb(
-    () => ({ rows: days }),
-    async (calls) => {
-      const response = await GET(
-        new Request(
-          `http://localhost/api/lunch-visits?user_id=${user}&scope=history&cursor=2026-10-01`,
-        ),
-      );
-      const page = await response.json();
-      assert.equal(page.visits.length, 30);
-      assert.equal(page.hasMore, true);
-      assert.equal(page.nextCursor, page.visits[29].visit_date);
-      assert.match(calls[0].sql, /order by v\.visit_date desc/);
-      assert.deepEqual(calls[0].values, [user, '2026-10-01', 31]);
-    },
-  );
 });
 
 test('month scope returns that Korean month oldest first, owner-scoped', async () => {

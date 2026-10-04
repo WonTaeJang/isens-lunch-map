@@ -5,14 +5,13 @@ import {
   cancelTodayVisit,
   getTodayVisit,
   listMonthVisits,
-  listUserVisits,
   setTodayVisit,
 } from '../../lib/server/lunch-visits';
 
 // Only an explicitly configured test DB is used; production tables are never touched.
 const connectionString = process.env.REVIEW_TEST_DATABASE_URL;
 test(
-  'PostgreSQL: one lunch per Korean day, replace, cancel, history and concurrent checks',
+  'PostgreSQL: one lunch per Korean day, replace, cancel, concurrent checks and months',
   { skip: !connectionString },
   async () => {
     const pool = new Pool({ connectionString, max: 4 });
@@ -93,24 +92,6 @@ test(
         [racer],
       );
       assert.equal(raced.rows[0].n, 1);
-
-      // History: newest first, 30 per page, past days kept, other users excluded.
-      for (let day = 1; day <= 31; day++)
-        await db.query(
-          `insert into public.lunch_visit (user_id, restaurant_id, visit_date)
-          values ($1, $2, (now() at time zone 'Asia/Seoul')::date - $3::int)`,
-          [user, day % 2 ? first : inactive, day],
-        );
-      const page = await listUserVisits(db, user);
-      assert.equal(page.visits.length, 30);
-      assert.equal(page.visits[0].visit_date, today.rows[0].d);
-      assert.equal(page.hasMore, true);
-      assert.ok(page.visits.some((visit) => visit.restaurant_active === false));
-      const rest = await listUserVisits(db, user, page.nextCursor);
-      assert.equal(rest.visits.length, 2);
-      assert.equal(rest.hasMore, false);
-      assert.equal(rest.nextCursor, null);
-      assert.ok(rest.visits.every((visit) => visit.visit_date < page.nextCursor!));
 
       // Month: only that calendar month, oldest first, inactive restaurants kept.
       const monthUser = crypto.randomUUID();

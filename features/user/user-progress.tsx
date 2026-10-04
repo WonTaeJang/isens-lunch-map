@@ -52,12 +52,8 @@ export default function UserProgress({
           recommended={stats.recommended_active}
           notRecommended={stats.not_recommended_active}
         />
-        {!rated && (
-          <p className="subtle">
-            {stats.reviewed_active
-              ? '추천·비추천 평가가 아직 없어요.'
-              : '아직 리뷰를 작성한 활성 식당이 없어요.'}
-          </p>
+        {!rated && stats.reviewed_active > 0 && (
+          <p className="subtle">추천·비추천 평가가 아직 없어요.</p>
         )}
       </div>
     </section>

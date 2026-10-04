@@ -1,6 +1,8 @@
 'use client';
 
-import { BookmarkIcon, DirectionsIcon } from '@/components/ui/icons';
+import { DirectionsIcon } from '@/components/ui/icons';
+import FavoriteToggle from '@/features/favorites/favorite-toggle';
+import TodayLunchButton from '@/features/lunch-visits/today-lunch-button';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
 import ReviewCountBadges from '@/features/reviews/review-counts';
 import type { ReviewCounts } from '@/lib/reviews/model';
@@ -13,9 +15,15 @@ type Props = {
   restaurant: MapRestaurant;
   counts: ReviewCounts[string] | null;
   favorite: boolean;
+  /** This restaurant is today's lunch. */
+  todayLunch: boolean;
+  todayLunchBusy: boolean;
   onReviews: () => void;
   onClose: () => void;
   onFavorite: () => string | null;
+  /** Records, changes (after confirmation) or cancels today's lunch and shows the result in a
+   * snackbar. `chosen` is true only when this restaurant just became today's lunch. */
+  onTodayLunch: () => Promise<{ chosen: boolean }>;
 };
 
 export default function RestaurantMapCard({
@@ -23,9 +31,12 @@ export default function RestaurantMapCard({
   counts,
   restaurant,
   favorite,
+  todayLunch,
+  todayLunchBusy,
   onClose,
   onFavorite,
   onReviews,
+  onTodayLunch,
 }: Props) {
   const [message, setMessage] = useState<string | null>(null);
   return (
@@ -58,17 +69,18 @@ export default function RestaurantMapCard({
         <p className="restaurant-card-menu">대표메뉴 · {restaurant.main_menu || '정보 없음'}</p>
       </div>
       <div className="restaurant-card-actions">
-        <button
-          type="button"
-          className="restaurant-card-favorite restaurant-card-icon"
-          title={favorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
-          aria-pressed={favorite}
-          aria-label={`${restaurant.name} 즐겨찾기 ${favorite ? '해제' : '추가'}`}
+        <FavoriteToggle
+          restaurantName={restaurant.name}
+          selected={favorite}
           onClick={() => setMessage(onFavorite())}
-        >
-          <BookmarkIcon />
-        </button>
-        <button type="button" className="restaurant-card-favorite" onClick={onReviews}>
+        />
+        <TodayLunchButton
+          restaurantName={restaurant.name}
+          active={todayLunch}
+          busy={todayLunchBusy}
+          onToggle={onTodayLunch}
+        />
+        <button type="button" className="restaurant-card-review" onClick={onReviews}>
           리뷰 보기
         </button>
         <a

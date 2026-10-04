@@ -501,12 +501,6 @@ td .button {
   font-size: 12px;
 }
 
-.restaurant-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-}
 .distance-badge {
   flex-shrink: 0;
   border-radius: 6px;
@@ -549,31 +543,57 @@ td .button {
 .restaurant-list-item {
   position: relative;
 }
-.restaurant-list-item .restaurant-title {
-  padding-left: 34px;
-}
-.restaurant-list-favorite {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 1;
-  display: inline-flex;
+/* List item: name / [distance] category · menu ... votes / address / actions ... reviews */
+.restaurant-list-meta {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
+  gap: 8px;
+  margin-top: 8px;
+  color: #727e86;
+  font-size: 12px;
+}
+.restaurant-list-menu {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.restaurant-list-meta .restaurant-review-counts {
+  flex: none;
+  flex-wrap: nowrap;
+}
+.restaurant-list-address {
+  margin-top: 6px;
+  color: #727e86;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.restaurant-list-actions {
+  display: flex;
+  gap: 6px;
+}
+.today-lunch-badge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
   border-radius: 6px;
-  color: #627078;
-  cursor: pointer;
+  background: #e6f3f0;
+  color: #127e70;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
 }
-.restaurant-list-favorite:hover {
-  background: #f3f5f4;
-}
-.restaurant-list-favorite[aria-pressed='true'] {
-  color: #866500;
-}
-.restaurant-list-favorite[aria-pressed='true'] svg {
-  fill: #ffd338;
+.restaurant-list-item[data-today-lunch]::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 1;
+  width: 3px;
+  background: #127e70;
+  pointer-events: none;
 }
 .favorite-error {
   padding: 12px 20px;
@@ -794,33 +814,25 @@ td .button {
 }
 .restaurant-card-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 18px;
+  gap: 6px;
+  margin-top: 12px;
 }
-.restaurant-card-favorite,
+.restaurant-card-review,
 .restaurant-card-directions {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 40px;
+  min-height: 32px;
   border-radius: 4px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
-.restaurant-card-favorite {
+.restaurant-card-review {
   flex: 1;
   border: 1px solid #d8dee1;
   color: #627078;
-}
-.restaurant-card-favorite[aria-pressed='true'] {
-  color: #866500;
-  border-color: #e8c44d;
-  background: #fff9df;
-}
-.restaurant-card-favorite[aria-pressed='true'] svg {
-  fill: #ffd338;
 }
 .restaurant-card-directions {
   padding: 0 18px;
@@ -828,9 +840,9 @@ td .button {
   color: white;
 }
 .restaurant-card-actions .restaurant-card-icon {
-  flex: 0 0 40px;
-  width: 40px;
-  height: 40px;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
   padding: 0;
 }
 .restaurant-card-status {

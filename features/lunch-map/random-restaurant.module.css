@@ -75,31 +75,37 @@
 .resultTitle {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 6px;
   color: #26343d;
   overflow-wrap: anywhere;
   text-align: left;
 }
-.resultCounts {
-  flex-shrink: 0;
-}
-.resultName {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1;
+.resultTitle strong {
   min-width: 0;
-}
-.resultTitle > :last-child {
-  flex-shrink: 0;
 }
 .resultMeta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   text-align: left;
+}
+.resultMenu {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: #727e86;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.resultCounts {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.resultActions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
 }
 .actions {
   display: flex;

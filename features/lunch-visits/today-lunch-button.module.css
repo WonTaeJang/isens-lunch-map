@@ -1,0 +1,172 @@
+.button {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 32px;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #d8dee1;
+  border-radius: 4px;
+  background: white;
+  color: #627078;
+  cursor: pointer;
+}
+.large {
+  flex-basis: 40px;
+  width: 40px;
+  height: 40px;
+}
+/* The sparks are laid out for 32px; scale them so they still start at the 40px edge. */
+.large[data-burst]::before {
+  transform: scale(1.25);
+}
+.button[aria-pressed='true'] {
+  border-color: #127e70;
+  background: #127e70;
+  color: white;
+}
+.button[aria-busy='true'] {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+/*
+ * Check-in burst: a ring and six sparks spread from the button while the icon pops.
+ * Two alternating names restart the animation on every successful check.
+ */
+.button[data-burst]::after,
+.button[data-burst]::before {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+.button[data-burst]::after {
+  inset: -1px;
+  border: 2px solid #127e70;
+  border-radius: inherit;
+}
+.button[data-burst]::before {
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+}
+.button[data-burst='odd']::after {
+  animation: lunch-ring-a 0.6s ease-out forwards;
+}
+.button[data-burst='even']::after {
+  animation: lunch-ring-b 0.6s ease-out forwards;
+}
+.button[data-burst='odd']::before {
+  animation: lunch-sparks-a 0.55s ease-out forwards;
+}
+.button[data-burst='even']::before {
+  animation: lunch-sparks-b 0.55s ease-out forwards;
+}
+.button[data-burst='odd'] svg {
+  animation: lunch-pop-a 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.button[data-burst='even'] svg {
+  animation: lunch-pop-b 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes lunch-ring-a {
+  from {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+@keyframes lunch-ring-b {
+  from {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+@keyframes lunch-sparks-a {
+  0% {
+    opacity: 0;
+    box-shadow:
+      0px -15px #127e70,
+      13px -8px #f2a93b,
+      13px 8px #127e70,
+      0px 15px #f2a93b,
+      -13px 8px #127e70,
+      -13px -8px #f2a93b;
+  }
+  15% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    box-shadow:
+      0px -30px #127e70,
+      26px -15px #f2a93b,
+      26px 15px #127e70,
+      0px 30px #f2a93b,
+      -26px 15px #127e70,
+      -26px -15px #f2a93b;
+  }
+}
+@keyframes lunch-sparks-b {
+  0% {
+    opacity: 0;
+    box-shadow:
+      0px -15px #127e70,
+      13px -8px #f2a93b,
+      13px 8px #127e70,
+      0px 15px #f2a93b,
+      -13px 8px #127e70,
+      -13px -8px #f2a93b;
+  }
+  15% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    box-shadow:
+      0px -30px #127e70,
+      26px -15px #f2a93b,
+      26px 15px #127e70,
+      0px 30px #f2a93b,
+      -26px 15px #127e70,
+      -26px -15px #f2a93b;
+  }
+}
+@keyframes lunch-pop-a {
+  40% {
+    transform: scale(1.3);
+  }
+}
+@keyframes lunch-pop-b {
+  40% {
+    transform: scale(1.3);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .button[data-burst]::after,
+  .button[data-burst]::before,
+  .button[data-burst] svg {
+    animation: none;
+    opacity: 0;
+  }
+  .button[data-burst] svg {
+    opacity: 1;
+  }
+}

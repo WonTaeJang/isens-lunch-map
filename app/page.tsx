@@ -4,6 +4,7 @@ import { connection } from 'next/server';
 import { getActiveMapRestaurants } from '@/lib/server/restaurants';
 import LunchExplorer from '@/features/lunch-map/lunch-explorer';
 import PageHeading from '@/components/ui/page-heading';
+import TodayLunchTitle from '@/features/lunch-visits/today-lunch-title';
 
 export default async function Home({
   searchParams,
@@ -26,11 +27,7 @@ export default async function Home({
     <main className="page-shell">
       <PageHeading
         eyebrow="YOUR LUNCH, ON THE MAP"
-        title={
-          <>
-            오늘 점심, 어디로 갈까요<span>?</span>
-          </>
-        }
+        title={<TodayLunchTitle />}
         description="우리의 점심 리스트를 한눈에. 가까운 맛집을 지도에서 만나보세요."
       />
       <LunchExplorer

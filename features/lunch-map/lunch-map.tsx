@@ -8,6 +8,7 @@ import Script from 'next/script';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '@/components/ui/button';
+import useTodayLunchAction from '@/features/lunch-visits/use-today-lunch-action';
 import RestaurantMapCard from './restaurant-map-card';
 import { createMapController, OFFICE_ADDRESS, type MapController } from './map-controller';
 import labelStyles from './map-label.module.css';
@@ -46,6 +47,7 @@ export default function LunchMap({
   const [controller, setController] = useState<MapController | null>(null);
   const [error, setError] = useState(false);
   const selected = restaurants.find((row) => row.id === selectedId);
+  const todayLunch = useTodayLunchAction();
 
   useEffect(() => {
     if (!APP_KEY) return;
@@ -160,12 +162,17 @@ export default function LunchMap({
             key={selected.id}
             restaurant={selected}
             favorite={favorites.has(selected.id)}
+            todayLunch={todayLunch.visit?.restaurant_id === selected.id}
+            todayLunchBusy={todayLunch.busy}
             onClose={() => onSelect(null)}
             onReviews={() => onReviews(selected.id)}
             onFavorite={() => onFavorite(selected.id)}
+            onTodayLunch={() => todayLunch.request(selected)}
           />,
           controller.host,
         )}
+      {/* Outside the map card so Escape closes only the dialog, not the card. */}
+      {todayLunch.dialog}
       {APP_KEY && (
         <Script
           id="kakao-maps-sdk"

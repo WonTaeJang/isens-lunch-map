@@ -7,6 +7,8 @@ import Button from '@/components/ui/button';
 import ReviewCountBadges from '@/features/reviews/review-counts';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
 import FavoriteButton from '@/features/favorites/favorite-button';
+import TodayLunchButton from '@/features/lunch-visits/today-lunch-button';
+import useTodayLunchAction from '@/features/lunch-visits/use-today-lunch-action';
 import type { ReviewCounts } from '@/lib/reviews/model';
 import { hasCoordinates } from '@/lib/coordinates';
 import { formatDistance } from '@/lib/distance';
@@ -46,6 +48,7 @@ export default function RandomRestaurant({
   );
   const candidates = filterRestaurants(restaurants, filters, favorites);
   const resultCounts = result ? getReviewCounts(reviewCounts, result.id) : null;
+  const todayLunch = useTodayLunchAction();
 
   useEffect(() => {
     const element = dialog.current;
@@ -135,18 +138,33 @@ export default function RandomRestaurant({
               '맛있는 한 끼를 고르고 있어요…'
             ) : result ? (
               <>
+                {/* 식당명 ✓ … 추천 비추천 / [거리] 카테고리 · 대표메뉴 … [즐겨찾기][오늘의 점심] */}
                 <div className={styles.resultTitle}>
-                  <FavoriteButton restaurantId={result.id} restaurantName={result.name} />
-                  <div className={styles.resultName}>
-                    <strong>{result.name}</strong>
-                    {reviewedIds?.has(result.id) && <ReviewedBadge />}
-                  </div>
-                  <span className="distance-badge">{formatDistance(result.distance)}</span>
-                </div>
-                <div className={styles.resultMeta}>
-                  <span className="subtle">{result.category || '분류 없음'}</span>
+                  <strong>{result.name}</strong>
+                  {reviewedIds?.has(result.id) && <ReviewedBadge />}
                   <div className={styles.resultCounts}>
                     <ReviewCountBadges colored counts={resultCounts} />
+                  </div>
+                </div>
+                <div className={styles.resultMeta}>
+                  <span className="distance-badge">{formatDistance(result.distance)}</span>
+                  <span className={styles.resultMenu}>
+                    {[result.category, result.main_menu].filter(Boolean).join(' · ') ||
+                      '분류 정보 없음'}
+                  </span>
+                  <div className={styles.resultActions}>
+                    <FavoriteButton
+                      restaurantId={result.id}
+                      restaurantName={result.name}
+                      size="large"
+                    />
+                    <TodayLunchButton
+                      restaurantName={result.name}
+                      active={todayLunch.visit?.restaurant_id === result.id}
+                      busy={todayLunch.busy}
+                      size="large"
+                      onToggle={() => todayLunch.request(result)}
+                    />
                   </div>
                 </div>
                 {candidates.length === 1 && (
@@ -183,6 +201,7 @@ export default function RandomRestaurant({
           </Button>
         </div>
       )}
+      {todayLunch.dialog}
     </dialog>
   );
 }

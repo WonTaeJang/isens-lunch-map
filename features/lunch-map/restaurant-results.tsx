@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Button from '@/components/ui/button';
 import EmptyState from '@/components/ui/empty-state';
 import RestaurantListItem from './restaurant-list-item';
+import useTodayLunchAction from '@/features/lunch-visits/use-today-lunch-action';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 
 type Props = {
@@ -33,6 +34,7 @@ export default function RestaurantResults({
   onReviews,
   onReset,
 }: Props) {
+  const todayLunch = useTodayLunchAction();
   if (!total)
     return (
       <EmptyState
@@ -59,20 +61,26 @@ export default function RestaurantResults({
       />
     );
   return (
-    <ul className="restaurant-results">
-      {rows.map((row) => (
-        <RestaurantListItem
-          reviewed={reviewedIds?.has(row.id) ?? false}
-          counts={getReviewCounts(reviewCounts, row.id)}
-          key={row.id}
-          row={row}
-          favorite={favorites.has(row.id)}
-          selected={selectedId === row.id}
-          onFavorite={() => onFavorite(row.id)}
-          onSelect={() => onSelect(row.id)}
-          onReviews={() => onReviews(row.id)}
-        />
-      ))}
-    </ul>
+    <>
+      <ul className="restaurant-results">
+        {rows.map((row) => (
+          <RestaurantListItem
+            reviewed={reviewedIds?.has(row.id) ?? false}
+            counts={getReviewCounts(reviewCounts, row.id)}
+            key={row.id}
+            row={row}
+            favorite={favorites.has(row.id)}
+            selected={selectedId === row.id}
+            onFavorite={() => onFavorite(row.id)}
+            onSelect={() => onSelect(row.id)}
+            onReviews={() => onReviews(row.id)}
+            todayLunch={todayLunch.visit?.restaurant_id === row.id}
+            todayLunchBusy={todayLunch.busy}
+            onTodayLunch={() => todayLunch.request(row)}
+          />
+        ))}
+      </ul>
+      {todayLunch.dialog}
+    </>
   );
 }

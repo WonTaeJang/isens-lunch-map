@@ -81,6 +81,15 @@ export function BookmarkIcon(props: IconProps) {
   );
 }
 
+export function BowlChopsticksIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M3 12h18a9 7.5 0 0 1-18 0Z" />
+      <path d="M9 21h6M11 12l7-9m-3 9 5.5-7" />
+    </Icon>
+  );
+}
+
 export function DirectionsIcon(props: IconProps) {
   return (
     <Icon {...props}>

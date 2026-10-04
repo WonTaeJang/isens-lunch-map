@@ -1,7 +1,7 @@
 import { getDb } from '@/lib/server/db';
 import { getReviewCounts } from '@/lib/server/reviews';
 import { connection } from 'next/server';
-import { getActiveMapRestaurants } from '@/lib/server/restaurants';
+import { getCachedMapRestaurants } from '@/lib/server/restaurants';
 import LunchExplorer from '@/features/lunch-map/lunch-explorer';
 import PageHeading from '@/components/ui/page-heading';
 import TodayLunchTitle from '@/features/lunch-visits/today-lunch-title';
@@ -16,7 +16,7 @@ export default async function Home({
   const db = getDb();
   // Review counts are optional; a restaurant failure is handled by app/error.tsx.
   const [restaurants, reviewCounts] = await Promise.all([
-    getActiveMapRestaurants(db),
+    getCachedMapRestaurants(),
     getReviewCounts(db).catch(() => null),
   ]);
   const initialRestaurantId =

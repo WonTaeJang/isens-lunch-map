@@ -1,4 +1,4 @@
-import { getRestaurantRows, getRestaurants } from '@/lib/server/restaurants';
+import { expireRestaurantCache, getRestaurantRows, getRestaurants } from '@/lib/server/restaurants';
 import { getDb } from '@/lib/server/db';
 import { ImportError, parseWorkbook } from '@/lib/server/import/parser';
 import {
@@ -44,7 +44,9 @@ export async function POST(request: Request) {
       form.get('token') !== previewToken(buffer, rev)
     )
       throw new ImportError('파일 또는 DB가 변경되었습니다. 다시 미리보기를 실행해 주세요.');
-    return Response.json({ summary: await synchronize(incoming, existing, rev) });
+    const summary = await synchronize(incoming, existing, rev);
+    expireRestaurantCache();
+    return Response.json({ summary });
   } catch (error) {
     return Response.json(
       {
@@ -63,6 +65,7 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     if (body.action === 'address') {
       await correctAddress(body.id, body.address, body.previousAddress);
+      expireRestaurantCache();
       return Response.json({ ok: true });
     }
     if (
@@ -78,6 +81,7 @@ export async function PATCH(request: Request) {
     );
     if (!result.rowCount)
       throw new ImportError('다른 작업에서 상태가 변경되었습니다. 새로고침 후 다시 시도해 주세요.');
+    expireRestaurantCache();
     return Response.json({ ok: true });
   } catch (error) {
     return Response.json(

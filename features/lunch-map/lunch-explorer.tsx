@@ -108,14 +108,6 @@ export default function LunchExplorer({
           onReset={resetFilters}
           onReviews={openReviews}
         />
-        <div className="panel-note">
-          <span aria-hidden="true">ⓘ</span>
-          <p>
-            식당이 등록되면 지도와 리스트에서
-            <br />
-            함께 확인할 수 있어요.
-          </p>
-        </div>
       </aside>
       <LunchMap
         reviewedIds={reviewedIds}

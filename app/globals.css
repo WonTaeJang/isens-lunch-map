@@ -230,17 +230,6 @@ h3 {
 .text-link span {
   margin-left: 8px;
 }
-.panel-note {
-  display: flex;
-  gap: 10px;
-  margin: 16px;
-  padding: 15px;
-  border-radius: 10px;
-  background: #f7f9fa;
-  color: #7b878e;
-  font-size: 11px;
-  line-height: 1.8;
-}
 .map-panel {
   position: relative;
   min-width: 0;
@@ -436,9 +425,6 @@ th:nth-child(3) {
   }
   .list-empty {
     padding: 28px 15px;
-  }
-  .panel-note {
-    margin-top: 0;
   }
   .empty-symbol {
     margin-bottom: 15px;

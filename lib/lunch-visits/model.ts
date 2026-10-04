@@ -5,6 +5,7 @@ export type LunchVisit = {
   id: string;
   restaurant_id: string;
   restaurant_name: string;
+  restaurant_category: string | null;
   restaurant_active: boolean | null;
   /** Korean (Asia/Seoul) calendar date, YYYY-MM-DD. */
   visit_date: string;
@@ -43,6 +44,13 @@ export function visitCursor(raw: string | null): string | null {
   if (raw === null || raw === '') return null;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(raw) || !Number.isFinite(Date.parse(`${raw}T00:00:00Z`)))
     throw new LunchVisitError('페이지를 새로고침한 뒤 다시 조회해 주세요.');
+  return raw;
+}
+
+/** Calendar month, YYYY-MM (Korean dates). */
+export function visitMonth(raw: string | null): string {
+  if (!raw || !/^\d{4}-(0[1-9]|1[0-2])$/.test(raw))
+    throw new LunchVisitError('조회할 달을 확인해 주세요.');
   return raw;
 }
 

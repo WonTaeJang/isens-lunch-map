@@ -8,6 +8,7 @@ const visit = (restaurant_id: string, restaurant_name: string): LunchVisit => ({
   id: 'v',
   restaurant_id,
   restaurant_name,
+  restaurant_category: '한식',
   restaurant_active: true,
   visit_date: '2026-10-04',
   created_at: '2026-10-04T02:00:00.000Z',

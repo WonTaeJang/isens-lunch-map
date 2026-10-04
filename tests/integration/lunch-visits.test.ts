@@ -4,6 +4,7 @@ import { Pool } from 'pg';
 import {
   cancelTodayVisit,
   getTodayVisit,
+  listMonthVisits,
   listUserVisits,
   setTodayVisit,
 } from '../../lib/server/lunch-visits';
@@ -34,7 +35,7 @@ test(
     try {
       await pool.query(`create schema "${schema}"`);
       await db.query(
-        'create table public.restaurants (id uuid primary key, name text, active boolean)',
+        'create table public.restaurants (id uuid primary key, name text, category text, active boolean)',
       );
       // Same definition as the production table.
       await db.query(`create table public.lunch_visit (
@@ -48,7 +49,7 @@ test(
         constraint lunch_visit_user_date_key unique (user_id, visit_date)
       )`);
       await db.query(
-        "insert into public.restaurants values ($1,'첫 식당',true),($2,'둘째 식당',true),($3,'닫은 식당',false)",
+        "insert into public.restaurants values ($1,'첫 식당','한식',true),($2,'둘째 식당',null,true),($3,'닫은 식당','양식',false)",
         [first, second, inactive],
       );
 
@@ -110,6 +111,35 @@ test(
       assert.equal(rest.hasMore, false);
       assert.equal(rest.nextCursor, null);
       assert.ok(rest.visits.every((visit) => visit.visit_date < page.nextCursor!));
+
+      // Month: only that calendar month, oldest first, inactive restaurants kept.
+      const monthUser = crypto.randomUUID();
+      for (const [date, restaurant] of [
+        ['2026-09-30', first],
+        ['2026-10-31', inactive],
+        ['2026-10-01', first],
+        ['2026-11-01', second],
+      ])
+        await db.query(
+          'insert into public.lunch_visit (user_id, restaurant_id, visit_date) values ($1, $2, $3)',
+          [monthUser, restaurant, date],
+        );
+      const october = await listMonthVisits(db, monthUser, '2026-10');
+      assert.deepEqual(
+        october.map((visit) => [
+          visit.visit_date,
+          visit.restaurant_category,
+          visit.restaurant_active,
+        ]),
+        [
+          ['2026-10-01', '한식', true],
+          ['2026-10-31', '양식', false],
+        ],
+      );
+      assert.deepEqual(
+        (await listMonthVisits(db, monthUser, '2026-12')).map((visit) => visit.visit_date),
+        [],
+      );
     } finally {
       try {
         await pool.query(`drop schema if exists "${schema}" cascade`);

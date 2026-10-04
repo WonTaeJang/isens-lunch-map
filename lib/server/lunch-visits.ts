@@ -9,7 +9,8 @@ import {
 
 // The visit date is always decided by the server in Korean time, never by the browser.
 const TODAY = "(now() at time zone 'Asia/Seoul')::date";
-const FIELDS = `v.id, v.restaurant_id, s.name restaurant_name, s.active restaurant_active,
+const FIELDS = `v.id, v.restaurant_id, s.name restaurant_name, s.category restaurant_category,
+  s.active restaurant_active,
   v.visit_date::text visit_date, v.created_at, v.updated_at`;
 
 type VisitRow = Omit<LunchVisit, 'created_at' | 'updated_at'> & {
@@ -21,6 +22,7 @@ function present(row: VisitRow): LunchVisit {
     id: row.id,
     restaurant_id: row.restaurant_id,
     restaurant_name: row.restaurant_name,
+    restaurant_category: row.restaurant_category,
     restaurant_active: row.restaurant_active,
     visit_date: row.visit_date,
     created_at: new Date(row.created_at).toISOString(),
@@ -91,4 +93,22 @@ export async function listUserVisits(
   const visits = rows.slice(0, LUNCH_VISIT_PAGE_SIZE).map(present);
   const hasMore = rows.length > LUNCH_VISIT_PAGE_SIZE;
   return { visits, hasMore, nextCursor: hasMore ? (visits.at(-1)?.visit_date ?? null) : null };
+}
+
+/** Every visit in one month (YYYY-MM), oldest first. At most one per day, so at most 31 rows. */
+export async function listMonthVisits(
+  db: Pool,
+  user: string,
+  month: string,
+): Promise<LunchVisit[]> {
+  const { rows } = await db.query<VisitRow>(
+    `select ${FIELDS}
+    from public.lunch_visit v join public.restaurants s on s.id = v.restaurant_id
+    where v.user_id = $1
+      and v.visit_date >= $2::date
+      and v.visit_date < ($2::date + interval '1 month')
+    order by v.visit_date`,
+    [user, `${month}-01`],
+  );
+  return rows.map(present);
 }

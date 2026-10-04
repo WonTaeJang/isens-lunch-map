@@ -6,6 +6,7 @@ import {
   LunchVisitError,
   todayLunchAction,
   visitCursor,
+  visitMonth,
   visitUserName,
   visitUuid,
 } from '../lib/lunch-visits/model';
@@ -16,6 +17,7 @@ const row = {
   id: '33333333-3333-4333-8333-333333333333',
   restaurant_id: restaurant,
   restaurant_name: '식당',
+  restaurant_category: '한식',
   restaurant_active: true,
   visit_date: '2026-10-04',
   created_at: new Date('2026-10-04T02:00:00Z'),
@@ -71,7 +73,13 @@ test('invalid requests are rejected before any DB access', async () => {
       throw new Error('unexpected query');
     },
     async (calls) => {
-      for (const query of ['', 'user_id=bad', `user_id=${user}&scope=history&cursor=broken`]) {
+      for (const query of [
+        '',
+        'user_id=bad',
+        `user_id=${user}&scope=history&cursor=broken`,
+        `user_id=${user}&scope=month`,
+        `user_id=${user}&scope=month&month=2026-13`,
+      ]) {
         const response = await GET(new Request(`http://localhost/api/lunch-visits?${query}`));
         assert.equal(response.status, 400);
       }
@@ -185,6 +193,32 @@ test('history pages newest first and continues from the last visit date', async 
       assert.deepEqual(calls[0].values, [user, '2026-10-01', 31]);
     },
   );
+});
+
+test('month scope returns that Korean month oldest first, owner-scoped', async () => {
+  await withDb(
+    () => ({ rows: [row] }),
+    async (calls) => {
+      const response = await GET(
+        new Request(`http://localhost/api/lunch-visits?user_id=${user}&scope=month&month=2026-10`),
+      );
+      assert.equal(response.status, 200);
+      assert.equal(response.headers.get('Cache-Control'), 'private, no-store');
+      const body = await response.json();
+      assert.equal(body.visits.length, 1);
+      assert.equal(body.visits[0].restaurant_category, '한식');
+      assert.deepEqual(calls[0].values, [user, '2026-10-01']);
+      assert.match(calls[0].sql, /v\.visit_date < \(\$2::date \+ interval '1 month'\)/);
+      assert.match(calls[0].sql, /order by v\.visit_date$/);
+    },
+  );
+});
+
+test('month must be YYYY-MM with a real month', () => {
+  assert.equal(visitMonth('2026-01'), '2026-01');
+  assert.equal(visitMonth('2026-12'), '2026-12');
+  for (const bad of [null, '', '2026-00', '2026-13', '2026-1', '26-10', '2026-10-01'])
+    assert.throws(() => visitMonth(bad), LunchVisitError);
 });
 
 test('unexpected DB errors become a generic 500 without leaking details', async () => {

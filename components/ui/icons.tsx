@@ -152,6 +152,22 @@ export function CloseIcon(props: IconProps) {
   );
 }
 
+export function ChevronLeftIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth="2" {...props}>
+      <path d="m15 18-6-6 6-6" />
+    </Icon>
+  );
+}
+
+export function ChevronRightIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth="2" {...props}>
+      <path d="m9 18 6-6-6-6" />
+    </Icon>
+  );
+}
+
 export function DiceIcon(props: IconProps) {
   return (
     <Icon {...props}>

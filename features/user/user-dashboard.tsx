@@ -25,6 +25,7 @@ import { formatDistance } from '@/lib/distance';
 import useLocalUser from '@/features/local-user/use-local-user';
 import type { LocalIdentity } from '@/features/local-user/local-user-store';
 import useReviewFeed from '@/features/reviews/use-review-feed';
+import LunchCalendar from '@/features/lunch-visits/lunch-calendar';
 type Props = { restaurants: RestaurantRow[] };
 const DATE_FORMAT = new Intl.DateTimeFormat('ko-KR', {
   year: 'numeric',
@@ -32,6 +33,7 @@ const DATE_FORMAT = new Intl.DateTimeFormat('ko-KR', {
   day: 'numeric',
 });
 const TABS = [
+  { value: 'lunch', label: '점심 기록' },
   { value: 'reviews', label: '내 리뷰' },
   { value: 'favorites', label: '즐겨찾기' },
 ] as const;
@@ -88,7 +90,7 @@ function UserDashboardContent({
   });
   const { notice, editing, deleting, setError } = actions;
   const error = identityError || actions.error;
-  const [tab, setTab] = useState<'reviews' | 'favorites'>('reviews');
+  const [tab, setTab] = useState<(typeof TABS)[number]['value']>('lunch');
   const [favoriteError, setFavoriteError] = useState('');
   const savedRestaurants = restaurants
     .filter((row) => favorites.has(row.id))
@@ -146,7 +148,19 @@ function UserDashboardContent({
           </button>
         ))}
       </div>
-      {tab === 'reviews' ? (
+      {tab === 'lunch' ? (
+        <div className={styles['user-records']}>
+          {identity ? (
+            <LunchCalendar userId={identity.user_id} />
+          ) : identityReady ? (
+            <p className="review-error" role="alert">
+              {identityError || '사용자 정보를 확인할 수 없어 점심 기록을 불러오지 못했습니다.'}
+            </p>
+          ) : (
+            <LoadingStatus label="점심 기록을 불러오는 중…" />
+          )}
+        </div>
+      ) : tab === 'reviews' ? (
         <section className={styles['user-records']} aria-label="내 리뷰">
           {error && (
             <div className="review-error" role="alert">

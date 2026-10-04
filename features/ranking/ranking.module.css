@@ -6,7 +6,7 @@
 }
 .columns {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
   align-items: start;
 }
@@ -117,13 +117,13 @@
   font-weight: 700;
 }
 
-/* Same breakpoint as the map layout: below it, only the selected tab's ranking is shown. */
-@media (min-width: 761px) {
+/* Three rankings fit side by side from 1100px; below that only the selected tab is shown. */
+@media (min-width: 1100px) {
   .tabs {
     display: none;
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 1099px) {
   .columns {
     grid-template-columns: 1fr;
   }

@@ -2,12 +2,13 @@ import 'server-only';
 import type { Pool } from 'pg';
 import { withReviewRanks } from '@/lib/ranking/model';
 import {
+  LUNCH_RANKING_DAYS,
   RANKING_LIMIT,
   RECOMMENDATION_WEIGHT,
   RECOMMENDATION_SMOOTHING,
 } from '@/lib/ranking/constants';
 
-import type { RankedRestaurant } from '@/lib/ranking/model';
+import type { LunchRankedRestaurant, RankedRestaurant } from '@/lib/ranking/model';
 
 function restaurantCountsSql(includeInactive = false) {
   return `
@@ -57,6 +58,49 @@ export async function getRecommendationRanking(db: Pool): Promise<RankedRestaura
     from (${recommendationRankingSql()}) ranking order by rank, name, id
   `,
     [RANKING_LIMIT, RECOMMENDATION_WEIGHT, RECOMMENDATION_SMOOTHING],
+  );
+  return rows;
+}
+
+// 점심 랭킹: 최근 30일(한국 날짜, 오늘 포함) 오늘의 점심 기록 수. 공개 랭킹은 활성 식당만,
+// 관리자 통계는 비활성 식당까지 집계합니다. 같은 횟수면 고른 사람 수로 순위를 나누며 그래도
+// 같으면 공동 순위입니다(최근 기록 순으로 표시). 누가 골랐는지는 반환하지 않습니다.
+// position은 화면 표시 순서이며, 파라미터 번호는 호출하는 쿼리에 맞춰 넘깁니다.
+export function lunchRankingSql(includeInactive = false, params = { limit: '$1', days: '$2' }) {
+  return `
+    with visits as (
+      select restaurant_id, count(*)::int visits, count(distinct user_id)::int people,
+        max(visit_date) last_visit
+      from public.lunch_visit
+      where visit_date > (now() at time zone 'Asia/Seoul')::date - ${params.days}::int
+      group by restaurant_id
+    )
+    select s.id, s.name, s.category, s.latitude, s.longitude, s.active, v.visits, v.people,
+      (rank() over (order by v.visits desc, v.people desc))::int rank,
+      (row_number() over (order by v.visits desc, v.people desc, v.last_visit desc, s.name, s.id))::int position
+    from visits v
+    join public.restaurants s on s.id=v.restaurant_id${includeInactive ? '' : ' and s.active=true'}
+    order by position limit ${params.limit}
+  `;
+}
+
+export async function getLunchRanking(db: Pool): Promise<LunchRankedRestaurant[]> {
+  const { rows } = await db.query<LunchRankedRestaurant>(
+    `
+    select l.id, l.name, l.category, l.latitude, l.longitude, l.visits, l.people, l.rank,
+      coalesce(r.reviews, 0) reviews, coalesce(r.recommended, 0) recommended,
+      coalesce(r.not_recommended, 0) not_recommended
+    from (${lunchRankingSql()}) l
+    left join (
+      select restaurant_id, count(*)::int reviews,
+        count(*) filter (where is_recommended=true)::int recommended,
+        count(*) filter (where is_recommended=false)::int not_recommended
+      from public.review where enabled=true
+      group by restaurant_id
+    ) r on r.restaurant_id=l.id
+    order by l.position
+  `,
+    [RANKING_LIMIT, LUNCH_RANKING_DAYS],
   );
   return rows;
 }

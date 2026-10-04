@@ -2,10 +2,14 @@ import Link from 'next/link';
 import FavoriteButton from '@/features/favorites/favorite-button';
 import ReviewCountBadges from '@/features/reviews/review-counts';
 import { hasCoordinates } from '@/lib/coordinates';
-import type { RankedRestaurant } from '@/lib/ranking/model';
+import type { LunchRankedRestaurant, RankedRestaurant } from '@/lib/ranking/model';
 import styles from './ranking.module.css';
 
-export default function RankingList({ rows }: { rows: RankedRestaurant[] }) {
+export default function RankingList({
+  rows,
+}: {
+  rows: readonly (RankedRestaurant | LunchRankedRestaurant)[];
+}) {
   return (
     <ol className={styles.list}>
       {rows.map((row) => (
@@ -26,7 +30,9 @@ export default function RankingList({ rows }: { rows: RankedRestaurant[] }) {
             </div>
             <div className={styles.counts}>
               <div className={styles.details}>
-                <strong>리뷰 {row.reviews}</strong>
+                <strong>
+                  {'visits' in row ? `${row.visits}회 · ${row.people}명` : `리뷰 ${row.reviews}`}
+                </strong>
                 <span className="subtle">{row.category}</span>
               </div>
               <div className={styles.votes}>

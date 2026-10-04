@@ -57,3 +57,30 @@ test('admin recommendation ranking includes inactive restaurants while public ra
   assert.match(recommendationRankingSql(true), /active, reviews, recommended, not_recommended/);
   assert.match(recommendationRankingSql(true), /limit \$1/);
 });
+
+test('lunch ranking counts the last 30 Korean days for active restaurants without exposing who picked', async () => {
+  const { getLunchRanking } = await import('../lib/server/ranking');
+  const db = {
+    query: async (sql: string, values: unknown[]) => {
+      assert.deepEqual(values, [10, 30]);
+      assert.match(sql, /visit_date > \(now\(\) at time zone 'Asia\/Seoul'\)::date - \$2::int/);
+      assert.match(sql, /count\(distinct user_id\)::int people/);
+      assert.match(sql, /s\.active=true/);
+      assert.match(sql, /where enabled=true/);
+      assert.match(sql, /rank\(\) over \(order by v\.visits desc, v\.people desc\)/);
+      assert.match(sql, /limit \$1/);
+      assert.doesNotMatch(sql, /user_name/);
+      return { rows: [] };
+    },
+  } as unknown as Pool;
+  assert.deepEqual(await getLunchRanking(db), []);
+});
+
+test('admin lunch ranking includes inactive restaurants and takes its own parameter numbers', async () => {
+  const { lunchRankingSql } = await import('../lib/server/ranking');
+  assert.match(lunchRankingSql(), /s\.active=true/);
+  assert.doesNotMatch(lunchRankingSql(true), /active=true/);
+  const admin = lunchRankingSql(true, { limit: '$1', days: '$4' });
+  assert.match(admin, /- \$4::int/);
+  assert.match(admin, /limit \$1/);
+});

@@ -164,3 +164,52 @@
 .identity-editor input {
   width: 100%;
 }
+
+/* 다른 기기에서 이어 쓰기 */
+.user-device-link {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+.user-device-link button {
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  color: #087f73;
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.user-device-link button:hover {
+  color: #06695f;
+}
+.device-dialog {
+  --modal-width: 360px;
+  text-align: center;
+}
+.device-dialog h2 {
+  font-size: 18px;
+}
+.device-qr {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0 8px;
+}
+.device-warning {
+  color: #b54708;
+  font-size: 12px;
+  line-height: 1.5;
+}
+/* Close and copy share the dialog width 1:1. */
+.device-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 16px;
+}
+.device-actions :global(.button) {
+  width: 100%;
+  margin: 0;
+}

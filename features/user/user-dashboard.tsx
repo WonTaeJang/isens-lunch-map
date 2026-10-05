@@ -27,6 +27,8 @@ import useLocalUser from '@/features/local-user/use-local-user';
 import type { LocalIdentity } from '@/features/local-user/local-user-store';
 import useReviewFeed from '@/features/reviews/use-review-feed';
 import LunchCalendar from '@/features/lunch-visits/lunch-calendar';
+import DeviceLinkDialog from './device-link-dialog';
+import IdentityImport from './identity-import';
 type Props = { restaurants: RestaurantRow[] };
 const DATE_FORMAT = new Intl.DateTimeFormat('ko-KR', {
   year: 'numeric',
@@ -42,13 +44,16 @@ const TABS = [
 export default function UserDashboard(props: Props) {
   const user = useLocalUser();
   return (
-    <UserDashboardContent
-      key={user.identity?.user_id ?? String(user.ready)}
-      {...props}
-      identity={user.identity}
-      identityReady={user.ready}
-      identityError={user.error}
-    />
+    <>
+      <UserDashboardContent
+        key={user.identity?.user_id ?? String(user.ready)}
+        {...props}
+        identity={user.identity}
+        identityReady={user.ready}
+        identityError={user.error}
+      />
+      <IdentityImport identity={user.identity} ready={user.ready} />
+    </>
   );
 }
 function UserDashboardContent({
@@ -58,6 +63,7 @@ function UserDashboardContent({
   identityError,
 }: Props & { identity: LocalIdentity | null; identityReady: boolean; identityError: string }) {
   const [identityEditorOpen, setIdentityEditorOpen] = useState(false);
+  const [deviceDialogOpen, setDeviceDialogOpen] = useState(false);
   const profileClicks = useRef({ start: 0, count: 0 });
   function clickProfile() {
     if (!identity || busy || editing) return;
@@ -121,6 +127,16 @@ function UserDashboardContent({
           </p>
         </div>
       </section>
+      {identity && (
+        <div className={styles['user-device-link']}>
+          <button type="button" onClick={() => setDeviceDialogOpen(true)}>
+            다른 기기에서 이어 쓰기
+          </button>
+        </div>
+      )}
+      {deviceDialogOpen && identity && (
+        <DeviceLinkDialog identity={identity} onClose={() => setDeviceDialogOpen(false)} />
+      )}
       {identityEditorOpen && identity && (
         <IdentityEditor identity={identity} onClose={() => setIdentityEditorOpen(false)} />
       )}

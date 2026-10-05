@@ -1,0 +1,154 @@
+.body {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  color: #3d4b53;
+  font-size: 14px;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+.body p {
+  margin: 0;
+}
+.highlight {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #eef7f4;
+  color: #26343d;
+}
+.highlight strong {
+  color: #087f73;
+}
+.warning {
+  color: #b54708;
+}
+.items {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.items li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #eef7f4;
+  color: #127e70;
+}
+.markers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f5f7f8;
+  list-style: none;
+  color: #5d6a72;
+  font-size: 12px;
+}
+.markers li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* First-visit dialog */
+.dialog {
+  padding-top: 20px;
+}
+.dialog h2 {
+  margin: 8px 0 14px;
+  font-size: 19px;
+}
+.dots {
+  display: flex;
+  gap: 6px;
+}
+.dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d8dee1;
+}
+.dots span[data-current] {
+  width: 18px;
+  border-radius: 3px;
+  background: #127e70;
+}
+/* Steps slide in from the right on 다음 and from the left on 이전. */
+.viewport {
+  overflow: hidden;
+}
+.slide {
+  animation: slide-from-right 240ms ease-out;
+}
+.slide[data-direction='previous'] {
+  animation-name: slide-from-left;
+}
+@keyframes slide-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+}
+@keyframes slide-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    animation: none;
+  }
+}
+.dialog-body {
+  min-height: 190px;
+  align-content: center; /* Shorter steps sit in the middle of the fixed area. */
+}
+
+/* /guide page */
+.page {
+  display: grid;
+  gap: 16px;
+  max-width: 780px;
+  margin: 0 auto 40px;
+}
+.section {
+  padding: 24px;
+  border: 1px solid #e4e9eb;
+  border-radius: 16px;
+  background: white;
+}
+.section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-size: 17px;
+}
+.number {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #127e70;
+  color: white;
+  font-size: 13px;
+}
+@media (max-width: 480px) {
+  .section {
+    padding: 20px 16px;
+  }
+}

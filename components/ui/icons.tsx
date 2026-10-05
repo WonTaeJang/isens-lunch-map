@@ -178,6 +178,25 @@ export function CrosshairIcon(props: IconProps) {
   );
 }
 
+export function SearchIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="m16 16 4.5 4.5" />
+    </Icon>
+  );
+}
+
+export function HelpIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .8-1 1.5v.6" />
+      <path d="M12 16.8h.01" strokeWidth="2.6" />
+    </Icon>
+  );
+}
+
 export function DiceIcon(props: IconProps) {
   return (
     <Icon {...props}>

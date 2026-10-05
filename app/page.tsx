@@ -5,6 +5,7 @@ import { getCachedMapRestaurants } from '@/lib/server/restaurants';
 import LunchExplorer from '@/features/lunch-map/lunch-explorer';
 import PageHeading from '@/components/ui/page-heading';
 import TodayLunchTitle from '@/features/lunch-visits/today-lunch-title';
+import FirstVisitGuide from '@/features/guide/first-visit-guide';
 
 export default async function Home({
   searchParams,
@@ -36,6 +37,7 @@ export default async function Home({
         reviewCounts={reviewCounts}
         restaurants={restaurants}
       />
+      <FirstVisitGuide />
       <footer className="page-footer">
         <span>좋은 점심이 만드는 작은 즐거움.</span>
         <span>i-SENS · Lunch Map</span>

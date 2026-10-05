@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { HelpIcon, MapIcon, SettingsIcon, TrophyIcon, UserIcon } from '@/components/ui/icons';
+import { HelpIcon, MapIcon, TrophyIcon, UserIcon } from '@/components/ui/icons';
 
 export default function SiteHeader() {
   const pathname = usePathname();
@@ -52,15 +52,6 @@ export default function SiteHeader() {
           aria-current={pathname === '/guide' ? 'page' : undefined}
         >
           <HelpIcon size={22} />
-        </Link>
-        <Link
-          href="/admin"
-          className="admin-nav-icon"
-          aria-label="리스트 관리"
-          title="리스트 관리"
-          aria-current={pathname === '/admin' ? 'page' : undefined}
-        >
-          <SettingsIcon size={22} />
         </Link>
       </nav>
     </header>

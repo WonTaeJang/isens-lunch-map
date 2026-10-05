@@ -16,6 +16,29 @@
   margin: 6px 0 10px;
   overflow-wrap: anywhere;
 }
+.user-profile-wrap {
+  position: relative;
+}
+/* Small, quiet link to the admin page in the profile card's top-right corner. */
+.user-admin-link {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  color: #9aa4aa;
+}
+.user-admin-link:hover {
+  background: #f3f5f4;
+  color: #627078;
+}
+.user-admin-link:focus-visible {
+  outline: 2px solid #127e70;
+  outline-offset: 2px;
+}
 .user-avatar {
   flex: 0 0 64px;
   height: 64px;

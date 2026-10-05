@@ -6,7 +6,7 @@ import UserProgress from './user-progress';
 import Link from 'next/link';
 import { useRef, useState } from 'react';
 import Button from '@/components/ui/button';
-import { UserIcon } from '@/components/ui/icons';
+import { SettingsIcon, UserIcon } from '@/components/ui/icons';
 import LoadingStatus from '@/components/ui/loading-status';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import useFavorites from '@/features/favorites/use-favorites';
@@ -101,32 +101,43 @@ function UserDashboardContent({
     .sort((a, b) => Number(Boolean(b.active)) - Number(Boolean(a.active)));
   return (
     <div className={styles['user-dashboard']}>
-      <section
-        className={styles['user-profile']}
-        aria-label="내 프로필"
-        tabIndex={0}
-        onClick={clickProfile}
-        onKeyDown={(event) => {
-          if (!event.repeat && (event.key === 'Enter' || event.key === ' ')) {
-            event.preventDefault();
-            clickProfile();
-          }
-        }}
-      >
-        <span className={styles['user-avatar']} aria-hidden="true">
-          <UserIcon size={30} strokeWidth="1.7" />
-        </span>
-        <div>
-          <p className="subtle">나의 점심 기록</p>
-          <h1>
-            {identity?.user_name ??
-              (identityReady ? '사용자 정보를 확인해 주세요' : '불러오는 중…')}
-          </h1>
-          <p className="subtle">
-            작성한 리뷰 {page?.total ?? '—'} · 즐겨찾기 {identityReady ? favorites.size : '—'}
-          </p>
-        </div>
-      </section>
+      <div className={styles['user-profile-wrap']}>
+        <section
+          className={styles['user-profile']}
+          aria-label="내 프로필"
+          tabIndex={0}
+          onClick={clickProfile}
+          onKeyDown={(event) => {
+            if (!event.repeat && (event.key === 'Enter' || event.key === ' ')) {
+              event.preventDefault();
+              clickProfile();
+            }
+          }}
+        >
+          <span className={styles['user-avatar']} aria-hidden="true">
+            <UserIcon size={30} strokeWidth="1.7" />
+          </span>
+          <div>
+            <p className="subtle">나의 점심 기록</p>
+            <h1>
+              {identity?.user_name ??
+                (identityReady ? '사용자 정보를 확인해 주세요' : '불러오는 중…')}
+            </h1>
+            <p className="subtle">
+              작성한 리뷰 {page?.total ?? '—'} · 즐겨찾기 {identityReady ? favorites.size : '—'}
+            </p>
+          </div>
+        </section>
+        {/* A sibling, not a child, so the card's 5-click editor shortcut ignores it. */}
+        <Link
+          href="/admin"
+          className={styles['user-admin-link']}
+          aria-label="리스트 관리"
+          title="리스트 관리"
+        >
+          <SettingsIcon size={16} />
+        </Link>
+      </div>
       {identity && (
         <div className={styles['user-device-link']}>
           <button type="button" onClick={() => setDeviceDialogOpen(true)}>

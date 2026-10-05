@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import Button from '@/components/ui/button';
-import useModalDialog from '@/components/ui/use-modal-dialog';
-import modalStyles from '@/components/ui/modal.module.css';
+import Modal from '@/components/ui/modal';
 import { localUserStore, type LocalIdentity } from '@/features/local-user/local-user-store';
 import { updateLocalUser } from '@/features/local-user/update-local-user';
 import styles from './user.module.css';
@@ -15,23 +14,31 @@ export default function IdentityEditor({
   identity: LocalIdentity;
   onClose: () => void;
 }) {
-  const dialog = useModalDialog();
   const [userId, setUserId] = useState(identity.user_id);
   const [userName, setUserName] = useState(identity.user_name);
   const [error, setError] = useState('');
   return (
-    <dialog
-      ref={dialog}
-      className={`${modalStyles.modal} ${styles['identity-editor']}`}
-      aria-labelledby="identity-editor-title"
-      onCancel={onClose}
+    <Modal
+      title="사용자 정보 수정"
+      className={styles['identity-editor']}
+      onClose={onClose}
+      actions={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            취소
+          </Button>
+          <Button type="submit" form="identity-editor-form">
+            저장
+          </Button>
+        </>
+      }
     >
-      <h2 id="identity-editor-title">사용자 정보 수정</h2>
       <p className="description">
         이 브라우저의 사용자 정보를 바꿔요. ID를 바꾸면 내 리뷰 조회·관리 대상도 바뀌어요. 기존
         리뷰의 작성자 정보는 바뀌지 않아요.
       </p>
       <form
+        id="identity-editor-form"
         onSubmit={(event) => {
           event.preventDefault();
           try {
@@ -67,13 +74,7 @@ export default function IdentityEditor({
             {error}
           </p>
         )}
-        <div className="review-actions">
-          <Button variant="secondary" onClick={onClose}>
-            취소
-          </Button>
-          <Button type="submit">저장</Button>
-        </div>
       </form>
-    </dialog>
+    </Modal>
   );
 }

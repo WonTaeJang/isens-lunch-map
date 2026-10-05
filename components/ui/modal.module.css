@@ -13,3 +13,19 @@
 .modal::backdrop {
   background: #172e3c66;
 }
+.title {
+  margin: 0;
+  font-size: 18px;
+}
+/* Buttons share the width equally. */
+.actions {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  gap: 8px;
+  margin-top: 20px;
+}
+.actions :global(.button) {
+  width: 100%;
+  margin: 0;
+}

@@ -36,10 +36,6 @@ export type KakaoMaps = {
     zIndex?: number;
     clickable?: boolean;
   }) => { setPosition: (position: object) => void; setMap: (map: object | null) => void };
-  InfoWindow: new (options: { content: HTMLElement; removable?: boolean; zIndex?: number }) => {
-    open: (map: object, marker: object) => void;
-    close: () => void;
-  };
   event: {
     addListener: (target: object, type: string, callback: () => void) => void;
     removeListener: (target: object, type: string, callback: () => void) => void;

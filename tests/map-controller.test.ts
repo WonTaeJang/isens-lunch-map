@@ -81,10 +81,6 @@ function fixture() {
       constructor(public src: string) {}
     },
     CustomOverlay: Overlay,
-    InfoWindow: class {
-      open() {}
-      close() {}
-    },
     event: {
       addListener(target: object, name: string, fn: () => void) {
         if (!listeners.has(target)) listeners.set(target, new Map());
@@ -227,7 +223,7 @@ test('restaurant names show above markers only at zoom levels 1-2, except the se
   const other = { ...row, id: 'b', name: '다른 식당' };
   const labels = () =>
     f.overlays
-      .slice(1) // The first overlay is the selected restaurant popup.
+      .slice(2) // The first two overlays are the restaurant and office popups.
       .filter((overlay) => overlay.map)
       .map((overlay) => overlay.options.content.children[0].textContent);
   try {
@@ -266,6 +262,26 @@ test('labels created while zoomed in appear immediately for new restaurants', ()
     assert.equal(label.options.content.children[0].textContent, '식당');
     assert.ok(label.map);
     assert.equal(label.position, f.markers[1].options.position);
+  } finally {
+    f.restore();
+  }
+});
+
+test('the office marker opens a card styled like the restaurant card; selecting a restaurant closes it', () => {
+  const f = fixture();
+  try {
+    f.controller.update([row], new Set(), null);
+    const office = f.overlays[1];
+    const card = office.options.content.children[0];
+    assert.equal(card.className, 'restaurant-map-card');
+    assert.equal(card.children[1].children[0].textContent, '아이센스 빌딩');
+    assert.equal(office.map, null);
+    f.listeners.get(f.markers[0])!.get('click')!();
+    assert.notEqual(office.map, null);
+    assert.equal(f.overlays[0].map, null);
+    f.controller.update([row], new Set(), 'a');
+    assert.equal(office.map, null);
+    assert.notEqual(f.overlays[0].map, null);
   } finally {
     f.restore();
   }

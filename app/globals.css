@@ -505,15 +505,6 @@ td .button {
   font-weight: 600;
 }
 
-.map-office-info {
-  padding: 16px 30px 16px 16px;
-  min-width: 160px;
-  color: #168447;
-  font-size: 14px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
 .restaurant-select {
   display: block;
   width: 100%;
@@ -593,27 +584,6 @@ td .button {
   padding: 12px 20px;
   color: #b42318;
   font-size: 12px;
-}
-
-.map-office-info {
-  position: relative;
-}
-.map-info-close {
-  position: absolute;
-  top: 3px;
-  right: 3px;
-  width: 24px;
-  height: 24px;
-  border: 0;
-  border-radius: 4px;
-  background: white;
-  color: #52635b;
-  font-size: 20px;
-  line-height: 1;
-  cursor: pointer;
-}
-.map-info-close:hover {
-  background: #edf6f3;
 }
 
 .restaurant-filters {

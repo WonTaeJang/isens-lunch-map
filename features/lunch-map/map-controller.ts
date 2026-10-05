@@ -101,25 +101,52 @@ export function createMapController(
       offset: new maps.Point(20, 48),
     }),
   });
-  const officeContent = document.createElement('div');
-  officeContent.className = 'map-office-info';
-  officeContent.textContent = '아이센스 빌딩';
+  // The office popup looks like the restaurant card. Restaurant cards are rendered by React;
+  // this one never changes, so it is built once here.
+  const officeHost = document.createElement('div');
+  officeHost.className = 'restaurant-map-overlay';
+  const officeCard = document.createElement('article');
+  officeCard.className = 'restaurant-map-card';
+  officeCard.setAttribute('aria-label', '아이센스 빌딩 상세 정보');
   const closeButton = document.createElement('button');
   closeButton.type = 'button';
-  closeButton.className = 'map-info-close';
+  closeButton.className = 'restaurant-card-close';
   closeButton.setAttribute('aria-label', '상세 정보 닫기');
   closeButton.textContent = '×';
-  officeContent.append(closeButton);
-  const officeInfo = new maps.InfoWindow({ content: officeContent, removable: false, zIndex: 20 });
+  const officeHeader = document.createElement('div');
+  officeHeader.className = 'restaurant-card-header';
+  const officeTitle = document.createElement('h3');
+  officeTitle.textContent = '아이센스 빌딩';
+  officeHeader.append(officeTitle);
+  const officeDetails = document.createElement('div');
+  officeDetails.className = 'restaurant-card-details';
+  const officeAddress = document.createElement('p');
+  officeAddress.textContent = OFFICE_ADDRESS;
+  officeDetails.append(officeAddress);
+  officeCard.append(closeButton, officeHeader, officeDetails);
+  officeHost.append(officeCard);
+  blockedEvents.forEach((name) => officeHost.addEventListener(name, stop));
+  officeHost.addEventListener('dblclick', stopDoubleClick);
+  const officeOverlay = new maps.CustomOverlay({
+    content: officeHost,
+    position: center,
+    xAnchor: 0.5,
+    yAnchor: 1,
+    zIndex: 20,
+  });
   const close = () => {
-    officeInfo.close();
+    officeOverlay.setMap(null);
     onSelect(null);
   };
   closeButton.onclick = close;
+  const closeOnEscape = (event: Event) => {
+    if ((event as KeyboardEvent).key === 'Escape') close();
+  };
+  officeCard.addEventListener('keydown', closeOnEscape);
   const openOffice = () => {
     onSelect(null);
     overlay.setMap(null);
-    officeInfo.open(map, officeMarker);
+    officeOverlay.setMap(map);
   };
   maps.event.addListener(map, 'click', close);
   maps.event.addListener(officeMarker, 'click', openOffice);
@@ -188,7 +215,7 @@ export function createMapController(
       });
       const selected = selectedId ? entries.get(selectedId) : undefined;
       if (selected) {
-        officeInfo.close();
+        officeOverlay.setMap(null);
         overlay.setPosition(selected.position);
         overlay.setMap(map);
       } else overlay.setMap(null);
@@ -206,13 +233,16 @@ export function createMapController(
       entries.forEach(remove);
       entries.clear();
       overlay.setMap(null);
-      officeInfo.close();
+      officeOverlay.setMap(null);
       officeMarker.setMap(null);
       maps.event.removeListener(map, 'click', close);
       maps.event.removeListener(map, 'zoom_changed', onZoom);
       maps.event.removeListener(officeMarker, 'click', openOffice);
       blockedEvents.forEach((name) => host.removeEventListener(name, stop));
       host.removeEventListener('dblclick', stopDoubleClick);
+      blockedEvents.forEach((name) => officeHost.removeEventListener(name, stop));
+      officeHost.removeEventListener('dblclick', stopDoubleClick);
+      officeCard.removeEventListener('keydown', closeOnEscape);
       closeButton.onclick = null;
     },
   };

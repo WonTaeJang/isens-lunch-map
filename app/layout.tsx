@@ -6,6 +6,8 @@ import SiteHeader from '@/components/site-header';
 import SnackbarHost from '@/components/ui/snackbar';
 import { version } from '@/package.json';
 
+const REPOSITORY_URL = 'https://github.com/WonTaeJang/isens-lunch-map';
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -58,7 +60,10 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <SiteHeader />
         {children}
         <footer className="app-version" aria-label={`앱 버전 ${version}`}>
-          v{version}
+          v{version} ·{' '}
+          <a href={REPOSITORY_URL} target="_blank" rel="noreferrer">
+            GitHub
+          </a>
         </footer>
         <SnackbarHost />
       </body>

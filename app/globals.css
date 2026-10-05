@@ -270,6 +270,14 @@ h3 {
   font-size: 10px;
   text-align: right;
 }
+.app-version a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.app-version a:hover {
+  color: #087f73;
+}
 .admin-shell {
   max-width: 1120px;
 }

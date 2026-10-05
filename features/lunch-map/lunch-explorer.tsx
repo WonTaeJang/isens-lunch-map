@@ -7,6 +7,7 @@ import type { ReviewCounts } from '@/lib/reviews/model';
 import useReviewedRestaurants from '@/features/reviews/use-reviewed-restaurants';
 import ReviewPanel from '@/features/reviews/review-panel';
 import CountBadge from '@/components/ui/count-badge';
+import { showSnackbar } from '@/components/ui/snackbar';
 import RandomRestaurant from './random-restaurant';
 import RestaurantFilters from './restaurant-filters';
 import RestaurantResults from './restaurant-results';
@@ -61,6 +62,18 @@ export default function LunchExplorer({
     setFocusRequest({ id });
     if (window.matchMedia('(max-width: 760px)').matches)
       layoutRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  /** Selects a restaurant and shows it on the map, clearing the filters only if they hide it.
+   * Returns false when the restaurant is not on the map at all (e.g. deactivated). */
+  function showRestaurant(id: string) {
+    if (!restaurants.some((row) => row.id === id)) return false;
+    if (!rows.some((row) => row.id === id)) setFilters(DEFAULT_FILTERS);
+    selectFromList(id);
+    return true;
+  }
+  function showTodayLunch(id: string) {
+    if (!showRestaurant(id))
+      showSnackbar('오늘의 점심 식당을 지도에서 찾을 수 없어요.', { tone: 'error' });
   }
   function favoriteFromList(id: string) {
     setFavoriteError(toggleStoredFavorite(id));
@@ -120,6 +133,9 @@ export default function LunchExplorer({
         onSelect={setSelectedId}
         onFavorite={toggleStoredFavorite}
         onReviews={openReviews}
+        randomDisabled={!restaurants.length}
+        onRandom={() => setRandomOpen(true)}
+        onShowTodayLunch={showTodayLunch}
       />
       {reviewRestaurant && (
         <ReviewPanel
@@ -138,8 +154,7 @@ export default function LunchExplorer({
           onClose={() => setRandomOpen(false)}
           onSelect={(id) => {
             setRandomOpen(false);
-            setFilters(DEFAULT_FILTERS);
-            selectFromList(id);
+            showRestaurant(id);
           }}
         />
       )}

@@ -2,11 +2,11 @@
 import { getReviewCounts } from '@/lib/reviews/model';
 
 import LoadingSpinner from '@/components/ui/loading-spinner';
-import { CrosshairIcon } from '@/components/ui/icons';
+import { BowlChopsticksIcon, CrosshairIcon, DiceIcon } from '@/components/ui/icons';
 
 import type { ReviewCounts } from '@/lib/reviews/model';
 import Script from 'next/script';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '@/components/ui/button';
 import useTodayLunchAction from '@/features/lunch-visits/use-today-lunch-action';
@@ -31,6 +31,11 @@ type Props = {
   onReviews: (id: string) => void;
   onSelect: (id: string | null) => void;
   onFavorite: (id: string) => string | null;
+  randomDisabled: boolean;
+  /** Opens the random pick dialog. */
+  onRandom: () => void;
+  /** Shows today's lunch restaurant on the map. */
+  onShowTodayLunch: (restaurantId: string) => void;
 };
 
 export default function LunchMap({
@@ -43,6 +48,9 @@ export default function LunchMap({
   onSelect,
   onFavorite,
   onReviews,
+  randomDisabled,
+  onRandom,
+  onShowTodayLunch,
 }: Props) {
   const onSelectRef = useRef(onSelect);
   useLayoutEffect(() => {
@@ -54,6 +62,7 @@ export default function LunchMap({
   const [error, setError] = useState(false);
   const selected = restaurants.find((row) => row.id === selectedId);
   const todayLunch = useTodayLunchAction();
+  const todayVisit = todayLunch.visit;
 
   useEffect(() => {
     if (!APP_KEY) return;
@@ -112,14 +121,29 @@ export default function LunchMap({
         aria-label={`아이센스 회사 주변 지도: ${OFFICE_ADDRESS}`}
       />
       {ready && (
-        <button
-          type="button"
-          className="map-center-button"
-          aria-label="아이센스 빌딩 중심으로 지도 이동"
-          onClick={() => controller?.center()}
-        >
-          <CrosshairIcon size={18} />
-        </button>
+        <div className="map-controls">
+          <MapControlButton
+            label="랜덤 추천"
+            title="랜덤 추천"
+            icon={<DiceIcon size={18} />}
+            disabled={randomDisabled}
+            onClick={onRandom}
+          />
+          {todayVisit && (
+            <MapControlButton
+              label={`오늘의 점심 ${todayVisit.restaurant_name}(으)로 지도 이동`}
+              title={`오늘의 점심 · ${todayVisit.restaurant_name}`}
+              icon={<BowlChopsticksIcon size={18} />}
+              onClick={() => onShowTodayLunch(todayVisit.restaurant_id)}
+            />
+          )}
+          <MapControlButton
+            label="아이센스 빌딩 중심으로 지도 이동"
+            title="아이센스 빌딩으로 이동"
+            icon={<CrosshairIcon size={18} />}
+            onClick={() => controller?.center()}
+          />
+        </div>
       )}
       {!ready && (
         <div className="map-message" role="status">
@@ -177,5 +201,33 @@ export default function LunchMap({
         />
       )}
     </section>
+  );
+}
+
+/** 32px icon button stacked at the bottom right of the map. */
+function MapControlButton({
+  label,
+  title,
+  icon,
+  disabled,
+  onClick,
+}: {
+  label: string;
+  title: string;
+  icon: ReactNode;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className="map-control-button"
+      aria-label={label}
+      title={title}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {icon}
+    </button>
   );
 }

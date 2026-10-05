@@ -663,14 +663,16 @@ td .button {
 .restaurant-filters .subtle + .subtle {
   margin-top: 6px;
 }
-.map-center-button {
+.map-controls {
   position: absolute;
   z-index: 10;
   bottom: 8px;
   right: 12px;
-  /* display: inline-flex; */
-  align-items: center;
-  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.map-control-button {
   box-sizing: border-box;
   width: 32px;
   height: 32px;
@@ -680,16 +682,18 @@ td .button {
   background: white;
   color: #127e70;
   box-shadow: 0 2px 8px #0002;
-  font-size: 12px;
-  font-weight: 600;
   cursor: pointer;
 }
-.map-center-button svg {
+.map-control-button svg {
   display: block;
   margin: auto;
 }
-.map-center-button:hover {
+.map-control-button:hover:not(:disabled) {
   background: #edf6f3;
+}
+.map-control-button:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .main-nav a.admin-nav-icon {

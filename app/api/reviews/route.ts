@@ -18,7 +18,7 @@ function failure(error: unknown) {
       error:
         error instanceof ReviewError
           ? error.message
-          : '리뷰 요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+          : '리뷰 요청을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.',
     },
     { status: error instanceof ReviewError ? error.status : 500 },
   );
@@ -31,21 +31,21 @@ export async function GET(request: Request) {
     if (params.has('offset') && params.get('offset') !== '0')
       throw new ReviewError('페이지를 새로고침한 뒤 다시 조회해 주세요.');
     if (params.get('scope') === 'review') {
-      if (!user) throw new ReviewError('사용자 정보가 필요합니다.');
+      if (!user) throw new ReviewError('사용자 정보가 필요해요.');
       return Response.json(
         { review: await getOwnReview(getDb(), uuid(params.get('review_id')), user) },
         { headers: { 'Cache-Control': 'private, no-store' } },
       );
     }
     if (params.get('scope') === 'reviewed-restaurants') {
-      if (!user) throw new ReviewError('사용자 정보가 필요합니다.');
+      if (!user) throw new ReviewError('사용자 정보가 필요해요.');
       return Response.json(
         { restaurantIds: await listReviewedRestaurantIds(getDb(), user) },
         { headers: { 'Cache-Control': 'private, no-store' } },
       );
     }
     if (params.get('scope') === 'mine') {
-      if (!user) throw new ReviewError('사용자 정보가 필요합니다.');
+      if (!user) throw new ReviewError('사용자 정보가 필요해요.');
       return Response.json(await listUserReviews(getDb(), user, cursor), {
         headers: { 'Cache-Control': 'private, no-store' },
       });

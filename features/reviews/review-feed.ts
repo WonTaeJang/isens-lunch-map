@@ -52,7 +52,7 @@ export function createReviewFeed<P extends Page>(
       });
     } catch (error) {
       if (active && token === generation)
-        publish({ error: error instanceof Error ? error.message : '리뷰를 불러오지 못했습니다.' });
+        publish({ error: error instanceof Error ? error.message : '리뷰를 불러오지 못했어요.' });
     } finally {
       if (active && token === generation) publish({ loading: false });
     }

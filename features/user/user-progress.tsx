@@ -21,7 +21,7 @@ export default function UserProgress({
           <LoadingStatus label="점심 통계를 불러오는 중…" />
         ) : (
           <p className="subtle" role="status">
-            점심 통계를 불러오지 못했습니다.
+            점심 통계를 불러오지 못했어요.
           </p>
         )}
       </section>

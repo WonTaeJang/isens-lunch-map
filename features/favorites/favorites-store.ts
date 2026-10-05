@@ -26,6 +26,6 @@ export function toggleStoredFavorite(id: string): string | null {
     window.dispatchEvent(new Event(FAVORITES_CHANGED_EVENT));
     return null;
   } catch {
-    return '저장하지 못했습니다. 브라우저 저장소 설정을 확인해 주세요.';
+    return '저장하지 못했어요. 브라우저 저장소 설정을 확인해 주세요.';
   }
 }

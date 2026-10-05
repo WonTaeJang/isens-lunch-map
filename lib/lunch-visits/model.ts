@@ -23,7 +23,7 @@ export class LunchVisitError extends Error {
 }
 
 export function visitUuid(value: unknown): string {
-  if (!isUuid(value)) throw new LunchVisitError('식별 정보가 올바르지 않습니다.');
+  if (!isUuid(value)) throw new LunchVisitError('식별 정보가 올바르지 않아요.');
   return value.toLowerCase();
 }
 export function visitUserName(value: unknown): string {

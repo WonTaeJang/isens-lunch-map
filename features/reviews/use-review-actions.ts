@@ -94,7 +94,7 @@ export default function useReviewActions<E extends Review | 'new'>({
     confirmDelete() {
       if (!deleting) return;
       void mutate('DELETE', deleting).catch((cause) =>
-        setError(cause instanceof Error ? cause.message : '삭제하지 못했습니다.'),
+        setError(cause instanceof Error ? cause.message : '삭제하지 못했어요.'),
       );
     },
   };

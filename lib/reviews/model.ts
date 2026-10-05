@@ -29,7 +29,7 @@ export class ReviewError extends Error {
   }
 }
 export function uuid(value: unknown): string {
-  if (!isUuid(value)) throw new ReviewError('식별 정보가 올바르지 않습니다.');
+  if (!isUuid(value)) throw new ReviewError('식별 정보가 올바르지 않아요.');
   return value.toLowerCase();
 }
 export function reviewInput(value: Record<string, unknown>) {

@@ -20,7 +20,7 @@ function failure(error: unknown) {
       error:
         error instanceof LunchVisitError
           ? error.message
-          : '오늘의 점심 요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+          : '오늘의 점심 요청을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.',
     },
     { status: error instanceof LunchVisitError ? error.status : 500, headers: PRIVATE },
   );

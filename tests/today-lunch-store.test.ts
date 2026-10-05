@@ -92,7 +92,7 @@ test('busy is cleared even when saving fails', async () => {
     {
       ...fake.api,
       choose: async () => {
-        throw new Error('현재 오늘의 점심으로 고를 수 없는 식당입니다.');
+        throw new Error('지금은 오늘의 점심으로 고를 수 없는 식당이에요.');
       },
     },
     () => () => {},

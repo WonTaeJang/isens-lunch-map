@@ -45,14 +45,14 @@ export default function ReviewForm({
             dispatch({ type: 'conflict' });
           }
           setError(
-            cause instanceof Error ? cause.message : '저장하지 못했습니다. 다시 시도해 주세요.',
+            cause instanceof Error ? cause.message : '저장하지 못했어요. 다시 시도해 주세요.',
           );
         }
       }}
     >
       {conflict && (
         <div role="alert" className="review-error">
-          <p>다른 곳에서 리뷰가 변경되었습니다. 작성 중인 내용은 아래에 유지했습니다.</p>
+          <p>다른 곳에서 리뷰가 바뀌었어요. 작성 중인 내용은 아래에 그대로 뒀어요.</p>
           <Button
             disabled={busy || checking}
             onClick={async () => {
@@ -60,9 +60,7 @@ export default function ReviewForm({
               try {
                 dispatch({ type: 'latest', value: await onReload() });
               } catch (cause) {
-                setError(
-                  cause instanceof Error ? cause.message : '최신 리뷰를 불러오지 못했습니다.',
-                );
+                setError(cause instanceof Error ? cause.message : '최신 리뷰를 불러오지 못했어요.');
               } finally {
                 setChecking(false);
               }
@@ -72,7 +70,7 @@ export default function ReviewForm({
           </Button>
           {latest === null && (
             <p>
-              리뷰가 삭제되었거나 더 이상 수정할 수 없습니다. 작성 내용을 복사한 뒤 취소해 주세요.
+              리뷰가 삭제되었거나 더 이상 수정할 수 없어요. 작성 내용을 복사한 뒤 취소해 주세요.
             </p>
           )}
           {latest && (

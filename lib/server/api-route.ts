@@ -24,16 +24,16 @@ export async function readJsonObject(
 ): Promise<Record<string, unknown>> {
   const origin = request.headers.get('origin');
   if (origin && origin !== new URL(request.url).origin)
-    throw fail('허용되지 않은 요청입니다.', 403);
+    throw fail('허용되지 않은 요청이에요.', 403);
   const text = await request.text();
-  if (text.length > maxLength) throw fail('입력 내용이 너무 큽니다.', 413);
+  if (text.length > maxLength) throw fail('입력 내용이 너무 길어요.', 413);
   let body: unknown;
   try {
     body = JSON.parse(text);
   } catch {
-    throw fail('요청 형식이 올바르지 않습니다.');
+    throw fail('요청 형식이 올바르지 않아요.');
   }
   if (!body || typeof body !== 'object' || Array.isArray(body))
-    throw fail('요청 형식이 올바르지 않습니다.');
+    throw fail('요청 형식이 올바르지 않아요.');
   return body as Record<string, unknown>;
 }

@@ -90,7 +90,7 @@ function UserDashboardContent({
   const actions = useReviewActions<UserReview>({
     identity,
     feed,
-    savedNotice: '리뷰를 수정했습니다.',
+    savedNotice: '리뷰를 수정했어요.',
   });
   const { notice, editing, deleting, setError } = actions;
   const error = identityError || actions.error;
@@ -168,7 +168,7 @@ function UserDashboardContent({
             <LunchCalendar userId={identity.user_id} />
           ) : identityReady ? (
             <p className="review-error" role="alert">
-              {identityError || '사용자 정보를 확인할 수 없어 점심 기록을 불러오지 못했습니다.'}
+              {identityError || '사용자 정보를 확인할 수 없어 점심 기록을 불러오지 못했어요.'}
             </p>
           ) : (
             <LoadingStatus label="점심 기록을 불러오는 중…" />
@@ -226,7 +226,7 @@ function UserDashboardContent({
                     />
                   </div>
                 </div>
-                {!review.restaurant_active && <p className="subtle">현재 비활성 식당입니다.</p>}
+                {!review.restaurant_active && <p className="subtle">현재 비활성 식당이에요.</p>}
                 {review.restaurant_active && !hasCoordinates(review) && (
                   <p className="subtle">위치 정보 없음 · 지도에 표시되지 않아요</p>
                 )}
@@ -312,14 +312,14 @@ function UserDashboardContent({
                   {row.category} · {row.main_menu}
                 </p>
                 <p className="description">{row.address || '주소 확인 필요'}</p>
-                {!row.active && <p className="subtle">현재 비활성 식당입니다.</p>}
+                {!row.active && <p className="subtle">현재 비활성 식당이에요.</p>}
               </li>
             ))}
           </ul>
         </section>
       )}
       <p className={styles['user-storage-note']}>
-        이 브라우저에 저장된 사용자 정보입니다. 브라우저 데이터를 삭제하면 기존 리뷰를 관리할 수
+        이 브라우저에 저장된 사용자 정보예요. 브라우저 데이터를 삭제하면 기존 리뷰를 관리할 수
         없어요.
       </p>
     </div>

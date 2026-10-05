@@ -46,8 +46,8 @@ export default function IdentityImport({
       title="이 기기에서 이어 쓸까요?"
       description={
         replaced
-          ? `${withEuro(incoming.user_name)} 이어 씁니다.\n지금 이 기기의 사용자(${replaced})로 쓴 리뷰는 더 이상 관리할 수 없어요.`
-          : `${withEuro(incoming.user_name)} 이어 씁니다.`
+          ? `${withEuro(incoming.user_name)} 이어 써요.\n지금 이 기기의 사용자(${replaced})로 쓴 리뷰는 더 이상 관리할 수 없어요.`
+          : `${withEuro(incoming.user_name)} 이어 써요.`
       }
       confirmLabel="이어 쓰기"
       error={error}
@@ -59,7 +59,7 @@ export default function IdentityImport({
         try {
           updateLocalUser(window.localStorage, incoming);
         } catch (cause) {
-          setError(cause instanceof Error ? cause.message : '사용자 정보를 저장하지 못했습니다.');
+          setError(cause instanceof Error ? cause.message : '사용자 정보를 저장하지 못했어요.');
           return;
         }
         setError('');

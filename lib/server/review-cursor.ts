@@ -33,7 +33,7 @@ export function decodeReviewCursor(raw: string | null): ReviewCursor | null {
       ...(value.restaurantActive === undefined ? {} : { restaurantActive: value.restaurantActive }),
     };
   } catch {
-    throw new ReviewError('페이지 정보가 올바르지 않습니다.');
+    throw new ReviewError('페이지 정보가 올바르지 않아요.');
   }
 }
 export function encodeReviewCursor(cursor: ReviewCursor): string {

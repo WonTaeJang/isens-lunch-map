@@ -28,7 +28,7 @@ export default function useTodayLunchAction() {
       showSnackbar(await action());
       return { chosen };
     } catch (cause) {
-      showSnackbar(cause instanceof Error ? cause.message : '오늘의 점심을 저장하지 못했습니다.', {
+      showSnackbar(cause instanceof Error ? cause.message : '오늘의 점심을 저장하지 못했어요.', {
         tone: 'error',
       });
       return { chosen: false };
@@ -74,7 +74,7 @@ export default function useTodayLunchAction() {
           await todayLunch.choose(pending.to.id);
           close(true);
         } catch (cause) {
-          setError(cause instanceof Error ? cause.message : '오늘의 점심을 바꾸지 못했습니다.');
+          setError(cause instanceof Error ? cause.message : '오늘의 점심을 바꾸지 못했어요.');
         }
       }}
       onCancel={() => close()}

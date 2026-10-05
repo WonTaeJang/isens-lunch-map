@@ -4,7 +4,7 @@ import { requestJson } from '@/lib/request-json';
 function request<T>(
   init?: RequestInit,
   query = '',
-  fallback = '오늘의 점심을 저장하지 못했습니다.',
+  fallback = '오늘의 점심을 저장하지 못했어요.',
 ): Promise<T> {
   return requestJson<T>(`/api/lunch-visits${query}`, init, fallback);
 }
@@ -26,7 +26,7 @@ export const lunchVisitApi = {
     request<{ visits: LunchVisit[] }>(
       { signal },
       `?${new URLSearchParams({ user_id: userId, scope: 'month', month })}`,
-      '점심 기록을 불러오지 못했습니다.',
+      '점심 기록을 불러오지 못했어요.',
     ),
   cancel: (userId: string) => request<{ deleted: boolean }>(json('DELETE', { user_id: userId })),
 };

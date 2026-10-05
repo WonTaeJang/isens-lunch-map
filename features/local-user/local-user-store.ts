@@ -36,7 +36,7 @@ export function createLocalUserStore(read: () => Promise<LocalIdentity>) {
             publish({
               identity: null,
               ready: true,
-              error: '브라우저의 사용자 정보를 사용할 수 없습니다. 저장소 설정을 확인해 주세요.',
+              error: '브라우저의 사용자 정보를 사용할 수 없어요. 저장소 설정을 확인해 주세요.',
             });
         })
         .finally(() => {

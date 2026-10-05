@@ -59,7 +59,7 @@ export async function setTodayVisit(
     from saved v join public.restaurants s on s.id = v.restaurant_id`,
     [input.user, input.userName, input.restaurant],
   );
-  if (!rows[0]) throw new LunchVisitError('현재 오늘의 점심으로 고를 수 없는 식당입니다.', 404);
+  if (!rows[0]) throw new LunchVisitError('지금은 오늘의 점심으로 고를 수 없는 식당이에요.', 404);
   return present(rows[0]);
 }
 

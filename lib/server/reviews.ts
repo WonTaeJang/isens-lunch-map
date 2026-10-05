@@ -120,12 +120,13 @@ export async function mutateReview(db: Pool, method: string, body: Record<string
         [restaurant, user],
       );
       if (exists.rowCount)
-        throw new ReviewError('이미 작성한 리뷰가 있습니다. 기존 리뷰를 수정해 주세요.', 409);
+        throw new ReviewError('이미 작성한 리뷰가 있어요. 기존 리뷰를 수정해 주세요.', 409);
       const available = await client.query(
         'select id from public.restaurants where id=$1 and active=true for share',
         [restaurant],
       );
-      if (!available.rowCount) throw new ReviewError('현재 리뷰를 작성할 수 없는 식당입니다.', 404);
+      if (!available.rowCount)
+        throw new ReviewError('지금은 리뷰를 작성할 수 없는 식당이에요.', 404);
       // Deleted (enabled=false) reviews still count, so deleting never frees a daily slot.
       const today = await client.query<{ count: number }>(
         `select count(*)::int count from public.review
@@ -174,7 +175,7 @@ export async function mutateReview(db: Pool, method: string, body: Record<string
     );
   }
   if (!result.rowCount)
-    throw new ReviewError('리뷰가 변경되었거나 수정·삭제할 수 없습니다. 새로고침해 주세요.', 409);
+    throw new ReviewError('리뷰가 바뀌었거나 수정·삭제할 수 없어요. 새로고침해 주세요.', 409);
 }
 
 // Aggregate once for the list instead of requesting reviews for every restaurant.

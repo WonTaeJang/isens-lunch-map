@@ -30,6 +30,6 @@ export function updateLocalUser(
     } catch {
       /* Storage may remain unavailable; report the failed save below. */
     }
-    throw new Error('저장하지 못했습니다. 브라우저 저장소 설정을 확인해 주세요.');
+    throw new Error('저장하지 못했어요. 브라우저 저장소 설정을 확인해 주세요.');
   }
 }

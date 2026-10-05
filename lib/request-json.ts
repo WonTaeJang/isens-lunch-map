@@ -21,6 +21,6 @@ export async function requestJson<T>(
       typeof body?.error === 'string' ? body.error : fallbackMessage,
       response.status,
     );
-  if (body === null) throw new ApiError('서버 응답을 읽지 못했습니다.', response.status);
+  if (body === null) throw new ApiError('서버 응답을 읽지 못했어요.', response.status);
   return body as T;
 }

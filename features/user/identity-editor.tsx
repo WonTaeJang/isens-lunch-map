@@ -28,8 +28,8 @@ export default function IdentityEditor({
     >
       <h2 id="identity-editor-title">사용자 정보 수정</h2>
       <p className="description">
-        이 브라우저의 사용자 정보를 변경합니다. ID를 변경하면 내 리뷰 조회·관리 대상도 바뀝니다.
-        기존 리뷰의 작성자 정보는 변경되지 않습니다.
+        이 브라우저의 사용자 정보를 바꿔요. ID를 바꾸면 내 리뷰 조회·관리 대상도 바뀌어요. 기존
+        리뷰의 작성자 정보는 바뀌지 않아요.
       </p>
       <form
         onSubmit={(event) => {
@@ -39,7 +39,7 @@ export default function IdentityEditor({
             onClose();
             void localUserStore.initialize(true);
           } catch (cause) {
-            setError(cause instanceof Error ? cause.message : '사용자 정보를 저장하지 못했습니다.');
+            setError(cause instanceof Error ? cause.message : '사용자 정보를 저장하지 못했어요.');
           }
         }}
       >

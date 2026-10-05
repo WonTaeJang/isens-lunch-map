@@ -54,7 +54,7 @@ function ReviewPanelContent({
     identity,
     feed,
     extraBody: { user_name: identity?.user_name, restaurant_id: restaurant.id },
-    savedNotice: '리뷰를 저장했습니다.',
+    savedNotice: '리뷰를 저장했어요.',
   });
   const { error, notice, editing, deleting, setError } = actions;
   const [limitReached, setLimitReached] = useState(false);
@@ -80,7 +80,7 @@ function ReviewPanelContent({
   }
   function close() {
     if (busy) return;
-    if (editing && !window.confirm('리뷰 작성을 닫을까요? 작성 중인 내용은 저장되지 않습니다.'))
+    if (editing && !window.confirm('리뷰 작성을 닫을까요? 작성 중인 내용은 저장되지 않아요.'))
       return;
     onClose();
   }

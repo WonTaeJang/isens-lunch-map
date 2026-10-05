@@ -23,13 +23,13 @@ export default function useTodayLunch() {
 
   const choose = useCallback(
     async (restaurantId: string) => {
-      if (!identity) throw new Error('사용자 정보를 확인할 수 없어 저장하지 못했습니다.');
+      if (!identity) throw new Error('사용자 정보를 확인할 수 없어 저장하지 못했어요.');
       return todayLunchStore.choose(identity, restaurantId);
     },
     [identity],
   );
   const cancel = useCallback(async () => {
-    if (!identity) throw new Error('사용자 정보를 확인할 수 없어 취소하지 못했습니다.');
+    if (!identity) throw new Error('사용자 정보를 확인할 수 없어 취소하지 못했어요.');
     await todayLunchStore.cancel(identity.user_id);
   }, [identity]);
 

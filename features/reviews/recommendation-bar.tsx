@@ -21,7 +21,7 @@ export default function RecommendationBar({
         aria-label={
           total
             ? `추천 ${recommended} (${PERCENT_FORMAT.format(positivePercent)}%), 비추천 ${notRecommended} (${PERCENT_FORMAT.format(negativePercent)}%)`
-            : '추천·비추천 평가가 아직 없습니다'
+            : '추천·비추천 평가가 아직 없어요'
         }
       >
         <span className={styles.positive} style={{ width: `${positivePercent}%` }} />

@@ -28,7 +28,7 @@ export default function LunchCalendar({ userId }: { userId: string }) {
       (error: unknown) => {
         if (controller.signal.aborted) return;
         const message = error instanceof Error ? error.message : '';
-        setLoaded({ key, error: message || '점심 기록을 불러오지 못했습니다.' });
+        setLoaded({ key, error: message || '점심 기록을 불러오지 못했어요.' });
       },
     );
     return () => controller.abort();

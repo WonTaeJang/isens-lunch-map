@@ -1,4 +1,5 @@
 import { MAX_REVIEW_LENGTH, MAX_REVIEW_TAGS, REVIEW_TAGS } from './constants';
+import { isUuid } from '@/lib/uuid';
 
 export type Review = {
   id: string;
@@ -28,11 +29,7 @@ export class ReviewError extends Error {
   }
 }
 export function uuid(value: unknown): string {
-  if (
-    typeof value !== 'string' ||
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
-  )
-    throw new ReviewError('식별 정보가 올바르지 않습니다.');
+  if (!isUuid(value)) throw new ReviewError('식별 정보가 올바르지 않습니다.');
   return value.toLowerCase();
 }
 export function reviewInput(value: Record<string, unknown>) {

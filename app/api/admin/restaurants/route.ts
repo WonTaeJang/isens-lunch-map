@@ -1,4 +1,5 @@
 import { expireRestaurantCache, getRestaurantRows, getRestaurants } from '@/lib/server/restaurants';
+import { isUuid } from '@/lib/uuid';
 import { getDb } from '@/lib/server/db';
 import { ImportError, parseWorkbook } from '@/lib/server/import/parser';
 import {
@@ -68,12 +69,7 @@ export async function PATCH(request: Request) {
       expireRestaurantCache();
       return Response.json({ ok: true });
     }
-    if (
-      typeof body.id !== 'string' ||
-      !/^[0-9a-f-]{36}$/i.test(body.id) ||
-      typeof body.active !== 'boolean' ||
-      typeof body.previous !== 'boolean'
-    )
+    if (!isUuid(body.id) || typeof body.active !== 'boolean' || typeof body.previous !== 'boolean')
       throw new ImportError('상태 변경 요청이 올바르지 않습니다.');
     const result = await getDb().query(
       'update public.restaurants set active=$1, updated_at=now() where id=$2 and coalesce(active,false)=$3 returning id',

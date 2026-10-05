@@ -1,3 +1,5 @@
+import { isUuid } from '@/lib/uuid';
+
 export type LocalIdentity = { user_id: string; user_name: string };
 const initial = { identity: null as LocalIdentity | null, ready: false, error: '' };
 
@@ -47,7 +49,6 @@ export function createLocalUserStore(read: () => Promise<LocalIdentity>) {
 export const localUserStore = createLocalUserStore(async () => {
   const { ensureLocalUser } = await import('./local-user');
   const identity = ensureLocalUser(window.localStorage);
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identity.user_id))
-    throw new Error('Invalid identity');
+  if (!isUuid(identity.user_id)) throw new Error('Invalid identity');
   return identity;
 });

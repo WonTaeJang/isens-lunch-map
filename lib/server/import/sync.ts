@@ -1,4 +1,5 @@
 import 'server-only';
+import { isUuid } from '@/lib/uuid';
 import {
   geocode,
   validCoordinates,
@@ -207,8 +208,7 @@ export async function synchronize(incoming: ImportRow[], existing: Restaurant[],
 
 export async function correctAddress(id: unknown, address: unknown, previousAddress: unknown) {
   if (
-    typeof id !== 'string' ||
-    !/^[0-9a-f-]{36}$/i.test(id) ||
+    !isUuid(id) ||
     typeof address !== 'string' ||
     !address.trim() ||
     address.length > 500 ||

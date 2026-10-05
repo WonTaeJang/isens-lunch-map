@@ -19,7 +19,7 @@ export default function SiteHeader() {
       <nav className="main-nav" aria-label="주 메뉴">
         <Link
           href="/"
-          className="admin-nav-icon"
+          className="nav-icon"
           aria-label="점심 지도"
           title="점심 지도"
           aria-current={pathname === '/' ? 'page' : undefined}
@@ -28,7 +28,7 @@ export default function SiteHeader() {
         </Link>
         <Link
           href="/ranking"
-          className="admin-nav-icon"
+          className="nav-icon"
           aria-label="점심 랭킹"
           title="점심 랭킹"
           aria-current={pathname === '/ranking' ? 'page' : undefined}
@@ -37,7 +37,7 @@ export default function SiteHeader() {
         </Link>
         <Link
           href="/user"
-          className="admin-nav-icon"
+          className="nav-icon"
           aria-label="내 페이지"
           title="내 페이지"
           aria-current={pathname === '/user' ? 'page' : undefined}
@@ -46,7 +46,7 @@ export default function SiteHeader() {
         </Link>
         <Link
           href="/guide"
-          className="admin-nav-icon"
+          className="nav-icon"
           aria-label="사용법"
           title="사용법"
           aria-current={pathname === '/guide' ? 'page' : undefined}

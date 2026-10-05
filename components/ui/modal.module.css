@@ -1,0 +1,15 @@
+/* Centered card dialog. Set --modal-width on a second class to change the width. */
+.modal {
+  width: min(var(--modal-width, 440px), calc(100vw - 32px));
+  max-height: 85dvh;
+  overflow-y: auto;
+  margin: auto;
+  padding: 24px;
+  border: 1px solid #e4e9eb;
+  border-radius: 16px;
+  color: #273239;
+  background: white;
+}
+.modal::backdrop {
+  background: #172e3c66;
+}

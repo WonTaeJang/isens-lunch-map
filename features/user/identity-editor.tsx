@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import Button from '@/components/ui/button';
+import useModalDialog from '@/components/ui/use-modal-dialog';
+import modalStyles from '@/components/ui/modal.module.css';
 import { localUserStore, type LocalIdentity } from '@/features/local-user/local-user-store';
 import { updateLocalUser } from '@/features/local-user/update-local-user';
 import styles from './user.module.css';
@@ -13,17 +15,14 @@ export default function IdentityEditor({
   identity: LocalIdentity;
   onClose: () => void;
 }) {
-  const dialog = useRef<HTMLDialogElement>(null);
+  const dialog = useModalDialog();
   const [userId, setUserId] = useState(identity.user_id);
   const [userName, setUserName] = useState(identity.user_name);
   const [error, setError] = useState('');
-  useEffect(() => {
-    dialog.current?.showModal();
-  }, []);
   return (
     <dialog
       ref={dialog}
-      className={styles['identity-editor']}
+      className={`${modalStyles.modal} ${styles['identity-editor']}`}
       aria-labelledby="identity-editor-title"
       onCancel={onClose}
     >

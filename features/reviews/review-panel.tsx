@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import useModalDialog from '@/components/ui/use-modal-dialog';
 import Button from '@/components/ui/button';
 import LoadingStatus from '@/components/ui/loading-status';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
@@ -43,7 +44,7 @@ function ReviewPanelContent({
   identityReady,
   storageError,
 }: Props & { identity: LocalIdentity | null; identityReady: boolean; storageError: string }) {
-  const dialog = useRef<HTMLDialogElement>(null);
+  const dialog = useModalDialog();
   const params = new URLSearchParams({ restaurant_id: restaurant.id });
   if (identity) params.set('user_id', identity.user_id);
   const feed = useReviewFeed<ReviewPage>(identityReady ? `/api/reviews?${params}` : null);
@@ -57,11 +58,6 @@ function ReviewPanelContent({
   });
   const { error, notice, editing, deleting, setError } = actions;
   const [limitReached, setLimitReached] = useState(false);
-  useEffect(() => {
-    const element = dialog.current;
-    element?.showModal();
-    return () => element?.close();
-  }, []);
   async function save(input: ReturnType<typeof reviewInput>, base: Review | null) {
     if (base) return actions.mutate('PATCH', base, input);
     if (!identity) return;

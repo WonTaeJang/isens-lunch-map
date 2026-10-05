@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useId, useRef } from 'react';
+import { useId } from 'react';
+import useModalDialog from './use-modal-dialog';
 import Button from './button';
 import { CalendarCheckIcon } from '@/components/ui/icons';
 import styles from './confirm-dialog.module.css';
@@ -26,14 +27,9 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
 }: Props) {
-  const dialog = useRef<HTMLDialogElement>(null);
+  const dialog = useModalDialog();
   const titleId = useId();
   const descriptionId = useId();
-  useEffect(() => {
-    const element = dialog.current;
-    element?.showModal();
-    return () => element?.close();
-  }, []);
   return (
     <dialog
       ref={dialog}

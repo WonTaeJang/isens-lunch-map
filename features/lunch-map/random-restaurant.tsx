@@ -2,7 +2,8 @@
 
 import { CloseIcon } from '@/components/ui/icons';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
+import useModalDialog from '@/components/ui/use-modal-dialog';
 import Button from '@/components/ui/button';
 import ReviewCountBadges from '@/features/reviews/review-counts';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
@@ -37,7 +38,7 @@ export default function RandomRestaurant({
   onClose: () => void;
   onSelect: (id: string) => void;
 }) {
-  const dialog = useRef<HTMLDialogElement>(null);
+  const dialog = useModalDialog();
   const titleId = useId();
   const drawing = useRef(false);
   const [filters, setFilters] = useState({ ...initialFilters, query: '' });
@@ -49,14 +50,6 @@ export default function RandomRestaurant({
   const candidates = filterRestaurants(restaurants, filters, favorites);
   const resultCounts = result ? getReviewCounts(reviewCounts, result.id) : null;
   const todayLunch = useTodayLunchAction();
-
-  useEffect(() => {
-    const element = dialog.current;
-    element?.showModal();
-    return () => {
-      element?.close();
-    };
-  }, []);
 
   function changeFilters(next: Partial<RestaurantFilters>) {
     setFilters((current) => ({ ...current, ...next, query: '' }));

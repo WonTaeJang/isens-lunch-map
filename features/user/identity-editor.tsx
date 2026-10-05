@@ -68,10 +68,10 @@ export default function IdentityEditor({
           </p>
         )}
         <div className="review-actions">
-          <Button type="submit">저장</Button>
           <Button variant="secondary" onClick={onClose}>
             취소
           </Button>
+          <Button type="submit">저장</Button>
         </div>
       </form>
     </dialog>

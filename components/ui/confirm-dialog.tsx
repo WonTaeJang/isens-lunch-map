@@ -56,14 +56,15 @@ export default function ConfirmDialog({
         </p>
       )}
       <div className={styles.actions}>
-        <Button autoFocus={!showCancel} loading={busy} onClick={onConfirm}>
-          {confirmLabel}
-        </Button>
+        {/* App-wide order: 취소 on the left, the action on the right. */}
         {showCancel && (
           <Button variant="secondary" autoFocus disabled={busy} onClick={onCancel}>
             취소
           </Button>
         )}
+        <Button autoFocus={!showCancel} loading={busy} onClick={onConfirm}>
+          {confirmLabel}
+        </Button>
       </div>
     </dialog>
   );

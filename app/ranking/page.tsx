@@ -40,7 +40,7 @@ export default async function RankingPage({
     <main className="page-shell">
       <PageHeading
         eyebrow="LUNCH MAP RANKING"
-        title="점심 랭킹"
+        title={`랭킹 TOP ${RANKING_LIMIT}`}
         description="인기 식당을 만나보세요."
       />
       <nav className={styles.tabs} aria-label="랭킹 분류">
@@ -50,7 +50,7 @@ export default async function RankingPage({
             href={tab.href}
             aria-current={tab.type === selected ? 'page' : undefined}
           >
-            {tab.title} TOP {RANKING_LIMIT}
+            {tab.title}
           </Link>
         ))}
       </nav>
@@ -100,9 +100,7 @@ function RankingPanel({
   return (
     <section className={styles.panel} aria-label={label} data-active={active || undefined}>
       <div className={styles.heading}>
-        <h2>
-          {title} TOP {RANKING_LIMIT}
-        </h2>
+        <h2>{title}</h2>
         {note && <span className="subtle">{note}</span>}
       </div>
       {rows.length ? <RankingList rows={rows} /> : <p className={styles.empty}>{empty}</p>}

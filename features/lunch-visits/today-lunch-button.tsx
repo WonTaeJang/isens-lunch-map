@@ -29,7 +29,7 @@ export default function TodayLunchButton({
     <button
       type="button"
       className={size === 'large' ? `${styles.button} ${styles.large}` : styles.button}
-      title={active ? '오늘의 점심 취소' : '오늘의 점심은 여기'}
+      title={active ? '오늘의 점심 취소' : '오늘의 점심으로 기록'}
       aria-pressed={active}
       aria-busy={busy || undefined}
       aria-label={`${restaurantName} ${active ? '오늘의 점심 취소' : '오늘의 점심으로 기록'}`}

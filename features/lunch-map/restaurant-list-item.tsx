@@ -68,7 +68,9 @@ export default function RestaurantListItem({
           <ReviewCountBadges counts={counts} />
         </div>
         <p className="restaurant-list-address">{row.address || '주소 확인 필요'}</p>
-        {!hasCoordinates(row) && <span className="subtle">위치 확인 중 · 지도 이동 불가</span>}
+        {!hasCoordinates(row) && (
+          <span className="subtle">위치 정보 없음 · 지도에 표시되지 않아요</span>
+        )}
       </button>
       <div className="restaurant-list-footer">
         <div className="restaurant-list-actions">

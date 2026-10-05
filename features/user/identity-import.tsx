@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { showSnackbar } from '@/components/ui/snackbar';
 import { identityFromHash } from '@/features/local-user/identity-link';
+import { withEuro } from '@/lib/korean';
 import { localUserStore, type LocalIdentity } from '@/features/local-user/local-user-store';
 import { updateLocalUser } from '@/features/local-user/update-local-user';
 import { clearLocationHash, useLocationHash } from './location-hash';
@@ -45,8 +46,8 @@ export default function IdentityImport({
       title="이 기기에서 이어 쓸까요?"
       description={
         replaced
-          ? `${incoming.user_name}(으)로 이어 씁니다.\n지금 이 기기의 사용자(${replaced})로 쓴 리뷰는 더 이상 관리할 수 없어요.`
-          : `${incoming.user_name}(으)로 이어 씁니다.`
+          ? `${withEuro(incoming.user_name)} 이어 씁니다.\n지금 이 기기의 사용자(${replaced})로 쓴 리뷰는 더 이상 관리할 수 없어요.`
+          : `${withEuro(incoming.user_name)} 이어 씁니다.`
       }
       confirmLabel="이어 쓰기"
       error={error}
@@ -64,7 +65,7 @@ export default function IdentityImport({
         setError('');
         clearLocationHash();
         void localUserStore.initialize(true);
-        showSnackbar(`${incoming.user_name}(으)로 이어 쓰기를 시작했어요.`);
+        showSnackbar(`${withEuro(incoming.user_name)} 이어 쓰기를 시작했어요.`);
       }}
     />
   );

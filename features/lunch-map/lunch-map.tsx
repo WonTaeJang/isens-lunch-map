@@ -18,6 +18,7 @@ import {
   type MapController,
 } from './map-controller';
 import labelStyles from './map-label.module.css';
+import { withEuro } from '@/lib/korean';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 
 const APP_KEY = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY?.trim();
@@ -131,7 +132,7 @@ export default function LunchMap({
           />
           {todayVisit && (
             <MapControlButton
-              label={`오늘의 점심 ${todayVisit.restaurant_name}(으)로 지도 이동`}
+              label={`오늘의 점심 ${withEuro(todayVisit.restaurant_name)} 지도 이동`}
               title={`오늘의 점심 · ${todayVisit.restaurant_name}`}
               icon={<BowlChopsticksIcon size={18} />}
               onClick={() => onShowTodayLunch(todayVisit.restaurant_id)}

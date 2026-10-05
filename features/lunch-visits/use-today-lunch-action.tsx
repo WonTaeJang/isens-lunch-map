@@ -65,7 +65,7 @@ export default function useTodayLunchAction() {
   const dialog: ReactNode = pending && (
     <ConfirmDialog
       title="오늘의 점심을 바꿀까요?"
-      description={`오늘의 점심을 ‘${pending.from}’에서 ‘${pending.to.name}’ 식당으로 바꿀게요.`}
+      description={`‘${pending.from}’ → ‘${pending.to.name}’`}
       confirmLabel="바꾸기"
       busy={todayLunch.busy}
       error={error}

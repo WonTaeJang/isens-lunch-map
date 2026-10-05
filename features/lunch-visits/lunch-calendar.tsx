@@ -70,9 +70,9 @@ export default function LunchCalendar({ userId }: { userId: string }) {
           <dt>{month === thisMonth ? '이번 달' : `${monthNumber}월`} 점심</dt>
           <dd>
             {current ? (
-              <>
+              <span>
                 <strong>{summary.count}</strong>번
-              </>
+              </span>
             ) : (
               <LoadingSpinner size={16} />
             )}

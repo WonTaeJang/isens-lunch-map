@@ -94,7 +94,7 @@ export default function ReviewForm({
                   setError('');
                 }}
               >
-                내 작성 내용 유지하고 수정 계속하기
+                내 내용으로 계속 수정하기
               </Button>
             </>
           )}

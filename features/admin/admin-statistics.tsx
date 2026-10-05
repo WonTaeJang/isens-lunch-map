@@ -44,10 +44,10 @@ export default function AdminStatistics({ password }: { password: string }) {
           </div>
           <div className={styles.section}>
             <div className={styles.heading}>
-              <h3>점심 탐방 달성률</h3>
+              <h3>점심 탐방 진행률</h3>
               <strong>{progress.toFixed(1)}%</strong>
             </div>
-            <ProgressBar className={styles.track} value={progress} label="점심 탐방 달성률" />
+            <ProgressBar className={styles.track} value={progress} label="점심 탐방 진행률" />
             <p className="subtle">
               활성 식당 {data.activeRestaurants}곳 중 {data.reviewedRestaurants}곳에 리뷰가 있어요.
             </p>

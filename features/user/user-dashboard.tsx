@@ -228,7 +228,7 @@ function UserDashboardContent({
                 </div>
                 {!review.restaurant_active && <p className="subtle">현재 비활성 식당입니다.</p>}
                 {review.restaurant_active && !hasCoordinates(review) && (
-                  <p className="subtle">위치 확인 중 · 지도 이동 불가</p>
+                  <p className="subtle">위치 정보 없음 · 지도에 표시되지 않아요</p>
                 )}
                 <p className="subtle">
                   {DATE_FORMAT.format(new Date(review.updated_at ?? review.created_at))}

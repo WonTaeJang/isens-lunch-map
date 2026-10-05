@@ -2,6 +2,7 @@
 import { getReviewCounts } from '@/lib/reviews/model';
 
 import LoadingSpinner from '@/components/ui/loading-spinner';
+import { CrosshairIcon } from '@/components/ui/icons';
 
 import type { ReviewCounts } from '@/lib/reviews/model';
 import Script from 'next/script';
@@ -117,7 +118,7 @@ export default function LunchMap({
           aria-label="아이센스 빌딩 중심으로 지도 이동"
           onClick={() => controller?.center()}
         >
-          <span aria-hidden="true">⌖</span>
+          <CrosshairIcon size={18} />
         </button>
       )}
       {!ready && (
@@ -126,7 +127,7 @@ export default function LunchMap({
             <LoadingSpinner size={40} />
           ) : (
             <span className="empty-symbol" aria-hidden="true">
-              ⌖
+              <CrosshairIcon size={28} />
             </span>
           )}
           <strong>

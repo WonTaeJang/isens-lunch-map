@@ -672,8 +672,8 @@ td .button {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: 1px solid #dce5e1;
   border-radius: 10px;
@@ -684,9 +684,9 @@ td .button {
   font-weight: 600;
   cursor: pointer;
 }
-.map-center-button span {
-  font-size: 22px;
-  line-height: 1;
+.map-center-button svg {
+  display: block;
+  margin: auto;
 }
 .map-center-button:hover {
   background: #edf6f3;

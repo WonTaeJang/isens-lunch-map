@@ -25,6 +25,8 @@ export function useLocationHash() {
 /** Removes `#…` from the address bar without navigating or adding a history entry. */
 export function clearLocationHash() {
   const { pathname, search } = window.location;
-  window.history.replaceState(window.history.state, '', pathname + search);
+  // Pass null, not history.state: Next.js skips state carrying its own `__NA` marker, so the router
+  // would keep the old URL and write the hash back on its next update (e.g. router.refresh()).
+  window.history.replaceState(null, '', pathname + search);
   listeners.forEach((listener) => listener());
 }

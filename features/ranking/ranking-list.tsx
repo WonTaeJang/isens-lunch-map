@@ -13,34 +13,44 @@ export default function RankingList({
 }) {
   return (
     <ol className={styles.list}>
-      {rows.map((row) => (
-        <li key={row.id} value={row.rank} data-top={row.rank <= 3 || undefined}>
-          <span className={styles.rank}>{row.rank}</span>
-          <div className={styles.content}>
-            <div className={styles.title}>
-              <FavoriteButton restaurantId={row.id} restaurantName={row.name} />
-              <h3>
-                {hasCoordinates(row) ? (
-                  <Link href={restaurantMapHref(row.id)}>{row.name}</Link>
-                ) : (
-                  row.name
-                )}
-              </h3>
-            </div>
-            <div className={styles.counts}>
-              <div className={styles.details}>
-                <strong>
-                  {'visits' in row ? `${row.visits}회 · ${row.people}명` : `리뷰 ${row.reviews}`}
-                </strong>
-                <span className="subtle">{row.category}</span>
+      {rows.map((row) => {
+        const onMap = hasCoordinates(row);
+        return (
+          <li key={row.id} value={row.rank} data-top={row.rank <= 3 || undefined}>
+            <span className={styles.rank}>{row.rank}</span>
+            <div className={styles.content}>
+              <div className={styles.title}>
+                <FavoriteButton restaurantId={row.id} restaurantName={row.name} />
+                <h3>
+                  {onMap ? <Link href={restaurantMapHref(row.id)}>{row.name}</Link> : row.name}
+                </h3>
               </div>
-              <div className={styles.votes}>
-                <ReviewCountBadges counts={row} colored />
+              <div className={styles.counts}>
+                <div className={styles.details}>
+                  <strong>
+                    {'visits' in row ? (
+                      `${row.visits}회 · ${row.people}명`
+                    ) : onMap ? (
+                      <Link
+                        href={restaurantMapHref(row.id, { reviews: true })}
+                        aria-label={`${row.name} 리뷰 ${row.reviews}개 보기`}
+                      >
+                        리뷰 {row.reviews}
+                      </Link>
+                    ) : (
+                      `리뷰 ${row.reviews}`
+                    )}
+                  </strong>
+                  <span className="subtle">{row.category}</span>
+                </div>
+                <div className={styles.votes}>
+                  <ReviewCountBadges counts={row} colored />
+                </div>
               </div>
             </div>
-          </div>
-        </li>
-      ))}
+          </li>
+        );
+      })}
     </ol>
   );
 }

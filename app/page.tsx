@@ -10,9 +10,9 @@ import FirstVisitGuide from '@/features/guide/first-visit-guide';
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ restaurant?: string | string[] }>;
+  searchParams: Promise<{ restaurant?: string | string[]; reviews?: string | string[] }>;
 }) {
-  const requestedId = (await searchParams).restaurant;
+  const { restaurant: requestedId, reviews } = await searchParams;
   await connection();
   const db = getDb();
   // Review counts are optional; a restaurant failure is handled by app/error.tsx.
@@ -24,6 +24,7 @@ export default async function Home({
     typeof requestedId === 'string' && restaurants.some((row) => row.id === requestedId)
       ? requestedId
       : null;
+  const initialReviewsOpen = initialRestaurantId !== null && reviews === '1';
   return (
     <main className="page-shell">
       <PageHeading
@@ -32,8 +33,9 @@ export default async function Home({
         description="우리의 점심 리스트를 한눈에. 가까운 맛집을 지도에서 만나보세요."
       />
       <LunchExplorer
-        key={initialRestaurantId ?? 'map'}
+        key={initialRestaurantId ? `${initialRestaurantId}:${initialReviewsOpen}` : 'map'}
         initialRestaurantId={initialRestaurantId}
+        initialReviewsOpen={initialReviewsOpen}
         reviewCounts={reviewCounts}
         restaurants={restaurants}
       />

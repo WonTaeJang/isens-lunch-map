@@ -22,13 +22,18 @@ export default function LunchExplorer({
   restaurants,
   reviewCounts,
   initialRestaurantId = null,
+  initialReviewsOpen = false,
 }: {
   initialRestaurantId?: string | null;
+  /** Also opens the reviews of `initialRestaurantId` (links from the review rankings). */
+  initialReviewsOpen?: boolean;
   reviewCounts: ReviewCounts | null;
   restaurants: MapRestaurant[];
 }) {
   const reviewedIds = useReviewedRestaurants(reviewCounts);
-  const [reviewRestaurant, setReviewRestaurant] = useState<MapRestaurant | null>(null);
+  const [reviewRestaurant, setReviewRestaurant] = useState<MapRestaurant | null>(() =>
+    initialReviewsOpen ? (restaurants.find((row) => row.id === initialRestaurantId) ?? null) : null,
+  );
   function openReviews(id: string) {
     setReviewRestaurant(restaurants.find((row) => row.id === id) ?? null);
   }

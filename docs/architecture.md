@@ -26,12 +26,14 @@ lib/                         # features와 서버가 함께 쓰는 코드 (featu
     db.ts                    # DB 연결
     restaurants.ts           # 식당 조회·화면용 필드 선택
     import/                  # 엑셀 파싱·검증·DB 동기화
+    distances.ts             # 거리 재측정 미리보기·반영
   reviews/                   # 리뷰 타입·입력 검증·태그 등 정책 상수
   ranking/                   # 랭킹 순위 계산·정책 상수
   admin/                     # 관리자 통계 타입
   restaurant-types.ts        # 공통 데이터 타입
   coordinates.ts             # 좌표 유효성 검사
-  distance.ts                # 거리 표시
+  office.ts                  # 아이센스 빌딩 주소·좌표 (지도 중심, 거리 기준점)
+  distance.ts                # 회사 기준 직선거리 계산·거리 표시
   certs/                     # DB TLS 연결용 공개 CA 인증서
 ```
 
@@ -178,8 +180,8 @@ The existing `NEXT_PUBLIC_KAKAO_MAP_APP_KEY` is used only for browser maps.
 1. Enter the administrator password and select the complete workbook.
 2. Run validation/preview. Exactly one table with `가맹점명` and `주소` headers
    must exist in the first 30 rows of a visible worksheet. Hidden and very-hidden
-   worksheets are excluded. Optional columns are
-   `카테고리`, `대표메뉴`, and `거리` (bare numbers mean meters).
+   worksheets are excluded. Optional columns are `카테고리` and `대표메뉴`.
+   A `거리` column is ignored (see distances below).
 3. Review added/updated/struck/missing counts, then apply the complete list.
 
 Matching uses name + address, ignoring whitespace and Unicode width differences.
@@ -201,6 +203,14 @@ An invalid row, stale preview, duplicate, or DB failure aborts the import withou
 uses a transaction; updates to the table after preview require a new preview.
 The main page reads only active restaurants; rows without valid coordinates are
 listed but do not receive map markers.
+
+Distances are never taken from the workbook. Whenever coordinates are saved (import,
+address correction) `officeDistance` in `lib/distance.ts` stores the straight-line
+distance from the office (`lib/office.ts`) rounded to 10 m; rows without coordinates
+store NULL. The import preview reports `거리 변경` when a stored distance differs.
+The admin 업데이트 tab's 거리 재측정 section (`/api/admin/restaurants/distances`)
+previews every changed distance (GET) and saves them (POST) in one locked transaction,
+rejecting the save if any restaurant changed after the preview.
 
 `npm test` checks parsing and synchronization with a mock database.
 `npm run db:check` checks the real DB read-only.

@@ -8,6 +8,8 @@ import {
 } from './geocoder';
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { getDb } from '@/lib/server/db';
+import { officeDistance, parseDistance } from '@/lib/distance';
+import { SELECT_ALL_RESTAURANTS_SQL } from '@/lib/server/restaurants';
 import { identity, ImportError, type ImportRow } from './parser';
 import type { Restaurant } from '@/lib/server/restaurants';
 import type { ImportPreview } from '@/lib/restaurant-types';
@@ -77,11 +79,10 @@ export function previewChanges(
       if (old.name !== row.name) fields.push('식당명 변경');
       if ((old.category ?? '') !== row.category) fields.push('분류 변경');
       if ((old.main_menu ?? '') !== row.main_menu) fields.push('대표메뉴 변경');
-      if ((old.distance === null ? null : Number(old.distance)) !== row.distance)
-        fields.push('거리 변경');
       if (old.active !== row.active) fields.push(row.active ? '활성화' : '취소선 비활성화');
-      // 기존 좌표가 유효하면 저장 시 기존 주소를 유지합니다.
+      // 기존 좌표가 유효하면 저장 시 기존 주소를 유지합니다. 거리는 저장할 좌표로 다시 계산합니다.
       if (old.address === null || !validCoordinates(old)) fields.push('주소·좌표 재조회');
+      else if (parseDistance(old.distance) !== officeDistance(old)) fields.push('거리 변경');
     }
     if (fields.length)
       changes.push({
@@ -156,6 +157,7 @@ export async function synchronize(incoming: ImportRow[], existing: Restaurant[],
           ? old.address
           : row.address,
       id: old?.id,
+      distance: officeDistance(coordinates!),
       latitude: coordinates!.latitude,
       longitude: coordinates!.longitude,
     });
@@ -164,9 +166,7 @@ export async function synchronize(incoming: ImportRow[], existing: Restaurant[],
   try {
     await client.query('BEGIN');
     await client.query('LOCK TABLE public.restaurants IN EXCLUSIVE MODE');
-    const current = await client.query<Restaurant>(
-      'select id, name, category, main_menu, address, distance, active, latitude, longitude, created_at, updated_at from public.restaurants order by name, id',
-    );
+    const current = await client.query<Restaurant>(SELECT_ALL_RESTAURANTS_SQL);
     if (revision(current.rows) !== expected)
       throw new ImportError('미리보기 이후 DB가 변경되었습니다. 다시 미리보기를 실행해 주세요.');
     const ids: string[] = [];
@@ -219,9 +219,16 @@ export async function correctAddress(id: unknown, address: unknown, previousAddr
   const coordinates = await geocode(address.trim());
   const result = await getDb().query(
     `update public.restaurants set address=$1,
-     latitude=$2, longitude=$3, updated_at=now()
+     latitude=$2, longitude=$3, distance=$6, updated_at=now()
      where id=$4 and address is not distinct from $5 returning id`,
-    [address.trim(), coordinates.latitude, coordinates.longitude, id, previousAddress],
+    [
+      address.trim(),
+      coordinates.latitude,
+      coordinates.longitude,
+      id,
+      previousAddress,
+      officeDistance(coordinates),
+    ],
   );
   if (!result.rowCount)
     throw new ImportError(

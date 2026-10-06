@@ -14,6 +14,20 @@ export type Restaurant = {
 
 export type RestaurantRow = Omit<Restaurant, 'created_at' | 'updated_at'>;
 export type MapRestaurant = Omit<RestaurantRow, 'active'>;
+export type DistanceChange = {
+  id: string;
+  name: string;
+  active: boolean;
+  /** Stored meters; null when empty. */
+  before: number | null;
+  /** Recomputed meters; null when the restaurant has no valid coordinates. */
+  after: number | null;
+};
+export type DistancePreview = {
+  rows: DistanceChange[];
+  summary: { total: number; changed: number; missingCoordinates: number };
+  revision: string;
+};
 export type ImportSummary = { added: number; updated: number; inactive: number; missing: number };
 export type ImportPreview = {
   rows: {

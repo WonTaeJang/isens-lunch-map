@@ -6,6 +6,7 @@ import { useState } from 'react';
 import styles from './admin-manager.module.css';
 import AdminStatistics from './admin-statistics';
 import ExcelImportSection from './excel-import-section';
+import DistanceSection from './distance-section';
 import RestaurantTable from './restaurant-table';
 import AddressErrorSection from './address-error-section';
 import useAdminRestaurants from './use-admin-restaurants';
@@ -56,6 +57,13 @@ export default function AdminManager({
           message={admin.message}
           error={error}
           upload={admin.upload}
+        />
+        <DistanceSection
+          busy={admin.busy}
+          preview={admin.distancePreview}
+          message={admin.distanceMessage}
+          error={error}
+          measure={admin.measureDistances}
         />
       </div>
       <div

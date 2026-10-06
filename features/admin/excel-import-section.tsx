@@ -45,8 +45,9 @@ export default function ExcelImportSection({
           데이터 검증 및 미리보기
         </Button>
         <small>
-          카테고리 / 가맹점명 / 대표메뉴 / 주소 / 거리 헤더를 인식합니다. 숨겨진 시트는 제외합니다.
-          취소선은 해당 행의 데이터 셀 중 하나라도 있으면 적용됩니다.
+          카테고리 / 가맹점명 / 대표메뉴 / 주소 헤더를 인식합니다. 거리 열은 사용하지 않고 좌표로
+          계산합니다. 숨겨진 시트는 제외합니다. 취소선은 해당 행의 데이터 셀 중 하나라도 있으면
+          적용됩니다.
         </small>
       </div>
       <p role="status" className="description">

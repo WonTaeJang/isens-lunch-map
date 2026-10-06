@@ -6,16 +6,15 @@ import { getDb } from './db';
 import type { MapRestaurant, Restaurant, RestaurantRow } from '@/lib/restaurant-types';
 export type { Restaurant } from '@/lib/restaurant-types';
 
+/** Every column of every restaurant. Admin writes compare `revision()` of this exact result. */
+export const SELECT_ALL_RESTAURANTS_SQL =
+  'select id, name, category, main_menu, address, distance, active, latitude, longitude, created_at, updated_at from public.restaurants order by name, id';
+
 // Server-only. Call from a Server Component, Route Handler or Server Action.
 // Reads the existing schema without modifying any records.
 export async function getRestaurants(db: Pool): Promise<Restaurant[]> {
   try {
-    const { rows } = await db.query<Restaurant>(`
-      select id, name, category, main_menu, address, distance,
-             active, latitude, longitude, created_at, updated_at
-      from public.restaurants
-      order by name, id
-    `);
+    const { rows } = await db.query<Restaurant>(SELECT_ALL_RESTAURANTS_SQL);
     return rows;
   } catch {
     // Do not propagate driver errors containing connection or schema details.

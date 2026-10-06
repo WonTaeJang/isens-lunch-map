@@ -1,7 +1,17 @@
 'use client';
 import { useRef, useState, useTransition } from 'react';
-import type { RestaurantRow as Row, ImportPreview as Preview } from '@/lib/restaurant-types';
-import { updateRestaurant, previewImport, commitImport } from './admin-api';
+import type {
+  RestaurantRow as Row,
+  ImportPreview as Preview,
+  DistancePreview,
+} from '@/lib/restaurant-types';
+import {
+  updateRestaurant,
+  previewImport,
+  commitImport,
+  previewDistances,
+  applyDistances,
+} from './admin-api';
 export default function useAdminRestaurants(
   restaurants: Row[],
   password: string,
@@ -24,6 +34,13 @@ export default function useAdminRestaurants(
     });
   }
   const [message, setMessage] = useState('');
+  // Every save changes the restaurant revision, so it also invalidates the other preview.
+  const [distancePreview, setDistancePreview] = useState<DistancePreview | null>(null);
+  const [distanceMessage, setDistanceMessage] = useState('');
+  function clearPreviews() {
+    setPreview(null);
+    setDistancePreview(null);
+  }
   /** Runs one admin request at a time; a failure is shown with `show` (`fallback` if unknown). */
   async function exclusive(
     show: (text: string) => void,
@@ -60,7 +77,7 @@ export default function useAdminRestaurants(
         address: addresses[row.id] ?? row.address ?? '',
         previousAddress: row.address,
       });
-      setPreview(null);
+      clearPreviews();
       setAddressMessage(`${row.name}: 주소와 좌표를 저장했습니다.`);
       refresh();
     });
@@ -84,7 +101,7 @@ export default function useAdminRestaurants(
         if (mode === 'preview') setPreview(await previewImport(password, form));
         else {
           const result = await commitImport(password, form);
-          setPreview(null);
+          clearPreviews();
           setMessage(
             `저장 완료: 신규 ${result.summary.added}건, 갱신 ${result.summary.updated}건, 누락 비활성화 ${result.summary.missing}건, 주소 확인 필요 ${result.summary.addressErrors}건`,
           );
@@ -102,15 +119,33 @@ export default function useAdminRestaurants(
       return;
     }
     await exclusive(setMessage, '상태 변경에 실패했습니다.', async () => {
-      await updateRestaurant(password, {
-        id: row.id,
-        active,
-        previous: !!row.active,
-      });
-      setPreview(null);
+      await updateRestaurant(password, { id: row.id, active, previous: !!row.active });
+      clearPreviews();
       setMessage(`${row.name}: ${active ? '활성' : '비활성'}으로 변경했습니다.`);
       refresh();
     });
+  }
+  async function measureDistances(mode: 'preview' | 'apply') {
+    if (!password) {
+      setDistanceMessage('관리자 비밀번호를 입력해 주세요.');
+      return;
+    }
+    await exclusive(
+      setDistanceMessage,
+      '거리 재측정에 실패했습니다.',
+      async () => {
+        if (mode === 'preview') setDistancePreview(await previewDistances(password));
+        else if (distancePreview) {
+          const result = await applyDistances(password, distancePreview.revision);
+          clearPreviews();
+          setDistanceMessage(`저장 완료: 거리 ${result.updated}건을 갱신했습니다.`);
+          refresh();
+        }
+      },
+      () => {
+        if (mode === 'preview') setDistancePreview(null);
+      },
+    );
   }
   function onFileChange(next: File | null) {
     setFile(next);
@@ -137,5 +172,8 @@ export default function useAdminRestaurants(
     saveAddress,
     upload,
     toggle,
+    distancePreview,
+    distanceMessage,
+    measureDistances,
   };
 }

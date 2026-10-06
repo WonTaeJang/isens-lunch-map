@@ -11,12 +11,8 @@ import { createPortal } from 'react-dom';
 import Button from '@/components/ui/button';
 import useTodayLunchAction from '@/features/lunch-visits/use-today-lunch-action';
 import RestaurantMapCard from './restaurant-map-card';
-import {
-  createMapController,
-  OFFICE_ADDRESS,
-  OFFICE_POSITION,
-  type MapController,
-} from './map-controller';
+import { createMapController, type MapController } from './map-controller';
+import { OFFICE_ADDRESS, OFFICE_POSITION } from '@/lib/office';
 import labelStyles from './map-label.module.css';
 import { withEuro } from '@/lib/korean';
 import type { MapRestaurant } from '@/lib/restaurant-types';

@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs';
 
-const WORKBOOK_FIELDS = ['가맹점명', '주소', '카테고리', '대표메뉴', '거리'] as const;
+// A '거리' column is ignored: distance is computed from coordinates (see officeDistance).
+const WORKBOOK_FIELDS = ['가맹점명', '주소', '카테고리', '대표메뉴'] as const;
 
 export class ImportError extends Error {}
 export type ImportRow = {
@@ -8,7 +9,6 @@ export type ImportRow = {
   address: string;
   category: string;
   main_menu: string;
-  distance: number | null;
   active: boolean;
   row: number;
 };
@@ -69,7 +69,7 @@ export async function parseWorkbook(buffer: Buffer): Promise<ImportRow[]> {
     );
     const values = cells.map((cell) => (cell ? text(cell) : ''));
     if (values.every((value) => !value)) continue;
-    const [name, address, category, main_menu, rawDistance] = values;
+    const [name, address, category, main_menu] = values;
     if (!name || !address) throw new ImportError(`${n}행: 가맹점명과 주소가 모두 필요합니다.`);
     if (cells.some((cell) => cell?.isMerged))
       throw new ImportError(`${n}행: 데이터 셀의 병합을 해제해 주세요.`);
@@ -80,23 +80,11 @@ export async function parseWorkbook(buffer: Buffer): Promise<ImportRow[]> {
       main_menu.length > 1000
     )
       throw new ImportError(`${n}행: 입력값이 너무 깁니다.`);
-    let distance: number | null = null;
-    if (rawDistance) {
-      const match = rawDistance
-        .replace(/,/g, '')
-        .match(/^(\d+(?:\.\d+)?)\s*(km|m|미터|킬로미터)?$/i);
-      if (!match) throw new ImportError(`${n}행: 거리는 0.1Km 또는 100m 형식으로 입력해 주세요.`);
-      distance = Math.round(
-        Number(match[1]) * (/^(km|킬로미터)$/i.test(match[2] ?? '') ? 1000 : 1),
-      );
-      if (!Number.isSafeInteger(distance)) throw new ImportError(`${n}행: 거리값을 확인해 주세요.`);
-    }
     const item = {
       name,
       address,
       category,
       main_menu,
-      distance,
       active: !cells.some((cell) => cell && struck(cell)),
       row: n,
     };

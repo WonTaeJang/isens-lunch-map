@@ -37,10 +37,10 @@ async function fixture(
   }
   return Buffer.from(await book.xlsx.writeBuffer());
 }
-test('header detection, meter conversion and normal row', async () => {
+test('header detection and normal row; the distance column is ignored', async () => {
   const [r] = await parseWorkbook(await fixture());
-  assert.equal(r.distance, 100);
   assert.equal(r.active, true);
+  assert.ok(!('distance' in r));
 });
 test('cell and rich-text strike produce inactive rows', async () => {
   for (const option of [{ strike: true }, { rich: true }])
@@ -63,7 +63,7 @@ const existing: Restaurant[] = [
     category: '한식',
     main_menu: '곰탕',
     active: true,
-    distance: '100',
+    distance: '160', // officeDistance of the coordinates below
     latitude: '37.49',
     longitude: '127.01',
     created_at: null,
@@ -108,10 +108,9 @@ test('existing coordinates reused; strike and absent rows deactivate in transact
     const calls = mockDb();
     await synchronize(incoming, existing, revision(existing));
     assert.equal(calls.at(-1)?.text, 'COMMIT');
-    assert.equal(
-      calls.find((c) => c.text.startsWith('update public.restaurants set name'))?.values?.[5],
-      false,
-    );
+    const update = calls.find((c) => c.text.startsWith('update public.restaurants set name'));
+    assert.equal(update?.values?.[4], 160, 'distance is recomputed from the reused coordinates');
+    assert.equal(update?.values?.[5], false);
     assert.ok(calls.some((c) => c.text.includes('not (id=any')));
   } finally {
     globalThis.fetch = oldFetch;
@@ -279,7 +278,7 @@ test('address correction saves server coordinates; failed searches do not write'
         JSON.stringify({ documents: [{ x: '127.01', y: '37.49' }], meta: { total_count: 1 } }),
       );
     await correctAddress(existing[0].id, ' 수정 주소 ', null);
-    assert.deepEqual(calls[0], ['수정 주소', '37.49', '127.01', existing[0].id, null]);
+    assert.deepEqual(calls[0], ['수정 주소', '37.49', '127.01', existing[0].id, null, 160]);
   } finally {
     globalThis.fetch = oldFetch;
     if (oldKey === undefined) delete process.env.KAKAO_REST_API_KEY;
@@ -328,12 +327,12 @@ test('preview excludes unchanged rows and already inactive missing restaurants',
 test('preview includes changed fields, additions and missing deactivations', async () => {
   const rows = await parseWorkbook(await fixture());
   rows[0].main_menu = '갈비탕';
-  rows[0].distance = 200;
   rows[0].active = false;
   rows.push({ ...rows[0], row: 4, name: '새 식당', active: true });
-  const changes = previewChanges(rows, existing);
+  // The stored distance predates officeDistance (e.g. a workbook value).
+  const changes = previewChanges(rows, [{ ...existing[0], distance: '100' }, existing[1]]);
   assert.equal(changes.length, 3);
-  assert.deepEqual(changes[0].changes, ['대표메뉴 변경', '거리 변경', '취소선 비활성화']);
+  assert.deepEqual(changes[0].changes, ['대표메뉴 변경', '취소선 비활성화', '거리 변경']);
   assert.deepEqual(changes[1].changes, ['신규 등록']);
   assert.deepEqual(changes[2].changes, ['파일 누락으로 비활성화']);
   assert.equal(changes[2].row, null);

@@ -1,3 +1,4 @@
+import { parseDistance } from '@/lib/distance';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 
 export type RestaurantFilters = {
@@ -24,7 +25,7 @@ export function filterRestaurants(
     const text = normalize(
       [row.name, row.category, row.main_menu, row.address].filter(Boolean).join(' '),
     );
-    const distance = row.distance?.trim() ? Number(row.distance) : NaN;
+    const distance = parseDistance(row.distance) ?? NaN;
     return (
       terms.every((term) => text.includes(term)) &&
       (filters.maxDistance === null ||

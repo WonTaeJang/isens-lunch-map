@@ -1,21 +1,12 @@
 import 'server-only';
+import { hasCoordinates } from '@/lib/coordinates';
 import { ImportError } from './parser';
 
 export class AddressNotFoundError extends ImportError {}
 export class GeocodingUnavailableError extends ImportError {}
 
 export function validCoordinates(r?: { latitude: string | null; longitude: string | null }) {
-  return (
-    !!r &&
-    r.latitude !== null &&
-    r.longitude !== null &&
-    r.latitude.trim() !== '' &&
-    r.longitude.trim() !== '' &&
-    Number.isFinite(Number(r.latitude)) &&
-    Number.isFinite(Number(r.longitude)) &&
-    Math.abs(Number(r.latitude)) <= 90 &&
-    Math.abs(Number(r.longitude)) <= 180
-  );
+  return !!r && hasCoordinates(r);
 }
 export async function geocode(address: string) {
   const key = process.env.KAKAO_REST_API_KEY;

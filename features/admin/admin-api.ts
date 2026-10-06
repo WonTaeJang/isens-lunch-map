@@ -1,8 +1,14 @@
-import type { ImportPreview, ImportSummary } from '@/lib/restaurant-types';
+import type { AdminStatistics } from '@/lib/admin/statistics-types';
+import type { ImportPreview, ImportSummary, RestaurantRow } from '@/lib/restaurant-types';
 
 export type RestaurantUpdate =
   | { action?: 'active'; id: string; active: boolean; previous: boolean }
-  | { action: 'address'; id: string; address: string; previousAddress: string | null };
+  | {
+      action: 'address';
+      id: string;
+      address: string;
+      previousAddress: string | null;
+    };
 
 type CommitResult = { summary: ImportSummary & { addressErrors: number } };
 
@@ -37,25 +43,31 @@ export function commitImport(password: string, form: FormData) {
   return request<CommitResult>(password, 'POST', form);
 }
 
-export async function loadAdminRestaurants(password: string) {
-  const response = await fetch('/api/admin/restaurants', {
-    headers: { 'x-admin-password': password },
-    cache: 'no-store',
-  });
-
-  const result = await response.json();
-
-  if (!response.ok) throw new Error(result.error || '관리자 목록을 불러오지 못했습니다.');
-  return result.restaurants as import('@/lib/restaurant-types').RestaurantRow[];
-}
-
-export async function loadAdminStatistics(password: string, signal?: AbortSignal) {
-  const response = await fetch('/api/admin/statistics', {
+async function load<T>(password: string, url: string, failure: string, signal?: AbortSignal) {
+  const response = await fetch(url, {
     headers: { 'x-admin-password': password },
     cache: 'no-store',
     signal,
   });
   const result = await response.json();
-  if (!response.ok) throw new Error(result.error || '통계를 불러오지 못했습니다.');
-  return result as import('@/lib/admin/statistics-types').AdminStatistics;
+  if (!response.ok) throw new Error(result.error || failure);
+  return result as T;
+}
+
+export async function loadAdminRestaurants(password: string) {
+  const result = await load<{ restaurants: RestaurantRow[] }>(
+    password,
+    '/api/admin/restaurants',
+    '관리자 목록을 불러오지 못했습니다.',
+  );
+  return result.restaurants;
+}
+
+export function loadAdminStatistics(password: string, signal?: AbortSignal) {
+  return load<AdminStatistics>(
+    password,
+    '/api/admin/statistics',
+    '통계를 불러오지 못했습니다.',
+    signal,
+  );
 }

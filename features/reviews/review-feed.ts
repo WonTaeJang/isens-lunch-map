@@ -1,4 +1,4 @@
-import { reviewRequest } from './review-api';
+import { reviewRequest, writeReview, type ReviewWriteMethod } from './review-api';
 
 type Page = { reviews: { id: string }[]; hasMore: boolean; nextCursor: string | null };
 type Request = typeof reviewRequest;
@@ -75,17 +75,13 @@ export function createReviewFeed<P extends Page>(
       invalidate();
     },
     load,
-    async mutate(method: 'POST' | 'PATCH' | 'DELETE', body: object, onSuccess?: () => void) {
+    async mutate(method: ReviewWriteMethod, body: object, onSuccess?: () => void) {
       if (!active || snapshot.busy) return false;
       invalidate();
       const token = generation;
       publish({ busy: true, loading: false, error: '' });
       try {
-        await request('/api/reviews', {
-          method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
+        await writeReview(method, body, request);
         onSuccess?.();
         if (!active || token !== generation) return false;
         await load(false, true);

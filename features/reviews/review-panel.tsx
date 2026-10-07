@@ -11,7 +11,12 @@ import RecommendationBar from './recommendation-bar';
 import ReviewActionIcons from './review-action-icons';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from './review-form';
-import { type Review, type ReviewPage, type reviewInput } from '@/lib/reviews/model';
+import {
+  reviewTimestamp,
+  type Review,
+  type ReviewPage,
+  type reviewInput,
+} from '@/lib/reviews/model';
 import { DAILY_REVIEW_LIMIT, REVIEW_TAGS } from '@/lib/reviews/constants';
 
 import useLocalUser from '@/features/local-user/use-local-user';
@@ -193,7 +198,7 @@ function ReviewPanelContent({
                 </div>
               </div>
               <p className="subtle">
-                {DATE_FORMAT.format(new Date(review.updated_at ?? review.created_at))}
+                {DATE_FORMAT.format(new Date(reviewTimestamp(review)))}
                 {review.updated_at && ' · 수정됨'}
               </p>
               {review.content && <p className="review-content">{review.content}</p>}

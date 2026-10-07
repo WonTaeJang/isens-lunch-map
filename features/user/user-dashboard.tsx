@@ -16,7 +16,7 @@ import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from '@/features/reviews/review-form';
 import ReviewDeleteDialog from '@/features/reviews/review-delete-dialog';
 import useReviewActions from '@/features/reviews/use-review-actions';
-import type { UserReview, UserReviewPage } from '@/lib/reviews/model';
+import { reviewTimestamp, type UserReview, type UserReviewPage } from '@/lib/reviews/model';
 import { REVIEW_TAGS } from '@/lib/reviews/constants';
 import type { RestaurantRow } from '@/lib/restaurant-types';
 import { hasCoordinates } from '@/lib/coordinates';
@@ -242,7 +242,7 @@ function UserDashboardContent({
                   <p className="subtle">위치 정보 없음 · 지도에 표시되지 않아요</p>
                 )}
                 <p className="subtle">
-                  {DATE_FORMAT.format(new Date(review.updated_at ?? review.created_at))}
+                  {DATE_FORMAT.format(new Date(reviewTimestamp(review)))}
                   {review.updated_at && ' · 수정됨'}
                 </p>
                 {editing?.id === review.id ? (

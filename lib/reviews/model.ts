@@ -20,6 +20,14 @@ export type ReviewPage = {
   hasMore: boolean;
   nextCursor: string | null;
 };
+/** When the review last changed: shown as its date and sent as the edit/delete version. */
+export function reviewTimestamp(review: Pick<Review, 'created_at' | 'updated_at'>) {
+  return review.updated_at ?? review.created_at;
+}
+/** `id` and optimistic-lock `version` of the review a PATCH/DELETE targets (none for POST). */
+export function reviewTarget(review: Review | null) {
+  return { id: review?.id, version: review ? reviewTimestamp(review) : undefined };
+}
 export class ReviewError extends Error {
   constructor(
     message: string,

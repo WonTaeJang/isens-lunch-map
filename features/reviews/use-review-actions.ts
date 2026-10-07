@@ -3,10 +3,9 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { LocalIdentity } from '@/features/local-user/local-user-store';
-import type { Review, reviewInput } from '@/lib/reviews/model';
-import { reviewRequest } from './review-api';
+import { reviewTarget, type Review, type reviewInput } from '@/lib/reviews/model';
+import { reviewRequest, type ReviewWriteMethod as Method } from './review-api';
 
-type Method = 'POST' | 'PATCH' | 'DELETE';
 type Feed = {
   error: string;
   mutate: (method: Method, body: object, onSuccess?: () => void) => Promise<boolean>;
@@ -48,8 +47,7 @@ export default function useReviewActions<E extends Review | 'new'>({
       {
         user_id: identity.user_id,
         ...extraBody,
-        id: review?.id,
-        version: review?.updated_at ?? review?.created_at,
+        ...reviewTarget(review),
         ...input,
       },
       onSuccess,

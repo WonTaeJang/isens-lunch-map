@@ -300,17 +300,23 @@ test('expanded tags preserve existing codes and allow mixed experiences for eith
   }
 });
 
-test('reviewed restaurant lookup returns IDs only in one user-scoped query without pagination', async () => {
-  const { listReviewedRestaurantIds } = await import('../lib/server/reviews');
+test('own recommendation lookup returns each reviewed restaurant with its choice in one user-scoped query', async () => {
+  const { listOwnRecommendations } = await import('../lib/server/reviews');
   const mock = database((sql, values) => {
-    assert.match(sql, /select distinct restaurant_id/);
+    assert.match(sql, /select distinct on \(restaurant_id\) restaurant_id, is_recommended/);
     assert.match(sql, /where user_id=\$1/);
     assert.doesNotMatch(sql, /limit|content|user_name/);
     assert.match(sql, /enabled=true/);
     assert.deepEqual(values, [user]);
-    return { rows: [{ restaurant_id: restaurant }, { restaurant_id: id }], rowCount: 2 };
+    return {
+      rows: [
+        { restaurant_id: restaurant, is_recommended: true },
+        { restaurant_id: id, is_recommended: null },
+      ],
+      rowCount: 2,
+    };
   });
-  assert.deepEqual(await listReviewedRestaurantIds(mock.db, user), [restaurant, id]);
+  assert.deepEqual(await listOwnRecommendations(mock.db, user), { [restaurant]: true, [id]: null });
   assert.equal(mock.calls.length, 1);
 });
 

@@ -68,6 +68,8 @@ export function decodeTags(raw: unknown): string[] {
 }
 
 export type ReviewCounts = Record<string, { recommended: number; not_recommended: number }>;
+/** The viewer's own review per restaurant: true 추천, false 비추천, null neither. */
+export type OwnRecommendations = Record<string, boolean | null>;
 
 // A failed query stays unknown; a missing restaurant has no reviews.
 export function getReviewCounts(counts: ReviewCounts | null, restaurantId: string) {

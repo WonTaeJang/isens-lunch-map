@@ -1179,10 +1179,14 @@ td .button {
   cursor: not-allowed;
 }
 
-.restaurant-review-counts[data-colored] > span:first-child {
+/* Colored mode (admin, random pick) colors both sides; elsewhere only the viewer's own choice
+   (data-mine, shown with a filled icon) gets its color. */
+.restaurant-review-counts[data-colored] > span:first-child,
+.restaurant-review-counts > [data-mine]:first-child {
   color: #2563eb;
 }
-.restaurant-review-counts[data-colored] > span:last-child {
+.restaurant-review-counts[data-colored] > span:last-child,
+.restaurant-review-counts > [data-mine]:last-child {
   color: #dc2626;
 }
 .restaurant-review-counts[data-colored] {
@@ -1191,7 +1195,10 @@ td .button {
 .restaurant-review-counts[data-colored] > span {
   gap: 4px;
 }
-.restaurant-review-counts[data-colored] strong {
+.restaurant-review-counts[data-colored] strong,
+.restaurant-review-counts > [data-mine] strong {
   color: inherit;
+}
+.restaurant-review-counts[data-colored] strong {
   font-weight: 400;
 }

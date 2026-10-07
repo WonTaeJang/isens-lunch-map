@@ -4,7 +4,7 @@ import {
   getOwnReview,
   listReviews,
   listUserReviews,
-  listReviewedRestaurantIds,
+  listOwnRecommendations,
   mutateReview,
 } from '@/lib/server/reviews';
 import { ReviewError, uuid } from '@/lib/reviews/model';
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     if (params.get('scope') === 'reviewed-restaurants') {
       if (!user) throw new ReviewError('사용자 정보가 필요해요.');
       return Response.json(
-        { restaurantIds: await listReviewedRestaurantIds(getDb(), user) },
+        { restaurants: await listOwnRecommendations(getDb(), user) },
         { headers: { 'Cache-Control': 'private, no-store' } },
       );
     }

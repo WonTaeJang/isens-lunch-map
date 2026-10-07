@@ -18,6 +18,7 @@ import type { MapRestaurant } from '@/lib/restaurant-types';
 export default function RestaurantListItem({
   reviewed,
   counts,
+  mine,
   row,
   selected,
   favorite,
@@ -30,6 +31,8 @@ export default function RestaurantListItem({
 }: {
   reviewed: boolean;
   counts: ReviewCounts[string] | null;
+  /** The viewer's own 추천(true)/비추천(false), shown filled. */
+  mine: boolean | null;
   row: MapRestaurant;
   selected: boolean;
   favorite: boolean;
@@ -65,7 +68,7 @@ export default function RestaurantListItem({
         <div className="restaurant-list-meta">
           <span className="distance-badge">{formatDistance(row.distance)}</span>
           <span className="restaurant-list-menu">{menu || '분류 정보 없음'}</span>
-          <ReviewCountBadges counts={counts} />
+          <ReviewCountBadges counts={counts} mine={mine} />
         </div>
         <p className="restaurant-list-address">{row.address || '주소 확인 필요'}</p>
         {!hasCoordinates(row) && (

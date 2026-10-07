@@ -1,6 +1,9 @@
+'use client';
+
 import Link from 'next/link';
 import FavoriteButton from '@/features/favorites/favorite-button';
 import ReviewCountBadges from '@/features/reviews/review-counts';
+import useOwnReviews from '@/features/reviews/use-own-reviews';
 import { hasCoordinates } from '@/lib/coordinates';
 import { restaurantMapHref } from '@/lib/map-link';
 import type { LunchRankedRestaurant, RankedRestaurant } from '@/lib/ranking/model';
@@ -11,6 +14,8 @@ export default function RankingList({
 }: {
   rows: readonly (RankedRestaurant | LunchRankedRestaurant)[];
 }) {
+  // Every ranking list on the page shares one lookup of the viewer's own 추천/비추천.
+  const own = useOwnReviews();
   return (
     <ol className={styles.list}>
       {rows.map((row) => {
@@ -44,7 +49,7 @@ export default function RankingList({
                   <span className="subtle">{row.category}</span>
                 </div>
                 <div className={styles.votes}>
-                  <ReviewCountBadges counts={row} colored />
+                  <ReviewCountBadges counts={row} mine={own?.choices.get(row.id) ?? null} />
                 </div>
               </div>
             </div>

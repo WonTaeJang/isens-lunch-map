@@ -7,6 +7,7 @@ import {
   reviewInput,
   uuid,
   type Review,
+  type OwnRecommendations,
   type ReviewCounts,
   type UserReview,
   type ReviewPage,
@@ -249,10 +250,13 @@ export async function listUserReviews(
   };
 }
 
-export async function listReviewedRestaurantIds(db: Pool, user: string): Promise<string[]> {
-  const { rows } = await db.query<{ restaurant_id: string }>(
-    'select distinct restaurant_id from public.review where user_id=$1 and enabled=true',
+/** Restaurants the user reviewed, each with that review's 추천(true)/비추천(false)/none(null). */
+export async function listOwnRecommendations(db: Pool, user: string): Promise<OwnRecommendations> {
+  const { rows } = await db.query<{ restaurant_id: string; is_recommended: boolean | null }>(
+    `select distinct on (restaurant_id) restaurant_id, is_recommended
+    from public.review where user_id=$1 and enabled=true
+    order by restaurant_id, created_at desc, id desc`,
     [user],
   );
-  return rows.map((row) => row.restaurant_id);
+  return Object.fromEntries(rows.map((row) => [row.restaurant_id, row.is_recommended]));
 }

@@ -4,7 +4,7 @@ import { DiceIcon } from '@/components/ui/icons';
 
 import { useMemo, useRef, useState } from 'react';
 import type { ReviewCounts } from '@/lib/reviews/model';
-import useReviewedRestaurants from '@/features/reviews/use-reviewed-restaurants';
+import useOwnReviews from '@/features/reviews/use-own-reviews';
 import ReviewPanel from '@/features/reviews/review-panel';
 import CountBadge from '@/components/ui/count-badge';
 import { showSnackbar } from '@/components/ui/snackbar';
@@ -30,7 +30,9 @@ export default function LunchExplorer({
   reviewCounts: ReviewCounts | null;
   restaurants: MapRestaurant[];
 }) {
-  const reviewedIds = useReviewedRestaurants(reviewCounts);
+  // Reloaded whenever the server counts refresh after a review change.
+  const ownReviews = useOwnReviews(reviewCounts);
+  const reviewedIds = ownReviews?.ids ?? null;
   const [reviewRestaurant, setReviewRestaurant] = useState<MapRestaurant | null>(() =>
     initialReviewsOpen ? (restaurants.find((row) => row.id === initialRestaurantId) ?? null) : null,
   );
@@ -115,7 +117,7 @@ export default function LunchExplorer({
           onFavoritesOnlyChange={(favoritesOnly) => changeFilters({ favoritesOnly })}
         />
         <RestaurantResults
-          reviewedIds={reviewedIds}
+          ownReviews={ownReviews?.choices ?? null}
           reviewCounts={reviewCounts}
           rows={rows}
           total={restaurants.length}

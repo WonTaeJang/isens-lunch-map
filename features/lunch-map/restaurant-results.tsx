@@ -8,7 +8,8 @@ import useTodayLunchAction from '@/features/lunch-visits/use-today-lunch-action'
 import type { MapRestaurant } from '@/lib/restaurant-types';
 
 type Props = {
-  reviewedIds: ReadonlySet<string> | null;
+  /** Restaurants the viewer reviewed, with their 추천(true)/비추천(false)/none(null). */
+  ownReviews: ReadonlyMap<string, boolean | null> | null;
   reviewCounts: ReviewCounts | null;
   rows: MapRestaurant[];
   total: number;
@@ -22,7 +23,7 @@ type Props = {
 };
 
 export default function RestaurantResults({
-  reviewedIds,
+  ownReviews,
   reviewCounts,
   rows,
   total,
@@ -65,8 +66,9 @@ export default function RestaurantResults({
       <ul className="restaurant-results">
         {rows.map((row) => (
           <RestaurantListItem
-            reviewed={reviewedIds?.has(row.id) ?? false}
+            reviewed={ownReviews?.has(row.id) ?? false}
             counts={getReviewCounts(reviewCounts, row.id)}
+            mine={ownReviews?.get(row.id) ?? null}
             key={row.id}
             row={row}
             favorite={favorites.has(row.id)}

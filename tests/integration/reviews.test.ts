@@ -147,6 +147,22 @@ test(
         version: deleted.created_at,
       });
       await write(places[3]);
+      // A recommendation without content is removed for real and frees its daily slot.
+      await mutateReview(db, 'POST', {
+        ...input,
+        user_id: limited,
+        restaurant_id: places[4],
+        content: '',
+      });
+      const vote = (await listReviews(db, places[4], limited)).mine!;
+      await mutateReview(db, 'DELETE', {
+        ...input,
+        user_id: limited,
+        id: vote.id,
+        version: vote.created_at,
+      });
+      const gone = await db.query('select id from public.review where id=$1', [vote.id]);
+      assert.equal(gone.rowCount, 0);
       const racing = await Promise.allSettled([write(places[4]), write(places[5])]);
       assert.equal(racing.filter((result) => result.status === 'fulfilled').length, 1);
       const rejected = racing.find((result) => result.status === 'rejected');

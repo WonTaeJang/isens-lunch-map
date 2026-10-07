@@ -161,10 +161,15 @@ export async function mutateReview(db: Pool, method: string, body: Record<string
   const condition =
     "id=$1 and user_id=$2 and enabled=true and date_trunc('milliseconds',coalesce(updated_at,created_at))=$3::timestamptz";
   let result;
-  // Deletion is logical: the row (and its content) is kept and hidden with enabled=false.
+  // A review with written content is deleted logically: the row stays, hidden with enabled=false.
+  // A recommendation alone (no content) is removed for real, so undoing a 추천/비추천 click does
+  // not use up the daily limit, which counts every row created today.
   if (method === 'DELETE')
     result = await db.query(
-      `update public.review set enabled=false where ${condition} returning id`,
+      `with target as (select id, coalesce(btrim(content),'')='' as empty from public.review where ${condition}),
+      removed as (delete from public.review where id in (select id from target where empty) returning id),
+      hidden as (update public.review set enabled=false where id in (select id from target where not empty) returning id)
+      select id from removed union all select id from hidden`,
       [id, user, version],
     );
   else {

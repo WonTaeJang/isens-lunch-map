@@ -165,8 +165,19 @@ test('edit and delete scope writes to supplied owner and timestamp; stale or wro
     assert.match(mock.calls[0].sql, /enabled=true/);
     if (method === 'PATCH') assert.match(mock.calls[0].sql, /updated_at=now\(\)/);
     else {
-      assert.match(mock.calls[0].sql, /^update public.review set enabled=false where/);
-      assert.doesNotMatch(mock.calls[0].sql, /delete from/);
+      // Written reviews are hidden; a recommendation without content is removed outright.
+      assert.match(
+        mock.calls[0].sql,
+        /^with target as \(select id, coalesce\(btrim\(content\),''\)='' as empty/,
+      );
+      assert.match(
+        mock.calls[0].sql,
+        /delete from public.review where id in \(select id from target where empty\)/,
+      );
+      assert.match(
+        mock.calls[0].sql,
+        /update public.review set enabled=false where id in \(select id from target where not empty\)/,
+      );
     }
     const missing = database(() => ({ rows: [], rowCount: 0 }));
     await assert.rejects(

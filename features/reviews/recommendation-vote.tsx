@@ -54,6 +54,8 @@ export default function RecommendationVote({ restaurantId, counts, className }: 
   const [loaded, setLoaded] = useState<(Vote & { key: string }) | null>(null);
   const [pending, setPending] = useState<boolean | null | undefined>(undefined);
   const [confirming, setConfirming] = useState<Review | null>(null);
+  // The side just chosen; `count` alternates the animation name so every choice replays it.
+  const [burst, setBurst] = useState<{ value: boolean; count: number } | null>(null);
 
   const key = `${restaurantId}:${userId}`;
   const vote = loaded?.key === key ? loaded : null;
@@ -109,8 +111,10 @@ export default function RecommendationVote({ restaurantId, counts, className }: 
       return;
     }
     const action = voteAction(mine, recommended);
-    if (action.type === 'confirm-delete') setConfirming(action.review);
-    else void send(action.method, action.review, action.next);
+    if (action.type === 'confirm-delete') return setConfirming(action.review);
+    if (action.next === recommended)
+      setBurst((last) => ({ value: recommended, count: (last?.count ?? 0) + 1 }));
+    void send(action.method, action.review, action.next);
   }
 
   return (
@@ -131,9 +135,12 @@ export default function RecommendationVote({ restaurantId, counts, className }: 
                 aria-pressed={choice === value}
                 aria-label={`${label} ${count ?? '집계 불가'}`}
                 title={choice === value ? `${label} 취소` : label}
+                data-burst={burst?.value === value ? (burst.count % 2 ? 'odd' : 'even') : undefined}
                 onClick={() => press(value)}
               >
-                <RecommendationIcon recommended={value} size={14} />
+                <span className={styles.icon}>
+                  <RecommendationIcon recommended={value} size={14} />
+                </span>
                 <span aria-hidden="true">{count ?? '—'}</span>
               </button>
             </Fragment>

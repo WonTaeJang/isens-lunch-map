@@ -1054,7 +1054,7 @@ td .button {
 .restaurant-card-meta {
   flex-wrap: wrap;
 }
-.restaurant-card-meta .restaurant-review-counts {
+.restaurant-card-meta .restaurant-card-vote {
   margin-left: auto;
 }
 

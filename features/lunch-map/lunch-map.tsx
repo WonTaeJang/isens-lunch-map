@@ -6,7 +6,7 @@ import { BowlChopsticksIcon, CrosshairIcon, DiceIcon } from '@/components/ui/ico
 
 import type { ReviewCounts } from '@/lib/reviews/model';
 import Script from 'next/script';
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '@/components/ui/button';
 import useTodayLunchAction from '@/features/lunch-visits/use-today-lunch-action';
@@ -58,6 +58,12 @@ export default function LunchMap({
   const [controller, setController] = useState<MapController | null>(null);
   const [error, setError] = useState(false);
   const selected = restaurants.find((row) => row.id === selectedId);
+  // A new object only when the page data is refreshed (after any review change), which tells the
+  // card's 추천/비추천 buttons to reload the own review.
+  const selectedCounts = useMemo(
+    () => (selectedId ? getReviewCounts(reviewCounts, selectedId) : null),
+    [reviewCounts, selectedId],
+  );
   const todayLunch = useTodayLunchAction();
   const todayVisit = todayLunch.visit;
 
@@ -173,7 +179,7 @@ export default function LunchMap({
         createPortal(
           <RestaurantMapCard
             reviewed={reviewedIds?.has(selected.id) ?? false}
-            counts={getReviewCounts(reviewCounts, selected.id)}
+            counts={selectedCounts}
             key={selected.id}
             restaurant={selected}
             favorite={favorites.has(selected.id)}

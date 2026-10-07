@@ -4,7 +4,7 @@ import { DirectionsIcon } from '@/components/ui/icons';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import TodayLunchButton from '@/features/lunch-visits/today-lunch-button';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
-import ReviewCountBadges from '@/features/reviews/review-counts';
+import RecommendationVote from '@/features/reviews/recommendation-vote';
 import type { ReviewCounts } from '@/lib/reviews/model';
 import { useState } from 'react';
 import type { MapRestaurant } from '@/lib/restaurant-types';
@@ -59,11 +59,15 @@ export default function RestaurantMapCard({
         <h3>{restaurant.name}</h3>
         {reviewed && <ReviewedBadge />}
       </div>
-      <p className="restaurant-card-meta">
+      <div className="restaurant-card-meta">
         {restaurant.category || '분류 정보 없음'}
         <span className="distance-badge">{formatDistance(restaurant.distance)}</span>
-        <ReviewCountBadges counts={counts} />
-      </p>
+        <RecommendationVote
+          restaurantId={restaurant.id}
+          counts={counts}
+          className="restaurant-card-vote"
+        />
+      </div>
       <div className="restaurant-card-details">
         <p>{restaurant.address || '주소 확인 필요'}</p>
         <p className="restaurant-card-menu">대표메뉴 · {restaurant.main_menu || '정보 없음'}</p>

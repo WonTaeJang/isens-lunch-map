@@ -69,6 +69,7 @@
 - .env 변경사항 무시
 - only staged changes
 - **Co-Authored-By 금지**: 커밋 메시지에 `Co-Authored-By` 트레일러를 절대 추가하지 않는다
+- **Claude-Session 금지** 커밋 메시지에 `Claude-Session` 트레일러를 절대 추가하지 않는다
 
 ---
 

@@ -60,8 +60,8 @@ export function createMapController(
   };
   maps.event.addListener(map, 'zoom_changed', onZoom);
   const image = (file: string, selected: boolean) =>
-    new maps.MarkerImage(file, new maps.Size(selected ? 40 : 24, selected ? 50 : 30), {
-      offset: new maps.Point(selected ? 20 : 12, selected ? 48 : 28.8),
+    new maps.MarkerImage(file, new maps.Size(selected ? 32 : 18, selected ? 40 : 22.5), {
+      offset: new maps.Point(selected ? 16 : 9, selected ? 38.4 : 21.6),
     });
   const images = {
     normal: image('/restaurant-marker-default.svg', false),
@@ -94,8 +94,8 @@ export function createMapController(
     title: '아이센스 빌딩',
     zIndex: 10,
     clickable: true,
-    image: new maps.MarkerImage('/office-marker.svg', new maps.Size(40, 50), {
-      offset: new maps.Point(20, 48),
+    image: new maps.MarkerImage('/office-marker.svg', new maps.Size(32, 40), {
+      offset: new maps.Point(16, 38.4),
     }),
   });
   // The office popup looks like the restaurant card. Restaurant cards are rendered by React;

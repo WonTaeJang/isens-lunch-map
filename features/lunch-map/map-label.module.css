@@ -10,7 +10,7 @@
 }
 .label {
   position: absolute;
-  bottom: 32px; /* Just above the 30px marker. */
+  bottom: 24px; /* Just above the 22.5px marker. */
   left: 0;
   transform: translateX(-50%);
   max-width: 120px;

@@ -713,7 +713,7 @@ td .button {
 .restaurant-map-card {
   pointer-events: auto;
   position: relative;
-  bottom: 58px;
+  bottom: 48px;
   width: min(320px, 78vw);
   padding: 20px;
   border: 1px solid #d9dfe2;

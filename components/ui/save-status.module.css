@@ -1,0 +1,27 @@
+.host {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 1000;
+  pointer-events: none;
+}
+.indicator {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #dce5e1;
+  border-radius: 50%;
+  background: white;
+  color: #127e70;
+  box-shadow: 0 2px 8px #172c3014;
+}
+.label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

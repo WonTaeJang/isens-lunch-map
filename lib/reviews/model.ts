@@ -20,6 +20,9 @@ export type ReviewPage = {
   hasMore: boolean;
   nextCursor: string | null;
 };
+export type ReviewVote = Pick<ReviewPage, 'recommended' | 'not_recommended' | 'mine'>;
+export type ReviewWriteResult = ReviewVote & { ok: true; restaurant_id: string };
+
 /** When the review last changed: shown as its date and sent as the edit/delete version. */
 export function reviewTimestamp(review: Pick<Review, 'created_at' | 'updated_at'>) {
   return review.updated_at ?? review.created_at;

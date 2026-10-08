@@ -3,7 +3,7 @@ import { BowlChopsticksIcon } from '@/components/ui/icons';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import TodayLunchButton from '@/features/lunch-visits/today-lunch-button';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
-import ReviewCountBadges from '@/features/reviews/review-counts';
+import RecommendationVote from '@/features/reviews/recommendation-vote';
 import type { ReviewCounts } from '@/lib/reviews/model';
 import { formatDistance } from '@/lib/distance';
 import { hasCoordinates } from '@/lib/coordinates';
@@ -47,14 +47,15 @@ export default function RestaurantListItem({
   const menu = [row.category, row.main_menu].filter(Boolean).join(' · ');
   return (
     <li className="restaurant-list-item" data-today-lunch={todayLunch || undefined}>
-      <button
-        type="button"
-        className="restaurant-select"
-        disabled={!hasCoordinates(row)}
-        aria-label={`${row.name} 지도에서 보기`}
-        aria-pressed={selected}
-        onClick={onSelect}
-      >
+      <div className="restaurant-select-content" data-selected={selected || undefined}>
+        <button
+          type="button"
+          className="restaurant-select-target"
+          disabled={!hasCoordinates(row)}
+          aria-label={`${row.name} 지도에서 보기`}
+          aria-pressed={selected}
+          onClick={onSelect}
+        />
         <div className="restaurant-list-name">
           <h3>{row.name}</h3>
           {reviewed && <ReviewedBadge />}
@@ -68,13 +69,19 @@ export default function RestaurantListItem({
         <div className="restaurant-list-meta">
           <span className="distance-badge">{formatDistance(row.distance)}</span>
           <span className="restaurant-list-menu">{menu || '분류 정보 없음'}</span>
-          <ReviewCountBadges counts={counts} mine={mine} />
+          <RecommendationVote
+            restaurantId={row.id}
+            counts={counts}
+            initialChoice={mine}
+            lazy
+            className="restaurant-list-vote"
+          />
         </div>
         <p className="restaurant-list-address">{row.address || '주소 확인 필요'}</p>
         {!hasCoordinates(row) && (
           <span className="subtle">위치 정보 없음 · 지도에 표시되지 않아요</span>
         )}
-      </button>
+      </div>
       <div className="restaurant-list-footer">
         <div className="restaurant-list-actions">
           <FavoriteToggle restaurantName={row.name} selected={favorite} onClick={onFavorite} />

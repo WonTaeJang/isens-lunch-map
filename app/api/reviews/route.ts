@@ -2,6 +2,7 @@ import { decodeReviewCursor } from '@/lib/server/review-cursor';
 import { getDb } from '@/lib/server/db';
 import {
   getOwnReview,
+  getReviewVote,
   listReviews,
   listUserReviews,
   listOwnRecommendations,
@@ -51,6 +52,12 @@ export async function GET(request: Request) {
       });
     }
     const restaurant = uuid(params.get('restaurant_id'));
+    if (params.get('scope') === 'vote') {
+      if (!user) throw new ReviewError('사용자 정보가 필요해요.');
+      return Response.json(await getReviewVote(getDb(), restaurant, user), {
+        headers: { 'Cache-Control': 'private, no-store' },
+      });
+    }
     return Response.json(await listReviews(getDb(), restaurant, user, cursor), {
       headers: { 'Cache-Control': 'private, no-store' },
     });
@@ -65,8 +72,11 @@ async function write(request: Request) {
       16000,
       (message, status) => new ReviewError(message, status),
     );
-    await mutateReview(getDb(), request.method, body);
-    return Response.json({ ok: true }, { status: request.method === 'POST' ? 201 : 200 });
+    const result = await mutateReview(getDb(), request.method, body);
+    return Response.json(
+      { ok: true, ...result },
+      { status: request.method === 'POST' ? 201 : 200 },
+    );
   } catch (error) {
     return failure(error);
   }

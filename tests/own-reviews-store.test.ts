@@ -39,3 +39,22 @@ test('a failed lookup keeps the marks already shown', async () => {
   await store.load(user);
   assert.equal(store.getSnapshot(), before);
 });
+
+test('saved votes update subscribers immediately and survive an older in-flight lookup', async () => {
+  let resolve!: (value: unknown) => void;
+  const store = createOwnReviewsStore(
+    (() =>
+      new Promise((done) => {
+        resolve = done;
+      })) as never,
+  );
+  const loading = store.load(user);
+  store.apply(user, 'a', false);
+  assert.equal(store.getSnapshot()?.choices.get('a'), false);
+  resolve({ restaurants: { a: true, b: true } });
+  await loading;
+  assert.equal(store.getSnapshot()?.choices.get('a'), false);
+  assert.equal(store.getSnapshot()?.choices.get('b'), true);
+  store.apply(user, 'a', undefined);
+  assert.equal(store.getSnapshot()?.ids.has('a'), false);
+});

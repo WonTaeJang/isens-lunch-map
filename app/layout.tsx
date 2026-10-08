@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import LocalUserInitializer from '@/features/local-user/local-user-initializer';
 import SiteHeader from '@/components/site-header';
+import SaveStatus from '@/components/ui/save-status';
 import SnackbarHost from '@/components/ui/snackbar';
 import { version } from '@/package.json';
 
@@ -66,6 +67,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
           </a>
         </footer>
         <SnackbarHost />
+        <SaveStatus />
       </body>
     </html>
   );

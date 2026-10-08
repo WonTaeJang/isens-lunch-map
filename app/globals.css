@@ -505,25 +505,10 @@ td .button {
   font-weight: 600;
 }
 
-.restaurant-select {
-  display: block;
-  width: 100%;
-  padding: 20px;
-  text-align: left;
-  border: 0;
-  border-bottom: 1px solid #eee;
+.restaurant-select-content {
+  position: relative;
+  padding: 20px 20px 8px;
   background: white;
-  cursor: pointer;
-}
-.restaurant-select:hover:not(:disabled),
-.restaurant-select[aria-pressed='true'] {
-  background: #edf6f3;
-}
-.restaurant-select:focus-visible {
-  outline-offset: -3px;
-}
-.restaurant-select:disabled {
-  cursor: default;
 }
 .restaurant-list-item {
   position: relative;
@@ -543,10 +528,6 @@ td .button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.restaurant-list-meta .restaurant-review-counts {
-  flex: none;
-  flex-wrap: nowrap;
 }
 .restaurant-list-address {
   margin-top: 6px;
@@ -724,6 +705,15 @@ td .button {
   white-space: normal;
   overflow-wrap: anywhere;
 }
+.restaurant-card-saving {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  background: transparent;
+  cursor: progress;
+  touch-action: none;
+}
 .restaurant-map-card::after {
   pointer-events: none;
   content: '';
@@ -751,6 +741,7 @@ td .button {
   line-height: 1.4;
 }
 .restaurant-card-close {
+  z-index: 3;
   position: absolute;
   top: 10px;
   right: 10px;
@@ -830,10 +821,6 @@ td .button {
 /* Restaurant reviews: native dialog keeps keyboard focus outside the map. */
 .restaurant-list-item {
   border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
-}
-.restaurant-list-item .restaurant-select {
-  border-bottom: 0;
   padding-bottom: 8px;
 }
 .restaurant-review-button {
@@ -1201,4 +1188,34 @@ td .button {
 }
 .restaurant-review-counts[data-colored] strong {
   font-weight: 400;
+}
+
+/* The selection hit area sits behind the separate, interactive vote controls. */
+.restaurant-select-target {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.restaurant-select-target:disabled {
+  cursor: default;
+}
+.restaurant-select-content .restaurant-list-name,
+.restaurant-select-content .restaurant-list-address,
+.restaurant-select-content .restaurant-list-meta,
+.restaurant-select-content > .subtle {
+  pointer-events: none;
+}
+.restaurant-select-content:has(.restaurant-select-target:hover:not(:disabled)),
+.restaurant-select-content[data-selected] {
+  background: #edf6f3;
+}
+.restaurant-list-vote {
+  position: relative;
+  pointer-events: auto;
+}
+.restaurant-select-target:focus-visible {
+  outline-offset: -3px;
 }

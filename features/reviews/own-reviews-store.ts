@@ -16,13 +16,24 @@ export function createOwnReviewsStore(request: typeof reviewRequest = reviewRequ
   let snapshot: OwnReviews | null = null;
   const listeners = new Set<() => void>();
   const running = new Map<string, Promise<void>>();
+  let revision = 0;
+  const changes = new Map<
+    string,
+    Map<string, { revision: number; choice: boolean | null | undefined }>
+  >();
   async function fetchFor(owner: string) {
+    const started = revision;
     try {
       const params = new URLSearchParams({ scope: 'reviewed-restaurants', user_id: owner });
       const { restaurants } = await request<{ restaurants: OwnRecommendations }>(
         `/api/reviews?${params}`,
       );
       const choices = new Map(Object.entries(restaurants));
+      changes.get(owner)?.forEach((change, restaurantId) => {
+        if (change.revision <= started) return;
+        if (change.choice === undefined) choices.delete(restaurantId);
+        else choices.set(restaurantId, change.choice);
+      });
       snapshot = { owner, ids: new Set(choices.keys()), choices };
       listeners.forEach((listener) => listener());
     } catch {
@@ -32,6 +43,16 @@ export function createOwnReviewsStore(request: typeof reviewRequest = reviewRequ
     }
   }
   return {
+    apply(owner: string, restaurantId: string, choice: boolean | null | undefined) {
+      const updates = changes.get(owner) ?? new Map();
+      updates.set(restaurantId, { revision: ++revision, choice });
+      changes.set(owner, updates);
+      const choices = new Map(snapshot?.owner === owner ? snapshot.choices : []);
+      if (choice === undefined) choices.delete(restaurantId);
+      else choices.set(restaurantId, choice);
+      snapshot = { owner, ids: new Set(choices.keys()), choices };
+      listeners.forEach((listener) => listener());
+    },
     subscribe(listener: () => void) {
       listeners.add(listener);
       return () => {

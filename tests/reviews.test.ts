@@ -35,6 +35,11 @@ function database(
   let released = false;
   const query = async (sql: string, values: unknown[] = []) => {
     calls.push({ sql, values });
+    if (sql.includes('row_to_json(own_review)'))
+      return {
+        rows: [{ recommended: 0, not_recommended: 1, mine: { ...row, is_mine: true } }],
+        rowCount: 1,
+      };
     return handler(sql, values);
   };
   return {
@@ -154,8 +159,12 @@ test('duplicates, inactive restaurants and failed inserts roll back without comm
 });
 test('edit and delete scope writes to supplied owner and timestamp; stale or wrong owner is rejected', async () => {
   for (const method of ['PATCH', 'DELETE']) {
-    const mock = database(() => ({ rows: [{ id }], rowCount: 1 }));
-    await mutateReview(mock.db, method, { ...input, id, version });
+    const mock = database(() => ({ rows: [{ id, restaurant_id: restaurant }], rowCount: 1 }));
+    const saved = await mutateReview(mock.db, method, { ...input, id, version });
+    assert.equal(saved.restaurant_id, restaurant);
+    assert.equal(saved.not_recommended, 1);
+    assert.equal(mock.calls.at(-1)?.sql, 'commit');
+    mock.calls.shift();
     assert.match(mock.calls[0].sql, /id=\$1 and user_id=\$2/);
     assert.match(
       mock.calls[0].sql,

@@ -4,6 +4,7 @@ import { DirectionsIcon } from '@/components/ui/icons';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import TodayLunchButton from '@/features/lunch-visits/today-lunch-button';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
+import useVoteState from '@/features/reviews/use-vote-state';
 import RecommendationVote from '@/features/reviews/recommendation-vote';
 import type { ReviewCounts } from '@/lib/reviews/model';
 import { useState } from 'react';
@@ -38,6 +39,7 @@ export default function RestaurantMapCard({
   onReviews,
   onTodayLunch,
 }: Props) {
+  const { busy: voteBusy } = useVoteState(restaurant.id);
   const [message, setMessage] = useState<string | null>(null);
   return (
     <article
@@ -55,52 +57,55 @@ export default function RestaurantMapCard({
       >
         ×
       </button>
-      <div className="restaurant-card-header">
-        <h3>{restaurant.name}</h3>
-        {reviewed && <ReviewedBadge />}
+      <div inert={voteBusy} aria-busy={voteBusy || undefined}>
+        <div className="restaurant-card-header">
+          <h3>{restaurant.name}</h3>
+          {reviewed && <ReviewedBadge />}
+        </div>
+        <div className="restaurant-card-meta">
+          {restaurant.category || '분류 정보 없음'}
+          <span className="distance-badge">{formatDistance(restaurant.distance)}</span>
+          <RecommendationVote
+            restaurantId={restaurant.id}
+            counts={counts}
+            className="restaurant-card-vote"
+          />
+        </div>
+        <div className="restaurant-card-details">
+          <p>{restaurant.address || '주소 확인 필요'}</p>
+          <p className="restaurant-card-menu">대표메뉴 · {restaurant.main_menu || '정보 없음'}</p>
+        </div>
+        <div className="restaurant-card-actions">
+          <FavoriteToggle
+            restaurantName={restaurant.name}
+            selected={favorite}
+            onClick={() => setMessage(onFavorite())}
+          />
+          <TodayLunchButton
+            restaurantName={restaurant.name}
+            active={todayLunch}
+            busy={todayLunchBusy}
+            onToggle={onTodayLunch}
+          />
+          <button type="button" className="restaurant-card-review" onClick={onReviews}>
+            리뷰 보기
+          </button>
+          <a
+            className="restaurant-card-directions restaurant-card-icon"
+            aria-label={`${restaurant.name} 길찾기 (새 탭)`}
+            title="길찾기"
+            href={`https://map.kakao.com/link/to/${encodeURIComponent(restaurant.name)},${Number(restaurant.latitude)},${Number(restaurant.longitude)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <DirectionsIcon size={20} />
+          </a>
+        </div>
+        <p className="restaurant-card-status" role="status">
+          {message}
+        </p>
       </div>
-      <div className="restaurant-card-meta">
-        {restaurant.category || '분류 정보 없음'}
-        <span className="distance-badge">{formatDistance(restaurant.distance)}</span>
-        <RecommendationVote
-          restaurantId={restaurant.id}
-          counts={counts}
-          className="restaurant-card-vote"
-        />
-      </div>
-      <div className="restaurant-card-details">
-        <p>{restaurant.address || '주소 확인 필요'}</p>
-        <p className="restaurant-card-menu">대표메뉴 · {restaurant.main_menu || '정보 없음'}</p>
-      </div>
-      <div className="restaurant-card-actions">
-        <FavoriteToggle
-          restaurantName={restaurant.name}
-          selected={favorite}
-          onClick={() => setMessage(onFavorite())}
-        />
-        <TodayLunchButton
-          restaurantName={restaurant.name}
-          active={todayLunch}
-          busy={todayLunchBusy}
-          onToggle={onTodayLunch}
-        />
-        <button type="button" className="restaurant-card-review" onClick={onReviews}>
-          리뷰 보기
-        </button>
-        <a
-          className="restaurant-card-directions restaurant-card-icon"
-          aria-label={`${restaurant.name} 길찾기 (새 탭)`}
-          title="길찾기"
-          href={`https://map.kakao.com/link/to/${encodeURIComponent(restaurant.name)},${Number(restaurant.latitude)},${Number(restaurant.longitude)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <DirectionsIcon size={20} />
-        </a>
-      </div>
-      <p className="restaurant-card-status" role="status">
-        {message}
-      </p>
+      {voteBusy && <div className="restaurant-card-saving" aria-hidden="true" />}
     </article>
   );
 }

@@ -1,3 +1,4 @@
+import type { ReviewWriteResult } from '@/lib/reviews/model';
 import { requestJson } from '@/lib/request-json';
 
 export { ApiError } from '@/lib/request-json';
@@ -13,7 +14,7 @@ export function writeReview(
   body: object,
   request: typeof reviewRequest = reviewRequest,
 ) {
-  return request('/api/reviews', {
+  return request<ReviewWriteResult>('/api/reviews', {
     method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

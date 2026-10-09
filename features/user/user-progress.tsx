@@ -3,9 +3,7 @@ import LoadingStatus from '@/components/ui/loading-status';
 import styles from './user.module.css';
 import RecommendationBar from '@/features/reviews/recommendation-bar';
 import type { UserReviewStats } from '@/lib/reviews/model';
-
-import { percent } from './progress-model';
-const PERCENT_FORMAT = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 1 });
+import { formatPercent, percent } from '@/lib/percent';
 
 export default function UserProgress({
   stats,
@@ -35,7 +33,7 @@ export default function UserProgress({
       <div>
         <div className={styles['user-progress-heading']}>
           <h2>점심 탐방 진행률</h2>
-          <strong>{PERCENT_FORMAT.format(progress)}%</strong>
+          <strong>{formatPercent(progress)}</strong>
         </div>
         <ProgressBar
           value={progress}

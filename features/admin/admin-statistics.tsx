@@ -6,7 +6,7 @@ import ProgressBar from '@/components/ui/progress-bar';
 import Button from '@/components/ui/button';
 import LoadingStatus from '@/components/ui/loading-status';
 import RecommendationBar from '@/features/reviews/recommendation-bar';
-import { percent } from '@/features/user/progress-model';
+import { formatPercent, percent } from '@/lib/percent';
 import styles from './admin-statistics.module.css';
 
 /** Share of active restaurants covered by one kind of record (reviews, 오늘의 점심). */
@@ -26,7 +26,7 @@ function CoverageProgress({
     <div className={styles.section}>
       <div className={styles.heading}>
         <h3>{title}</h3>
-        <strong>{progress.toFixed(1)}%</strong>
+        <strong>{formatPercent(progress)}</strong>
       </div>
       <ProgressBar
         className={styles.track}

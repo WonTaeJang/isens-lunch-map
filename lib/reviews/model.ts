@@ -89,6 +89,10 @@ export type UserReview = Review & {
 export type UserReviewStats = {
   active_total: number;
   reviewed_active: number;
+  /** Active restaurants picked as 오늘의 점심 at least once. */
+  lunched_active: number;
+  /** Active restaurants reviewed or picked as 오늘의 점심 (each counted once): the progress. */
+  visited_active: number;
   recommended_active: number;
   not_recommended_active: number;
 };

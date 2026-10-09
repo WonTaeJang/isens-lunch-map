@@ -335,6 +335,8 @@ test('user statistics aggregate all active restaurants independently of review p
     total: 45,
     active_total: 100,
     reviewed_active: 30,
+    lunched_active: 12,
+    visited_active: 35,
     recommended_active: 21,
     not_recommended_active: 9,
   };
@@ -345,6 +347,10 @@ test('user statistics aggregate all active restaurants independently of review p
       assert.equal(sql.match(/enabled=true/g)?.length, 2);
       assert.match(sql, /where s.active=true/);
       assert.match(sql, /left join mine/);
+      // 오늘의 점심 picks join the same count, each restaurant once.
+      assert.match(sql, /select distinct restaurant_id from public.lunch_visit where user_id=\$1/);
+      assert.match(sql, /left join lunched/);
+      assert.match(sql, /mine.restaurant_id is not null or lunched.restaurant_id is not null/);
       assert.doesNotMatch(sql, /limit|offset/);
       return { rows: [stats], rowCount: 1 };
     }

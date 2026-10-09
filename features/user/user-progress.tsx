@@ -26,7 +26,9 @@ export default function UserProgress({
         )}
       </section>
     );
-  const progress = percent(stats.reviewed_active, stats.active_total);
+  // A restaurant counts once whether it was reviewed, picked as 오늘의 점심, or both.
+  const progress = percent(stats.visited_active, stats.active_total);
+  const breakdown = `리뷰 ${stats.reviewed_active} · 오늘의 점심 ${stats.lunched_active}`;
   const rated = stats.recommended_active + stats.not_recommended_active;
   return (
     <section className={styles['user-progress']} aria-label="점심 통계">
@@ -38,11 +40,9 @@ export default function UserProgress({
         <ProgressBar
           value={progress}
           label="점심 탐방 진행률"
-          valueText={`식당 ${stats.active_total}곳 중 리뷰 ${stats.reviewed_active}`}
+          valueText={`식당 ${stats.active_total}곳 중 ${stats.visited_active}곳 (${breakdown})`}
         />
-        <p className="subtle">
-          {stats.active_total ? `리뷰 ${stats.reviewed_active}` : '집계할 식당이 없어요'}
-        </p>
+        <p className="subtle">{stats.active_total ? breakdown : '집계할 식당이 없어요'}</p>
       </div>
       <div>
         <div className={styles['user-progress-heading']}>

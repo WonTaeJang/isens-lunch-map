@@ -249,13 +249,18 @@ export async function listUserReviews(
     select distinct on (restaurant_id) restaurant_id, is_recommended
     from public.review where user_id=$1 and enabled=true
     order by restaurant_id, created_at desc, id desc
+  ), lunched as (
+    select distinct restaurant_id from public.lunch_visit where user_id=$1
   )
   select (select count(*)::int from public.review where user_id=$1 and enabled=true) total,
     count(*)::int active_total,
     count(mine.restaurant_id)::int reviewed_active,
+    count(lunched.restaurant_id)::int lunched_active,
+    count(*) filter (where mine.restaurant_id is not null or lunched.restaurant_id is not null)::int visited_active,
     count(*) filter (where mine.is_recommended=true)::int recommended_active,
     count(*) filter (where mine.is_recommended=false)::int not_recommended_active
   from public.restaurants s left join mine on mine.restaurant_id=s.id
+  left join lunched on lunched.restaurant_id=s.id
   where s.active=true`,
     [user],
   );

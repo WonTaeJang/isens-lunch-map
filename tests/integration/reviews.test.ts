@@ -16,7 +16,8 @@ test(
     const scoped = (sql: string) =>
       sql
         .replaceAll('public.review', `"${schema}".review`)
-        .replaceAll('public.restaurants', `"${schema}".restaurants`);
+        .replaceAll('public.restaurants', `"${schema}".restaurants`)
+        .replaceAll('public.lunch_visit', `"${schema}".lunch_visit`);
     const db = {
       query: (sql: string, values?: unknown[]) => pool.query(scoped(sql), values),
       connect: async () => {
@@ -39,6 +40,9 @@ test(
       await db.query(`create table public.review (id uuid primary key default gen_random_uuid(), restaurant_id uuid references public.restaurants(id),
       user_id uuid, user_name text, content text, is_recommended boolean, tags text, created_at timestamptz not null default clock_timestamp(), updated_at timestamptz,
       enabled boolean not null default true)`);
+      await db.query(`create table public.lunch_visit (id uuid primary key default gen_random_uuid(),
+      user_id uuid not null, user_name text, restaurant_id uuid not null references public.restaurants(id),
+      visit_date date not null, unique (user_id, visit_date))`);
       await db.query(
         "insert into public.restaurants(id,name,active) values ($1,'active',true),($2,'inactive',false),($3,'unrated',true)",
         [restaurant, inactive, nullRated],
@@ -77,6 +81,24 @@ test(
       assert.equal(stats.reviewed_active, 2);
       assert.equal(stats.recommended_active, 0);
       assert.equal(stats.not_recommended_active, 1);
+      assert.equal(stats.lunched_active, 0);
+      assert.equal(stats.visited_active, 2);
+      // 오늘의 점심 picks add to the progress: a reviewed restaurant counts once, an inactive one
+      // never, and a restaurant only picked for lunch counts too.
+      const lunchOnly = crypto.randomUUID();
+      await db.query("insert into public.restaurants(id,name,active) values ($1,'lunch',true)", [
+        lunchOnly,
+      ]);
+      await db.query(
+        `insert into public.lunch_visit(user_id,restaurant_id,visit_date)
+        values ($1,$2,'2026-10-01'),($1,$2,'2026-10-02'),($1,$3,'2026-10-03'),($1,$4,'2026-10-04')`,
+        [user, restaurant, inactive, lunchOnly],
+      );
+      const withLunch = await listUserReviews(db, user);
+      assert.equal(withLunch.active_total, 3);
+      assert.equal(withLunch.reviewed_active, 2);
+      assert.equal(withLunch.lunched_active, 2);
+      assert.equal(withLunch.visited_active, 3);
       // The advisory lock allows exactly one concurrent first review per user/restaurant.
       const newUser = crypto.randomUUID();
       const input = {

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import useModalDialog from '@/components/ui/use-modal-dialog';
+import useBackdropClose from '@/components/ui/use-backdrop-close';
 import Button from '@/components/ui/button';
 import LoadingStatus from '@/components/ui/loading-status';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
@@ -89,12 +90,15 @@ function ReviewPanelContent({
       return;
     onClose();
   }
+  // Clicking outside the panel works like its × button (asks first while writing).
+  const backdropClose = useBackdropClose(close);
 
   return (
     <dialog
       ref={dialog}
       className="review-panel"
       aria-labelledby="review-panel-title"
+      {...backdropClose}
       onCancel={(event) => {
         event.preventDefault();
         close();

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createUserName, ensureLocalUser } from '../features/local-user/local-user';
+import { createUserName, ensureLocalUser, splitUserName } from '../features/local-user/local-user';
 
 function memoryStorage(initial: Record<string, string> = {}) {
   const values = new Map(Object.entries(initial));
@@ -43,4 +43,14 @@ test('existing values are preserved and only missing fields are repaired', () =>
 
 test('nickname generator produces the expected display format', () => {
   for (let i = 0; i < 30; i++) assert.match(createUserName(), /^[가-힣]+#[0-9]{4}$/);
+});
+
+test('a nickname splits into the name and its #tag at the last #', () => {
+  assert.deepEqual(splitUserName('떠도는당근#4947'), { name: '떠도는당근', tag: '#4947' });
+  assert.deepEqual(splitUserName('C#개발자#0123'), { name: 'C#개발자', tag: '#0123' });
+});
+
+test('names without a usable #tag stay whole', () => {
+  for (const name of ['직접바꾼이름', '#4947', '이름#', ''])
+    assert.deepEqual(splitUserName(name), { name, tag: null });
 });

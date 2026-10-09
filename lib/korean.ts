@@ -15,9 +15,14 @@ function finalConsonant(text: string): number | null {
   return (code - HANGUL_START) % 28;
 }
 
+/** Just the "으로", "로" or "(으)로" that follows `name`, for when the name is rendered apart. */
+export function euroParticle(name: string) {
+  const final = finalConsonant(name);
+  if (final === null) return '(으)로';
+  return final === 0 || final === RIEUL ? '로' : '으로';
+}
+
 /** `name` + "으로" or "로", e.g. 고공 서초점 → "고공 서초점으로", 떠도는당근#4947 → "떠도는당근#4947로". */
 export function withEuro(name: string) {
-  const final = finalConsonant(name);
-  if (final === null) return `${name}(으)로`;
-  return `${name}${final === 0 || final === RIEUL ? '로' : '으로'}`;
+  return name + euroParticle(name);
 }

@@ -9,7 +9,8 @@ import {
   ThumbsUpIcon,
   UserIcon,
 } from '@/components/ui/icons';
-import { withEuro } from '@/lib/korean';
+import { euroParticle } from '@/lib/korean';
+import UserName from '@/features/local-user/user-name';
 import { DAILY_REVIEW_LIMIT } from '@/lib/reviews/constants';
 import styles from './guide.module.css';
 
@@ -42,7 +43,12 @@ export const GUIDE_STEPS: GuideStep[] = [
         <p>리스트에서 식당을 누르면 지도가 그 식당으로 이동하고 정보 카드가 열려요.</p>
         {nickname ? (
           <p className={styles.highlight}>
-            오늘부터 <strong>{withEuro(nickname)}</strong> 함께해요.
+            오늘부터{' '}
+            <strong>
+              <UserName name={nickname} />
+              {euroParticle(nickname)}
+            </strong>{' '}
+            함께해요.
           </p>
         ) : (
           <p className={styles.highlight}>

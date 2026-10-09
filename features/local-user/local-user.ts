@@ -16,6 +16,13 @@ export function createUserName(): string {
   return randSuffix(name, SUFFIX_OPTIONS);
 }
 
+/** Splits "이름#1234" into the name and its #tag; names without a tag come back whole. */
+export function splitUserName(userName: string) {
+  const index = userName.lastIndexOf(SUFFIX_OPTIONS.separator);
+  if (index <= 0 || index === userName.length - 1) return { name: userName, tag: null };
+  return { name: userName.slice(0, index), tag: userName.slice(index) };
+}
+
 // Toy-project identity: reviews compare this ID without authenticated ownership.
 export function ensureLocalUser(storage: Pick<Storage, 'getItem' | 'setItem'>) {
   const storedId = storage.getItem(LOCAL_USER_KEYS.id);

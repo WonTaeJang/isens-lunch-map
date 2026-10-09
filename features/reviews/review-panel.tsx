@@ -21,6 +21,7 @@ import {
 import { DAILY_REVIEW_LIMIT, REVIEW_TAGS } from '@/lib/reviews/constants';
 
 import useLocalUser from '@/features/local-user/use-local-user';
+import UserName from '@/features/local-user/user-name';
 import type { LocalIdentity } from '@/features/local-user/local-user-store';
 import useReviewFeed from './use-review-feed';
 import useReviewActions from './use-review-actions';
@@ -188,7 +189,8 @@ function ReviewPanelContent({
             <li key={review.id} className="review-item">
               <div className="review-item-heading">
                 <strong>
-                  {review.user_name || '익명'} {review.is_mine && <small>내 리뷰</small>}
+                  {review.user_name ? <UserName name={review.user_name} /> : '익명'}{' '}
+                  {review.is_mine && <small>내 리뷰</small>}
                 </strong>
                 <div className="review-heading-actions">
                   <RecommendationBadge recommended={review.is_recommended} />

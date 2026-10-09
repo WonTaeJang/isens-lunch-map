@@ -24,6 +24,7 @@ import { restaurantMapHref } from '@/lib/map-link';
 import { formatDistance } from '@/lib/distance';
 
 import useLocalUser from '@/features/local-user/use-local-user';
+import UserName from '@/features/local-user/user-name';
 import type { LocalIdentity } from '@/features/local-user/local-user-store';
 import useReviewFeed from '@/features/reviews/use-review-feed';
 import LunchCalendar from '@/features/lunch-visits/lunch-calendar';
@@ -120,8 +121,13 @@ function UserDashboardContent({
           <div>
             <p className="subtle">나의 점심 기록</p>
             <h1>
-              {identity?.user_name ??
-                (identityReady ? '사용자 정보를 확인해 주세요' : '불러오는 중…')}
+              {identity ? (
+                <UserName name={identity.user_name} />
+              ) : identityReady ? (
+                '사용자 정보를 확인해 주세요'
+              ) : (
+                '불러오는 중…'
+              )}
             </h1>
             <p className="subtle">
               작성한 리뷰 {page?.total ?? '—'} · 즐겨찾기 {identityReady ? favorites.size : '—'}

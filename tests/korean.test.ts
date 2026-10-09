@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { withEuro } from '../lib/korean';
+import { euroParticle, withEuro } from '../lib/korean';
 
 test('으로/로 follows the final consonant, digits as read aloud, ㄹ takes 로', () => {
   assert.equal(withEuro('고공 서초점'), '고공 서초점으로');
@@ -22,4 +22,10 @@ test('으로/로 follows the final consonant, digits as read aloud, ㄹ takes �
   // Unknown pronunciation falls back to (으)로.
   assert.equal(withEuro('Subway'), 'Subway(으)로');
   assert.equal(withEuro(''), '(으)로');
+});
+
+test('the particle alone matches what withEuro appends', () => {
+  assert.equal(euroParticle('떠도는당근#4947'), '로');
+  assert.equal(euroParticle('야무진젤리#6003'), '으로');
+  assert.equal(euroParticle('Subway'), '(으)로');
 });

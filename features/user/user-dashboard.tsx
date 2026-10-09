@@ -255,7 +255,6 @@ function UserDashboardContent({
                   <ReviewForm
                     key={editing.id}
                     review={editing}
-                    name={identity?.user_name ?? ''}
                     busy={busy || loading}
                     onReload={() => actions.loadOwnReview(editing.id)}
                     onCancel={() => actions.setEditing(null)}

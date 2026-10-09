@@ -9,14 +9,12 @@ import { MAX_REVIEW_LENGTH, MAX_REVIEW_TAGS, REVIEW_TAG_GROUPS } from '@/lib/rev
 
 export default function ReviewForm({
   review,
-  name,
   busy,
   onSave,
   onCancel,
   onReload,
 }: {
   review: Review | null;
-  name: string;
   busy: boolean;
   onSave: (input: ReturnType<typeof reviewInput>, base: Review | null) => Promise<void>;
   onCancel: () => void;
@@ -99,7 +97,6 @@ export default function ReviewForm({
         </div>
       )}
       <h3>{base ? '리뷰 수정' : '리뷰 작성'}</h3>
-      <p className="subtle">{name}</p>
       <fieldset disabled={busy}>
         <legend>이 식당을 추천하나요?</legend>
         <div className="review-options">

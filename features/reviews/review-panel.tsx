@@ -173,7 +173,6 @@ function ReviewPanelContent({
           <ReviewForm
             key={editing === 'new' ? 'new' : editing.id}
             review={editing === 'new' ? null : editing}
-            name={identity?.user_name ?? ''}
             busy={busy || loading}
             onReload={reloadEditing}
             onCancel={() => actions.setEditing(null)}

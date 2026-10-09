@@ -16,9 +16,9 @@ import { formatDistance } from '@/lib/distance';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 import { filterRestaurants, type RestaurantFilters } from './filter-restaurants';
 import { DistanceFilter, FavoritesFilter } from './restaurant-filter-controls';
-import RestaurantSlot, { createSlotNames } from './restaurant-slot';
+import RestaurantSlot from './restaurant-slot';
 import { getReviewCounts } from '@/lib/reviews/model';
-import { pickRestaurant } from './random-model';
+import { createSlotNames, pickRestaurant } from './random-model';
 import styles from './random-restaurant.module.css';
 
 export default function RandomRestaurant({

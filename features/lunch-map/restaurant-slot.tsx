@@ -1,19 +1,9 @@
 import type { CSSProperties } from 'react';
-import type { MapRestaurant } from '@/lib/restaurant-types';
+import { WINNER_INDEX } from './random-model';
 import styles from './restaurant-slot.module.css';
 
 const ROW_HEIGHT = 56;
-const WINNER_INDEX = 25;
 const DURATION_MS = 2000;
-
-export function createSlotNames(candidates: readonly MapRestaurant[], chosen: MapRestaurant) {
-  const names = Array.from(
-    { length: WINNER_INDEX + 2 },
-    () => candidates[Math.floor(Math.random() * candidates.length)].name,
-  );
-  names[WINNER_INDEX] = chosen.name;
-  return names;
-}
 
 export default function RestaurantSlot({
   reel,

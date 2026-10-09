@@ -1,6 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pickRestaurant } from '../features/lunch-map/random-model';
+import {
+  createSlotNames,
+  pickRestaurant,
+  SLOT_LENGTH,
+  WINNER_INDEX,
+} from '../features/lunch-map/random-model';
 import { filterRestaurants, DEFAULT_FILTERS } from '../features/lunch-map/filter-restaurants';
 import type { MapRestaurant } from '../lib/restaurant-types';
 import { getReviewCounts } from '../lib/reviews/model';
@@ -46,4 +51,35 @@ test('distance and favorites intersect; unknown distance only participates witho
     ['b', 'c'],
   );
   assert.deepEqual(filterRestaurants(rows, { ...filters, maxDistance: 100 }, favorites), []);
+});
+
+function many(count: number): MapRestaurant[] {
+  return Array.from({ length: count }, (_, index) => ({
+    ...rows[0],
+    id: `r${index}`,
+    name: `식당${index}`,
+  }));
+}
+test('slot reel never repeats a restaurant when there are enough candidates', () => {
+  for (const count of [SLOT_LENGTH, 40, 299]) {
+    const candidates = many(count);
+    for (let round = 0; round < 20; round++) {
+      const chosen = candidates[round % count];
+      const names = createSlotNames(candidates, chosen);
+      assert.equal(names.length, SLOT_LENGTH);
+      assert.equal(names[WINNER_INDEX], chosen.name);
+      assert.equal(new Set(names).size, SLOT_LENGTH);
+    }
+  }
+});
+test('with few candidates the reel cycles them, showing the winner only where it stops', () => {
+  const candidates = many(5);
+  const chosen = candidates[2];
+  const names = createSlotNames(candidates, chosen);
+  assert.equal(names.length, SLOT_LENGTH);
+  assert.deepEqual(
+    names.flatMap((name, index) => (name === chosen.name ? [index] : [])),
+    [WINNER_INDEX],
+  );
+  for (let i = 1; i < names.length; i++) assert.notEqual(names[i], names[i - 1]);
 });

@@ -2,7 +2,10 @@ export type AdminStatistics = {
   users: number;
   reviews: number;
   activeRestaurants: number;
+  /** Active restaurants with at least one review. */
   reviewedRestaurants: number;
+  /** Active restaurants picked as 오늘의 점심 at least once (any day, by anyone). */
+  lunchedRestaurants: number;
   recommended: number;
   notRecommended: number;
   recentDays: { date: string; count: number }[];

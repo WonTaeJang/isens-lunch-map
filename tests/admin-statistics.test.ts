@@ -38,6 +38,8 @@ test('statistics uses distinct authors, active restaurant coverage and counts ta
       assert.match(sql, /count\(distinct user_id\)/);
       assert.match(sql, /s.active=true/);
       assert.match(sql, /exists \(select 1 from public.review/);
+      // 오늘의 점심 coverage: active restaurants picked on any day.
+      assert.match(sql, /exists \(select 1 from public.lunch_visit v where v.restaurant_id=s.id\)/);
       // Deleted reviews are excluded everywhere: daily, coverage, tags, top lists, totals, ranking.
       assert.equal(sql.match(/enabled=true/g)?.length, 6);
       assert.match(sql, /group by tags/);
@@ -67,6 +69,7 @@ test('statistics uses distinct authors, active restaurant coverage and counts ta
             reviews: 4,
             activeRestaurants: 3,
             reviewedRestaurants: 2,
+            lunchedRestaurants: 1,
             recommended: 2,
             notRecommended: 1,
             recentDays: [{ date: '2026-10-01', count: 4 }],
@@ -99,6 +102,7 @@ test('statistics uses distinct authors, active restaurant coverage and counts ta
   assert.equal(result.recentDays[0].count, 4);
   assert.equal(result.topRestaurants[0].active, false);
   assert.deepEqual(result.topRecommendedRestaurants, topRecommendedRestaurants);
+  assert.equal(result.lunchedRestaurants, 1);
   assert.deepEqual(result.topLunchRestaurants, [
     { id: 'lunch', name: '점심 식당', active: false, visits: 3, people: 2, rank: 1 },
   ]);
@@ -113,6 +117,7 @@ test('empty statistics includes zero counts for all supported tags', async () =>
           reviews: 0,
           activeRestaurants: 0,
           reviewedRestaurants: 0,
+          lunchedRestaurants: 0,
           recommended: 0,
           notRecommended: 0,
           recentDays: [],

@@ -33,6 +33,8 @@ export async function getAdminStatistics(db: Pool): Promise<AdminStatistics> {
       (select count(*)::int from public.restaurants where active=true) "activeRestaurants",
       (select count(*)::int from public.restaurants s where s.active=true
         and exists (select 1 from public.review r where r.restaurant_id=s.id and r.enabled=true)) "reviewedRestaurants",
+      (select count(*)::int from public.restaurants s where s.active=true
+        and exists (select 1 from public.lunch_visit v where v.restaurant_id=s.id)) "lunchedRestaurants",
       (select coalesce(jsonb_agg(g), '[]'::jsonb) from
         (select tags, count(*)::int count from public.review where enabled=true group by tags) g) "tagGroups",
       (select jsonb_agg(jsonb_build_object('date', to_char(days.review_date, 'YYYY-MM-DD'), 'count', coalesce(daily.count, 0)) order by days.review_date)

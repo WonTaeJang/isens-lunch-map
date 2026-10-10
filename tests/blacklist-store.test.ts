@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createBlacklistStore } from '../features/blacklist/blacklist-store';
+import { createBlacklistStore, visibleBlacklist } from '../features/blacklist/blacklist-store';
 import { hideBlockReason } from '../features/blacklist/blacklist-rules';
 import type { BlacklistedRestaurant } from '../lib/blacklist/model';
 import type { BlacklistApi } from '../features/blacklist/blacklist-api';
@@ -137,4 +137,33 @@ test('rows shown again stay in the loaded list until the page reloads', async ()
     ['b'],
     'a new page starts from the saved list',
   );
+});
+
+test('server ids are shared only while this user has none on the page yet', async () => {
+  const { api, calls } = fakeApi([row('a')]);
+  const store = createBlacklistStore(api);
+  store.seed(user, ['s']);
+  assert.deepEqual([...store.getSnapshot()!.ids], ['s']);
+  await store.ensure(user);
+  assert.equal(calls.list, 0, 'seeded ids are not asked for again');
+  await store.set(user, 't', true);
+  store.seed(user, ['s']);
+  assert.deepEqual(
+    [...store.getSnapshot()!.ids],
+    ['s', 't'],
+    'a later page keeps newer local changes',
+  );
+  store.seed(other, ['o']);
+  assert.equal(store.getSnapshot()!.owner, other);
+});
+
+test('visible ids: shared copy, then the server seed (also before the identity is known)', () => {
+  const shared = { owner: user, ids: new Set(['a']) };
+  const seed = { owner: user, ids: new Set(['s']) };
+  assert.equal(visibleBlacklist(null, seed, null), seed.ids, 'hydration matches the server');
+  assert.equal(visibleBlacklist(null, seed, user), seed.ids);
+  assert.equal(visibleBlacklist(shared, seed, user), shared.ids);
+  assert.equal(visibleBlacklist(null, seed, other), null, 'another user never sees the seed');
+  assert.equal(visibleBlacklist(shared, null, other), null);
+  assert.equal(visibleBlacklist(shared, null, null), null);
 });

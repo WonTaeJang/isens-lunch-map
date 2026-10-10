@@ -5,6 +5,20 @@ import { blacklistApi, type BlacklistApi } from './blacklist-api';
 export type Blacklist = { owner: string; ids: ReadonlySet<string> };
 
 /**
+ * The ids to show for `userId`: the shared copy once it is theirs, else what the server page looked
+ * up (also before the browser's identity is known, so hydration matches the server), else null.
+ */
+export function visibleBlacklist(
+  shared: Blacklist | null,
+  seed: Blacklist | null,
+  userId: string | null,
+): ReadonlySet<string> | null {
+  if (userId && shared?.owner === userId) return shared.ids;
+  if (seed && (userId === null || seed.owner === userId)) return seed.ids;
+  return null;
+}
+
+/**
  * One shared copy per page. Hiding and showing change it at once and roll back if saving fails,
  * so every list reacts together; loads for the same user while one runs share it, and changes
  * made while a load runs are kept on top of what it returns.
@@ -66,6 +80,10 @@ export function createBlacklistStore(api: BlacklistApi = blacklistApi) {
         running.set(owner, task);
       }
       return task;
+    },
+    /** Shares ids the server page looked up, unless this user's are already shared (kept newer). */
+    seed(owner: string, ids: Iterable<string>) {
+      if (snapshot?.owner !== owner) publish({ owner, ids: new Set(ids) });
     },
     /** Loads the ids unless this user's are already shared (or loading) on this page. */
     ensure(owner: string) {

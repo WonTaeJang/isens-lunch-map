@@ -11,6 +11,8 @@ import {
   getRecommendationRanking,
 } from '@/lib/server/ranking';
 import styles from '@/features/ranking/ranking.module.css';
+import { BlacklistSeedProvider } from '@/features/blacklist/blacklist-seed';
+import { getViewerBlacklist } from '@/lib/server/viewer-blacklist';
 
 export const metadata = { title: '점심 랭킹 | Lunch Map' };
 
@@ -31,10 +33,12 @@ export default async function RankingPage({
   await connection();
   const db = getDb();
   // Wide screens show all rankings side by side; narrow screens show the selected tab only.
-  const [lunchRows, reviewRows, recommendationRows] = await Promise.all([
+  // The viewer's hidden restaurants (user cookie) are marked 숨김 from the first render.
+  const [lunchRows, reviewRows, recommendationRows, hidden] = await Promise.all([
     getLunchRanking(db),
     getRestaurantRanking(db),
     getRecommendationRanking(db),
+    getViewerBlacklist(db),
   ]);
   return (
     <main className="page-shell">
@@ -54,30 +58,32 @@ export default async function RankingPage({
           </Link>
         ))}
       </nav>
-      <div className={styles.columns}>
-        <RankingPanel
-          title="점심"
-          note={`최근 ${LUNCH_RANKING_DAYS}일`}
-          label="오늘의 점심으로 많이 고른 식당 순위"
-          empty={`최근 ${LUNCH_RANKING_DAYS}일 동안 오늘의 점심 기록이 없어요.`}
-          rows={lunchRows}
-          active={selected === 'lunch'}
-        />
-        <RankingPanel
-          title="리뷰"
-          label="리뷰 많은 식당 순위"
-          empty="아직 리뷰가 등록된 식당이 없어요."
-          rows={reviewRows}
-          active={selected === 'review'}
-        />
-        <RankingPanel
-          title="추천"
-          label="추천 식당 순위"
-          empty="아직 추천·비추천 평가가 있는 식당이 없어요."
-          rows={recommendationRows}
-          active={selected === 'recommendation'}
-        />
-      </div>
+      <BlacklistSeedProvider seed={hidden}>
+        <div className={styles.columns}>
+          <RankingPanel
+            title="점심"
+            note={`최근 ${LUNCH_RANKING_DAYS}일`}
+            label="오늘의 점심으로 많이 고른 식당 순위"
+            empty={`최근 ${LUNCH_RANKING_DAYS}일 동안 오늘의 점심 기록이 없어요.`}
+            rows={lunchRows}
+            active={selected === 'lunch'}
+          />
+          <RankingPanel
+            title="리뷰"
+            label="리뷰 많은 식당 순위"
+            empty="아직 리뷰가 등록된 식당이 없어요."
+            rows={reviewRows}
+            active={selected === 'review'}
+          />
+          <RankingPanel
+            title="추천"
+            label="추천 식당 순위"
+            empty="아직 추천·비추천 평가가 있는 식당이 없어요."
+            rows={recommendationRows}
+            active={selected === 'recommendation'}
+          />
+        </div>
+      </BlacklistSeedProvider>
     </main>
   );
 }

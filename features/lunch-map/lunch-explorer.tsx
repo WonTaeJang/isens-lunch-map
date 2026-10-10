@@ -57,9 +57,12 @@ export default function LunchExplorer({
     setReviewRestaurant(restaurants.find((row) => row.id === id) ?? null);
   }
   const layoutRef = useRef<HTMLDivElement>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(initialRestaurantId);
+  // A linked restaurant that is already known to be hidden is neither selected nor focused.
+  const linkedId =
+    initialRestaurantId && !hidden?.has(initialRestaurantId) ? initialRestaurantId : null;
+  const [selectedId, setSelectedId] = useState<string | null>(linkedId);
   const [focusRequest, setFocusRequest] = useState<{ id: string } | null>(() =>
-    initialRestaurantId ? { id: initialRestaurantId } : null,
+    linkedId ? { id: linkedId } : null,
   );
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [randomOpen, setRandomOpen] = useState(false);

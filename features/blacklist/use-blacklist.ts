@@ -3,25 +3,31 @@
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { showSnackbar } from '@/components/ui/snackbar';
 import useLocalUser from '@/features/local-user/use-local-user';
-import { blacklistStore } from './blacklist-store';
+import { blacklistStore, visibleBlacklist } from './blacklist-store';
+import { useBlacklistSeed } from './blacklist-seed';
 
 /**
- * The viewer's hidden restaurant ids (null until loaded or without an identity) and a setter.
- * They are loaded once and shared, so opening another map card does not ask again;
- * hiding/showing updates every user of the hook.
+ * The viewer's hidden restaurant ids (null while unknown) and a setter. A server page that read
+ * the user cookie hands them over through `BlacklistSeedProvider`, so they apply from the first
+ * render; otherwise they are loaded once and shared. Hiding/showing updates every user of the hook.
  */
 export default function useBlacklist() {
   const { identity } = useLocalUser();
-  const userId = identity?.user_id ?? null;
+  // Lowercase like the server's ids (the seed's owner comes from the cookie, stored lowercase).
+  const userId = identity?.user_id.toLowerCase() ?? null;
+  const seed = useBlacklistSeed();
   const state = useSyncExternalStore(
     blacklistStore.subscribe,
     blacklistStore.getSnapshot,
     blacklistStore.getServerSnapshot,
   );
   useEffect(() => {
+    if (!userId) return;
+    // The server already looked this user's list up: share it instead of asking again.
+    if (seed?.owner === userId) blacklistStore.seed(userId, seed.ids);
     // A failed load leaves the list unfiltered; the user page tab shows its own error.
-    if (userId) void blacklistStore.ensure(userId).catch(() => undefined);
-  }, [userId]);
+    else void blacklistStore.ensure(userId).catch(() => undefined);
+  }, [userId, seed]);
   /** Hides or shows a restaurant; a failure is shown in an error snackbar. Resolves to whether it saved. */
   const setHidden = useCallback(
     async (restaurantId: string, hidden: boolean) => {
@@ -39,5 +45,5 @@ export default function useBlacklist() {
     },
     [userId],
   );
-  return { ids: state && state.owner === userId ? state.ids : null, setHidden };
+  return { ids: visibleBlacklist(state, seed, userId), setHidden };
 }

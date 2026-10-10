@@ -1,5 +1,8 @@
 export type SnackbarTone = 'default' | 'error';
-export type Snack = { id: number; message: string; tone: SnackbarTone };
+/** A button in the snackbar (e.g. 되돌리기); pressing it also hides the snackbar. */
+export type SnackAction = { label: string; onClick: () => void };
+export type Snack = { id: number; message: string; tone: SnackbarTone; action?: SnackAction };
+type ShowOptions = { tone?: SnackbarTone; duration?: number; action?: SnackAction };
 export const SNACKBAR_DURATION = 3000;
 
 type Timers = {
@@ -26,9 +29,14 @@ export function createSnackbarStore(timers: Timers = browserTimers) {
     emit();
   }
   return {
-    show(message: string, options: { tone?: SnackbarTone; duration?: number } = {}) {
+    show(message: string, options: ShowOptions = {}) {
       if (timer !== null) timers.clear(timer);
-      const snack: Snack = { id: ++sequence, message, tone: options.tone ?? 'default' };
+      const snack: Snack = {
+        id: ++sequence,
+        message,
+        tone: options.tone ?? 'default',
+        ...(options.action ? { action: options.action } : {}),
+      };
       current = snack;
       timer = timers.set(() => hide(snack.id), options.duration ?? SNACKBAR_DURATION);
       emit();
@@ -49,9 +57,6 @@ export function createSnackbarStore(timers: Timers = browserTimers) {
 export const snackbarStore = createSnackbarStore();
 
 /** Shows a short message at the bottom of the screen. Render <SnackbarHost /> once in the layout. */
-export function showSnackbar(
-  message: string,
-  options?: { tone?: SnackbarTone; duration?: number },
-) {
+export function showSnackbar(message: string, options?: ShowOptions) {
   return snackbarStore.show(message, options);
 }

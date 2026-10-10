@@ -33,6 +33,18 @@ export default function SnackbarHost() {
       {snack && (
         <div key={snack.id} className={styles.snackbar} data-tone={snack.tone}>
           <span>{snack.message}</span>
+          {snack.action && (
+            <button
+              type="button"
+              className={styles.action}
+              onClick={() => {
+                snackbarStore.hide(snack.id);
+                snack.action?.onClick();
+              }}
+            >
+              {snack.action.label}
+            </button>
+          )}
           <button
             type="button"
             className={styles.close}

@@ -29,6 +29,20 @@
 .snackbar[data-tone='error'] {
   background: #a23b2c;
 }
+.action {
+  flex: none;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #7ee0cf;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.action:hover {
+  background: rgb(255 255 255 / 10%);
+}
 .close {
   flex: none;
   width: 24px;

@@ -76,3 +76,23 @@ test('closing ignores stale ids and custom durations are honored', () => {
   assert.equal(store.getSnapshot(), null);
   assert.equal(clock.pendingCount(), 0);
 });
+
+test('an action is kept on the snack only when given', () => {
+  const clock = fakeTimers();
+  const store = createSnackbarStore(clock.timers);
+  store.show('plain');
+  assert.equal('action' in store.getSnapshot()!, false);
+  let undone = 0;
+  store.show('숨겼어요.', {
+    duration: 5000,
+    action: { label: '되돌리기', onClick: () => undone++ },
+  });
+  const snack = store.getSnapshot()!;
+  assert.equal(snack.action?.label, '되돌리기');
+  snack.action!.onClick();
+  assert.equal(undone, 1);
+  clock.advance(4999);
+  assert.notEqual(store.getSnapshot(), null);
+  clock.advance(1);
+  assert.equal(store.getSnapshot(), null);
+});

@@ -12,6 +12,8 @@ const review: Review = {
   created_at: '2026-10-01T00:00:00Z',
   updated_at: null,
   is_mine: true,
+  like_count: 0,
+  liked: false,
 };
 
 test('a press creates, switches or deletes the own review', () => {

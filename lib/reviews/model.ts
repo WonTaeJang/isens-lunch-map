@@ -10,7 +10,16 @@ export type Review = {
   created_at: string;
   updated_at: string | null;
   is_mine: boolean;
+  /**
+   * Likes from other users (only reviews with content can be liked). Counted in the review lists
+   * that show it (restaurant reviews, my reviews); 0 from other lookups.
+   */
+  like_count: number;
+  /** The viewer liked it: set in the restaurant review list, false elsewhere and on own reviews. */
+  liked: boolean;
 };
+/** Result of liking or unliking a review. */
+export type ReviewLikeState = { review_id: string; liked: boolean; like_count: number };
 export type ReviewPage = {
   reviews: Review[];
   mine: Review | null;

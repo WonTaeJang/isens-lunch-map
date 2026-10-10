@@ -47,6 +47,8 @@ test('writes return the saved vote only after commit; limit and snapshot failure
     created_at: '2026-10-01T00:00:00.000Z',
     updated_at: null,
     is_mine: true,
+    like_count: 0,
+    liked: false,
   };
   try {
     for (const [method, handler] of [

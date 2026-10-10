@@ -17,6 +17,13 @@ import {
 
 import { DAILY_REVIEW_LIMIT, REVIEW_PAGE_SIZE } from '@/lib/reviews/constants';
 const FIELDS = 'id, user_name, content, is_recommended, tags, created_at, updated_at';
+// 좋아요 are counted only in the lists that show them (restaurant reviews, my reviews); other
+// lookups (vote snapshot, conflict reload) leave like_count 0. The review_like PK makes it cheap.
+const likeCount = (review = 'review') =>
+  `(select count(l.review_id)::int from public.review_like l where l.review_id=${review}.id) like_count`;
+/** Whether the viewer (`viewer` is a SQL parameter such as $2) liked the outer review row. */
+const likedBy = (viewer: string) =>
+  `exists (select 1 from public.review_like l where l.review_id=review.id and l.user_id=${viewer}::uuid) liked`;
 type ReviewRow = {
   id: string;
   user_name: string | null;
@@ -26,6 +33,8 @@ type ReviewRow = {
   created_at: Date | string;
   updated_at: Date | string | null;
   is_mine: boolean;
+  like_count?: number;
+  liked?: boolean;
 };
 type PagedReviewRow = ReviewRow & { cursor_time: string };
 type UserReviewRow = PagedReviewRow &
@@ -46,6 +55,8 @@ function present(row: ReviewRow): Review {
     created_at: iso(row.created_at),
     updated_at: row.updated_at === null ? null : iso(row.updated_at),
     is_mine: row.is_mine,
+    like_count: row.like_count ?? 0,
+    liked: row.liked ?? false,
   };
 }
 function pageCursor(rows: PagedReviewRow[], restaurantActive?: boolean) {
@@ -73,7 +84,7 @@ export async function listReviews(
     [restaurant],
   );
   const rows = await db.query<PagedReviewRow>(
-    `select ${FIELDS}, coalesce(user_id=$2::uuid,false) is_mine,
+    `select ${FIELDS}, ${likeCount()}, ${likedBy('$2')}, coalesce(user_id=$2::uuid,false) is_mine,
     to_char(created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') cursor_time
     from public.review where restaurant_id=$1 and enabled=true
     and ($3::timestamptz is null or (created_at,id)<($3::timestamptz,$4::uuid))
@@ -266,7 +277,7 @@ export async function listUserReviews(
   );
   const { rows } = await db.query<UserReviewRow>(
     `select r.id, r.user_name, r.content, r.is_recommended, r.tags,
-    r.created_at, r.updated_at, true is_mine, r.restaurant_id,
+    r.created_at, r.updated_at, true is_mine, r.restaurant_id, ${likeCount('r')},
     to_char(r.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') cursor_time,
     s.name restaurant_name, s.active restaurant_active, s.latitude, s.longitude
     from public.review r join public.restaurants s on s.id=r.restaurant_id

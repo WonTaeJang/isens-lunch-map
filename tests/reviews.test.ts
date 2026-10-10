@@ -376,6 +376,8 @@ test('review response serializes dates and never leaks DB fields or author ident
     updated_at: null,
     tags: [],
     is_mine: true,
+    like_count: 0,
+    liked: false,
   });
 });
 test('cursor preserves microseconds and rejects malformed inputs', async () => {

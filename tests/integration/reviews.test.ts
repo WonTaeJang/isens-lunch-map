@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { Pool } from 'pg';
 import { listReviews, listUserReviews, mutateReview, getOwnReview } from '../../lib/server/reviews';
 import { decodeReviewCursor } from '../../lib/server/review-cursor';
+import { setReviewLike } from '../../lib/server/review-likes';
 
 // Never use DATABASE_URL or production tables. An explicitly supplied test database
 // receives a disposable schema, and all application queries are scoped to it.
@@ -40,6 +41,10 @@ test(
       await db.query(`create table public.review (id uuid primary key default gen_random_uuid(), restaurant_id uuid references public.restaurants(id),
       user_id uuid, user_name text, content text, is_recommended boolean, tags text, created_at timestamptz not null default clock_timestamp(), updated_at timestamptz,
       enabled boolean not null default true)`);
+      await db.query(`create table public.review_like (
+        review_id uuid not null references public.review(id) on delete cascade,
+        user_id uuid not null, created_at timestamptz not null default now(),
+        primary key (review_id, user_id))`);
       await db.query(`create table public.lunch_visit (id uuid primary key default gen_random_uuid(),
       user_id uuid not null, user_name text, restaurant_id uuid not null references public.restaurants(id),
       visit_date date not null, unique (user_id, visit_date))`);
@@ -99,6 +104,44 @@ test(
       assert.equal(withLunch.reviewed_active, 2);
       assert.equal(withLunch.lunched_active, 2);
       assert.equal(withLunch.visited_active, 3);
+
+      // Likes: one per user and review, only on another user's review with content.
+      const fan = crypto.randomUUID();
+      const liked = first.reviews[1];
+      const like = (by: string, review = liked.id) => setReviewLike(db, { review, user: by }, true);
+      assert.deepEqual(await like(fan), { review_id: liked.id, liked: true, like_count: 1 });
+      assert.equal((await like(fan)).like_count, 1); // a repeated like changes nothing
+      const second2 = crypto.randomUUID();
+      const [a, b] = await Promise.all([like(second2), like(second2)]);
+      assert.equal(Math.max(a.like_count, b.like_count), 2);
+      await assert.rejects(like(user), /내 리뷰/);
+      const empty = await db.query<{ id: string }>(
+        `insert into public.review(restaurant_id,user_id,content,is_recommended) values ($1,$2,'  ',true) returning id`,
+        [nullRated, crypto.randomUUID()],
+      );
+      await assert.rejects(like(fan, empty.rows[0].id), /내용이 있는 리뷰/);
+      await assert.rejects(like(fan, crypto.randomUUID()), /찾을 수 없어요/);
+      const listed = await listReviews(db, restaurant, fan);
+      const shown = listed.reviews.find((r) => r.id === liked.id)!;
+      assert.equal(shown.like_count, 2);
+      assert.equal(shown.liked, true);
+      assert.equal(listed.reviews.find((r) => r.id !== liked.id)?.liked, false);
+      assert.equal(
+        (await listUserReviews(db, user)).reviews.find((r) => r.id === liked.id)?.like_count,
+        2,
+      );
+      assert.deepEqual(await setReviewLike(db, { review: liked.id, user: fan }, false), {
+        review_id: liked.id,
+        liked: false,
+        like_count: 1,
+      });
+      // Removing a review removes its likes with it.
+      await db.query('delete from public.review where id=$1', [liked.id]);
+      const left = await db.query(
+        'select count(*)::int n from public.review_like where review_id=$1',
+        [liked.id],
+      );
+      assert.equal(left.rows[0].n, 0);
       // The advisory lock allows exactly one concurrent first review per user/restaurant.
       const newUser = crypto.randomUUID();
       const input = {

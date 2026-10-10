@@ -26,6 +26,7 @@ import { formatDistance } from '@/lib/distance';
 import useLocalUser from '@/features/local-user/use-local-user';
 import useBlacklist from '@/features/blacklist/use-blacklist';
 import HiddenBadge from '@/features/blacklist/hidden-badge';
+import BlacklistList from '@/features/blacklist/blacklist-list';
 import UserName from '@/features/local-user/user-name';
 import type { LocalIdentity } from '@/features/local-user/local-user-store';
 import useReviewFeed from '@/features/reviews/use-review-feed';
@@ -42,6 +43,7 @@ const TABS = [
   { value: 'lunch', label: '점심 기록' },
   { value: 'reviews', label: '내 리뷰' },
   { value: 'favorites', label: '즐겨찾기' },
+  { value: 'hidden', label: '숨긴 식당' },
 ] as const;
 
 export default function UserDashboard(props: Props) {
@@ -287,6 +289,21 @@ function UserDashboardContent({
             >
               더 보기
             </Button>
+          )}
+        </section>
+      ) : tab === 'hidden' ? (
+        <section className={styles['user-records']} aria-label="숨긴 식당">
+          {identity ? (
+            <BlacklistList
+              userId={identity.user_id}
+              inactiveClassName={styles['user-restaurant-inactive']}
+            />
+          ) : identityReady ? (
+            <p className="review-error" role="alert">
+              {identityError || '사용자 정보를 확인할 수 없어 숨긴 식당을 불러오지 못했어요.'}
+            </p>
+          ) : (
+            <LoadingStatus label="숨긴 식당을 불러오는 중…" />
           )}
         </section>
       ) : (

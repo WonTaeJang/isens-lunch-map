@@ -1,0 +1,50 @@
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.name {
+  min-width: 0;
+}
+.name h2 {
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+/* Eye pill: hidden (eye-off, "다시 보기") or shown again this session (eye, teal, "보이는 중"). */
+.toggle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #d8dee1;
+  border-radius: 999px;
+  background: white;
+  color: #627078;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.toggle:hover {
+  background: #f3f5f4;
+}
+.toggle:focus-visible {
+  outline: 2px solid #127e70;
+  outline-offset: 2px;
+}
+.toggle[aria-pressed='true'] {
+  border-color: #a4d2c4;
+  background: #e4f2ed;
+  color: #0a7c6f;
+}
+.toggle[aria-busy] {
+  cursor: progress;
+}
+.toggle[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

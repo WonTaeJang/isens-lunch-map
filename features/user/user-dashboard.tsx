@@ -14,10 +14,10 @@ import { toggleStoredFavorite } from '@/features/favorites/favorites-store';
 import ReviewActionIcons from '@/features/reviews/review-action-icons';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from '@/features/reviews/review-form';
+import ReviewFooter from '@/features/reviews/review-footer';
 import ReviewDeleteDialog from '@/features/reviews/review-delete-dialog';
 import useReviewActions from '@/features/reviews/use-review-actions';
 import { reviewTimestamp, type UserReview, type UserReviewPage } from '@/lib/reviews/model';
-import { REVIEW_TAGS } from '@/lib/reviews/constants';
 import type { RestaurantRow } from '@/lib/restaurant-types';
 import { hasCoordinates } from '@/lib/coordinates';
 import { restaurantMapHref } from '@/lib/map-link';
@@ -263,13 +263,7 @@ function UserDashboardContent({
                 ) : (
                   <>
                     {review.content && <p className="review-content">{review.content}</p>}
-                    <div className="review-tags">
-                      {review.tags.map((tag) => (
-                        <span key={tag}>
-                          {REVIEW_TAGS.find((option) => option.value === tag)?.label}
-                        </span>
-                      ))}
-                    </div>
+                    <ReviewFooter review={review} />
                   </>
                 )}
               </li>

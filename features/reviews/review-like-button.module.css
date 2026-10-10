@@ -1,0 +1,65 @@
+/* Review 좋아요: a heart pill at the end of the tag row. Rose, so it never reads as 비추천 red. */
+.like {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  margin-left: auto;
+  padding: 0 10px;
+  border: 1px solid #d8dee1;
+  border-radius: 999px;
+  background: white;
+  color: #627078;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.like:hover {
+  background: #f3f5f4;
+}
+.like:focus-visible {
+  outline: 2px solid #127e70;
+  outline-offset: 2px;
+}
+.like[aria-pressed='true'] {
+  border-color: #fecdd3;
+  background: #fff1f2;
+  color: #e11d48;
+}
+.like[aria-pressed='true'] svg {
+  fill: currentColor;
+}
+.like[aria-busy] {
+  cursor: progress;
+}
+.like svg {
+  flex-shrink: 0;
+}
+/* Own review: the received count only, not a button. */
+.readonly {
+  border-color: transparent;
+  background: transparent;
+  padding: 0 2px;
+  color: #9aa6ad;
+  cursor: default;
+}
+.readonly:hover {
+  background: transparent;
+}
+.like[data-pop] svg {
+  animation: heart-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes heart-pop {
+  40% {
+    transform: scale(1.35);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .like[data-pop] svg {
+    animation: none;
+  }
+}

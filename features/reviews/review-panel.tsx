@@ -12,13 +12,14 @@ import RecommendationBar from './recommendation-bar';
 import ReviewActionIcons from './review-action-icons';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from './review-form';
+import ReviewFooter from './review-footer';
 import {
   reviewTimestamp,
   type Review,
   type ReviewPage,
   type reviewInput,
 } from '@/lib/reviews/model';
-import { DAILY_REVIEW_LIMIT, REVIEW_TAGS } from '@/lib/reviews/constants';
+import { DAILY_REVIEW_LIMIT } from '@/lib/reviews/constants';
 
 import useLocalUser from '@/features/local-user/use-local-user';
 import UserName from '@/features/local-user/user-name';
@@ -207,11 +208,7 @@ function ReviewPanelContent({
                 {review.updated_at && ' · 수정됨'}
               </p>
               {review.content && <p className="review-content">{review.content}</p>}
-              <div className="review-tags">
-                {review.tags.map((tag) => (
-                  <span key={tag}>{REVIEW_TAGS.find((option) => option.value === tag)?.label}</span>
-                ))}
-              </div>
+              <ReviewFooter review={review} />
             </li>
           ))}
         </ul>

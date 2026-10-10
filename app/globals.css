@@ -933,6 +933,13 @@ td .button {
   flex-wrap: wrap;
   gap: 8px;
 }
+/* Tags on the left, 좋아요 at the right end of the review's last row. */
+.review-item-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 .review-options button {
   border: 1px solid #cbd9d7;
   border-radius: 20px;

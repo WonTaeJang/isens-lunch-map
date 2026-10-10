@@ -9,21 +9,9 @@ import {
   mutateReview,
 } from '@/lib/server/reviews';
 import { ReviewError, uuid } from '@/lib/reviews/model';
-import { logUnexpectedError, readJsonObject } from '@/lib/server/api-route';
+import { readReviewBody, reviewFailure as failure } from '@/lib/server/review-response';
 
 export const runtime = 'nodejs';
-function failure(error: unknown) {
-  if (!(error instanceof ReviewError)) logUnexpectedError('Review request failed', error);
-  return Response.json(
-    {
-      error:
-        error instanceof ReviewError
-          ? error.message
-          : '리뷰 요청을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.',
-    },
-    { status: error instanceof ReviewError ? error.status : 500 },
-  );
-}
 export async function GET(request: Request) {
   try {
     const params = new URL(request.url).searchParams;
@@ -67,11 +55,7 @@ export async function GET(request: Request) {
 }
 async function write(request: Request) {
   try {
-    const body = await readJsonObject(
-      request,
-      16000,
-      (message, status) => new ReviewError(message, status),
-    );
+    const body = await readReviewBody(request, 16000);
     const result = await mutateReview(getDb(), request.method, body);
     return Response.json(
       { ok: true, ...result },

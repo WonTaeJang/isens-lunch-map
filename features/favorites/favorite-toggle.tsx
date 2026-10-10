@@ -2,6 +2,7 @@
 
 import type { ComponentProps } from 'react';
 import { BookmarkIcon } from '@/components/ui/icons';
+import square from '@/components/ui/square-button.module.css';
 import styles from './favorite-toggle.module.css';
 
 type Props = Omit<ComponentProps<'button'>, 'children' | 'aria-pressed'> & {
@@ -19,7 +20,7 @@ export default function FavoriteToggle({
   ...props
 }: Props) {
   const label = `${restaurantName} 즐겨찾기 ${selected ? '해제' : '추가'}`;
-  const classes = [styles.toggle, size === 'large' && styles.large, className]
+  const classes = [square.square, styles.toggle, size === 'large' && square.large, className]
     .filter(Boolean)
     .join(' ');
   return (

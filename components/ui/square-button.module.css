@@ -1,0 +1,35 @@
+/*
+ * The 32px square icon button next to restaurant names (favorite, hide); `large` is 40px.
+ * Hover never applies to a pressed or disabled button, so each button's own pressed colors win.
+ */
+.square {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #d8dee1;
+  border-radius: 4px;
+  background: white;
+  color: #627078;
+  cursor: pointer;
+}
+.large {
+  width: 40px;
+  height: 40px;
+}
+.square:not([aria-pressed='true'], :disabled, [aria-disabled='true']):hover {
+  background: #f3f5f4;
+}
+.square:focus-visible {
+  outline: 2px solid #127e70;
+  outline-offset: 2px;
+}
+/* Disabled, or only looking disabled (aria-disabled) so a tap can still say why. */
+.square:disabled,
+.square[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

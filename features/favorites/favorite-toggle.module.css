@@ -1,31 +1,6 @@
 /* The one favorite button look, shared by the map card, lists, ranking, random pick and user page. */
-.toggle {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 1px solid #d8dee1;
-  border-radius: 4px;
-  background: white;
-  color: #627078;
-  cursor: pointer;
-}
-.large {
-  width: 40px;
-  height: 40px;
-}
-.toggle:hover {
-  background: #f3f5f4;
-}
 .toggle[aria-pressed='true'] {
   border-color: #e8c44d;
   background: #fff9df;
   color: #866500;
-}
-.toggle:focus-visible {
-  outline: 2px solid #127e70;
-  outline-offset: 2px;
 }

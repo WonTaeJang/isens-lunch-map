@@ -22,6 +22,13 @@ export function euroParticle(name: string) {
   return final === 0 || final === RIEUL ? '로' : '으로';
 }
 
+/** `name` + "을" or "를", e.g. 고공 서초점 → "고공 서초점을", 서울라멘 → "서울라멘을"; "을(를)" when unknown. */
+export function withEul(name: string) {
+  const final = finalConsonant(name);
+  if (final === null) return `${name}을(를)`;
+  return `${name}${final === 0 ? '를' : '을'}`;
+}
+
 /** `name` + "으로" or "로", e.g. 고공 서초점 → "고공 서초점으로", 떠도는당근#4947 → "떠도는당근#4947로". */
 export function withEuro(name: string) {
   return name + euroParticle(name);

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { euroParticle, withEuro } from '../lib/korean';
+import { euroParticle, withEul, withEuro } from '../lib/korean';
 
 test('으로/로 follows the final consonant, digits as read aloud, ㄹ takes 로', () => {
   assert.equal(withEuro('고공 서초점'), '고공 서초점으로');
@@ -28,4 +28,11 @@ test('the particle alone matches what withEuro appends', () => {
   assert.equal(euroParticle('떠도는당근#4947'), '로');
   assert.equal(euroParticle('야무진젤리#6003'), '으로');
   assert.equal(euroParticle('Subway'), '(으)로');
+});
+
+test('을/를 follows the final consonant', () => {
+  assert.equal(withEul('고공 서초점'), '고공 서초점을');
+  assert.equal(withEul('광해쭈꾸미'), '광해쭈꾸미를');
+  assert.equal(withEul('봉구스밥버거(교대점)'), '봉구스밥버거(교대점)을');
+  assert.equal(withEul('Subway'), 'Subway을(를)');
 });

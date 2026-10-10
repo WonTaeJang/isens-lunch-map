@@ -2,7 +2,7 @@
 
 import { DiceIcon } from '@/components/ui/icons';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReviewCounts } from '@/lib/reviews/model';
 import useOwnReviews from '@/features/reviews/use-own-reviews';
 import ReviewPanel from '@/features/reviews/review-panel';
@@ -13,13 +13,14 @@ import RestaurantFilters from './restaurant-filters';
 import RestaurantResults from './restaurant-results';
 import LunchMap from './lunch-map';
 import useFavorites from '@/features/favorites/use-favorites';
+import useBlacklist from '@/features/blacklist/use-blacklist';
 import { toggleStoredFavorite } from '@/features/favorites/favorites-store';
 import { DEFAULT_FILTERS, filterRestaurants } from './filter-restaurants';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 import { LUNCH_MAP_ANCHOR } from '@/lib/map-link';
 
 export default function LunchExplorer({
-  restaurants,
+  restaurants: allRestaurants,
   reviewCounts,
   initialRestaurantId = null,
   initialReviewsOpen = false,
@@ -30,6 +31,22 @@ export default function LunchExplorer({
   reviewCounts: ReviewCounts | null;
   restaurants: MapRestaurant[];
 }) {
+  // Hidden (blacklisted) restaurants leave the map, the list, search and the random pick.
+  const hidden = useBlacklist().ids;
+  const restaurants = useMemo(
+    () => (hidden?.size ? allRestaurants.filter((row) => !hidden.has(row.id)) : allRestaurants),
+    [allRestaurants, hidden],
+  );
+  // A shared or typed link to a hidden restaurant opens nothing; say why once, when the hidden
+  // list first arrives (hiding the linked restaurant later shows its own undo message instead).
+  const linkChecked = useRef(false);
+  useEffect(() => {
+    if (!hidden || linkChecked.current) return;
+    linkChecked.current = true;
+    if (initialRestaurantId && hidden.has(initialRestaurantId)) {
+      showSnackbar('숨긴 식당이에요. 내 페이지의 숨긴 식당에서 다시 볼 수 있어요.');
+    }
+  }, [hidden, initialRestaurantId]);
   // Reloaded whenever the server counts refresh after a review change.
   const ownReviews = useOwnReviews(reviewCounts);
   const reviewedIds = ownReviews?.ids ?? null;
@@ -120,7 +137,7 @@ export default function LunchExplorer({
           ownReviews={ownReviews?.choices ?? null}
           reviewCounts={reviewCounts}
           rows={rows}
-          total={restaurants.length}
+          total={allRestaurants.length}
           favoritesOnly={filters.favoritesOnly}
           favorites={favorites}
           selectedId={visibleSelectedId}
@@ -144,7 +161,7 @@ export default function LunchExplorer({
         onRandom={() => setRandomOpen(true)}
         onShowTodayLunch={showTodayLunch}
       />
-      {reviewRestaurant && (
+      {reviewRestaurant && !hidden?.has(reviewRestaurant.id) && (
         <ReviewPanel
           key={reviewRestaurant.id}
           restaurant={reviewRestaurant}

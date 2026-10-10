@@ -2,6 +2,7 @@
 
 import { DirectionsIcon } from '@/components/ui/icons';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
+import HideButton from '@/features/blacklist/hide-button';
 import TodayLunchButton from '@/features/lunch-visits/today-lunch-button';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
 import useVoteState from '@/features/reviews/use-vote-state';
@@ -81,14 +82,25 @@ export default function RestaurantMapCard({
             selected={favorite}
             onClick={() => setMessage(onFavorite())}
           />
+          <HideButton
+            restaurantId={restaurant.id}
+            restaurantName={restaurant.name}
+            favorite={favorite}
+            todayLunch={todayLunch}
+          />
           <TodayLunchButton
             restaurantName={restaurant.name}
             active={todayLunch}
             busy={todayLunchBusy}
             onToggle={onTodayLunch}
           />
-          <button type="button" className="restaurant-card-review" onClick={onReviews}>
-            리뷰 보기
+          <button
+            type="button"
+            className="restaurant-card-review"
+            aria-label={`${restaurant.name} 리뷰 보기`}
+            onClick={onReviews}
+          >
+            리뷰
           </button>
           <a
             className="restaurant-card-directions restaurant-card-icon"

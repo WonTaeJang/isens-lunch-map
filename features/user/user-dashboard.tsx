@@ -24,6 +24,8 @@ import { restaurantMapHref } from '@/lib/map-link';
 import { formatDistance } from '@/lib/distance';
 
 import useLocalUser from '@/features/local-user/use-local-user';
+import useBlacklist from '@/features/blacklist/use-blacklist';
+import HiddenBadge from '@/features/blacklist/hidden-badge';
 import UserName from '@/features/local-user/user-name';
 import type { LocalIdentity } from '@/features/local-user/local-user-store';
 import useReviewFeed from '@/features/reviews/use-review-feed';
@@ -81,6 +83,7 @@ function UserDashboardContent({
     }
   }
   const favorites = useFavorites();
+  const hidden = useBlacklist().ids;
   const feed = useReviewFeed<UserReviewPage>(
     identity
       ? `/api/reviews?${new URLSearchParams({ scope: 'mine', user_id: identity.user_id })}`
@@ -219,55 +222,61 @@ function UserDashboardContent({
             </div>
           )}
           <ul className="review-list">
-            {page?.reviews.map((review) => (
-              <li
-                className={`review-item${review.restaurant_active ? '' : ` ${styles['user-restaurant-inactive']}`}`}
-                key={review.id}
-              >
-                <div className="review-item-heading">
-                  <h2>
-                    {review.restaurant_active && hasCoordinates(review) ? (
-                      <Link href={restaurantMapHref(review.restaurant_id)}>
-                        {review.restaurant_name}
-                      </Link>
-                    ) : (
-                      review.restaurant_name
-                    )}
-                  </h2>
-                  <div className="review-heading-actions">
-                    <RecommendationBadge recommended={review.is_recommended} />
-                    <ReviewActionIcons
-                      disabled={busy || loading || Boolean(editing)}
-                      onEdit={() => actions.startEdit(review)}
-                      onDelete={() => actions.startDelete(review)}
-                    />
+            {page?.reviews.map((review) => {
+              // A review of a hidden restaurant is only shown, marked 숨김: no link, edit or delete.
+              const isHidden = hidden?.has(review.restaurant_id) ?? false;
+              const usable = review.restaurant_active && !isHidden;
+              return (
+                <li
+                  className={`review-item${usable ? '' : ` ${styles['user-restaurant-inactive']}`}`}
+                  key={review.id}
+                >
+                  <div className="review-item-heading">
+                    <h2>
+                      {usable && hasCoordinates(review) ? (
+                        <Link href={restaurantMapHref(review.restaurant_id)}>
+                          {review.restaurant_name}
+                        </Link>
+                      ) : (
+                        review.restaurant_name
+                      )}
+                      {isHidden && <HiddenBadge />}
+                    </h2>
+                    <div className="review-heading-actions">
+                      <RecommendationBadge recommended={review.is_recommended} />
+                      <ReviewActionIcons
+                        disabled={busy || loading || Boolean(editing) || isHidden}
+                        onEdit={() => actions.startEdit(review)}
+                        onDelete={() => actions.startDelete(review)}
+                      />
+                    </div>
                   </div>
-                </div>
-                {!review.restaurant_active && <p className="subtle">현재 비활성 식당이에요.</p>}
-                {review.restaurant_active && !hasCoordinates(review) && (
-                  <p className="subtle">위치 정보 없음 · 지도에 표시되지 않아요</p>
-                )}
-                <p className="subtle">
-                  {DATE_FORMAT.format(new Date(reviewTimestamp(review)))}
-                  {review.updated_at && ' · 수정됨'}
-                </p>
-                {editing?.id === review.id ? (
-                  <ReviewForm
-                    key={editing.id}
-                    review={editing}
-                    busy={busy || loading}
-                    onReload={() => actions.loadOwnReview(editing.id)}
-                    onCancel={() => actions.setEditing(null)}
-                    onSave={(input, base) => actions.mutate('PATCH', base ?? editing, input)}
-                  />
-                ) : (
-                  <>
-                    {review.content && <p className="review-content">{review.content}</p>}
-                    <ReviewFooter review={review} />
-                  </>
-                )}
-              </li>
-            ))}
+                  {!review.restaurant_active && <p className="subtle">현재 비활성 식당이에요.</p>}
+                  {review.restaurant_active && !hasCoordinates(review) && (
+                    <p className="subtle">위치 정보 없음 · 지도에 표시되지 않아요</p>
+                  )}
+                  <p className="subtle">
+                    {DATE_FORMAT.format(new Date(reviewTimestamp(review)))}
+                    {review.updated_at && ' · 수정됨'}
+                  </p>
+                  {editing?.id === review.id ? (
+                    <ReviewForm
+                      key={editing.id}
+                      review={editing}
+                      busy={busy || loading}
+                      onReload={() => actions.loadOwnReview(editing.id)}
+                      onCancel={() => actions.setEditing(null)}
+                      onSave={(input, base) => actions.mutate('PATCH', base ?? editing, input)}
+                    />
+                  ) : (
+                    <>
+                      {review.content && <p className="review-content">{review.content}</p>}
+                      <ReviewFooter review={review} />
+                    </>
+                  )}
+                </li>
+              );
+            })}
           </ul>
           {page?.hasMore && (
             <Button

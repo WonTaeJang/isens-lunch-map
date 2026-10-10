@@ -11,9 +11,15 @@ type Props = {
   restaurantName: string;
   /** 'small' is 32px (default); 'large' is 40px. */
   size?: 'small' | 'large';
+  disabled?: boolean;
 };
 
-export default function FavoriteButton({ restaurantId, restaurantName, size = 'small' }: Props) {
+export default function FavoriteButton({
+  restaurantId,
+  restaurantName,
+  size = 'small',
+  disabled = false,
+}: Props) {
   const favorites = useFavorites();
   const [error, setError] = useState<string | null>(null);
   const errorId = useId();
@@ -24,6 +30,7 @@ export default function FavoriteButton({ restaurantId, restaurantName, size = 's
         restaurantName={restaurantName}
         selected={selected}
         size={size}
+        disabled={disabled}
         aria-describedby={error ? errorId : undefined}
         onClick={() => setError(toggleStoredFavorite(restaurantId))}
       />

@@ -131,3 +131,8 @@
     display: none;
   }
 }
+
+/* A restaurant the viewer hid: still ranked, but dimmed and not clickable. */
+.list li[data-hidden] .content {
+  opacity: 0.6;
+}

@@ -1,4 +1,5 @@
 import { isUuid } from '@/lib/uuid';
+import { userCookie } from '@/lib/user-cookie';
 
 export type LocalIdentity = { user_id: string; user_name: string };
 const initial = { identity: null as LocalIdentity | null, ready: false, error: '' };
@@ -50,5 +51,7 @@ export const localUserStore = createLocalUserStore(async () => {
   const { ensureLocalUser } = await import('./local-user');
   const identity = ensureLocalUser(window.localStorage);
   if (!isUuid(identity.user_id)) throw new Error('Invalid identity');
+  // Every identity change (first visit, editor, link import, another tab) passes here.
+  document.cookie = userCookie(identity.user_id, window.location.protocol === 'https:');
   return identity;
 });

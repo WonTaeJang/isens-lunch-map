@@ -4,7 +4,7 @@ import styles from './user.module.css';
 import IdentityEditor from './identity-editor';
 import UserProgress from './user-progress';
 import Link from 'next/link';
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import Button from '@/components/ui/button';
 import { SettingsIcon, UserIcon } from '@/components/ui/icons';
 import LoadingStatus from '@/components/ui/loading-status';
@@ -22,6 +22,7 @@ import type { RestaurantRow } from '@/lib/restaurant-types';
 import { hasCoordinates } from '@/lib/coordinates';
 import { restaurantMapHref } from '@/lib/map-link';
 import { formatDistance } from '@/lib/distance';
+import { withEul } from '@/lib/korean';
 
 import useLocalUser from '@/features/local-user/use-local-user';
 import useBlacklist from '@/features/blacklist/use-blacklist';
@@ -86,6 +87,16 @@ function UserDashboardContent({
   }
   const favorites = useFavorites();
   const hidden = useBlacklist().ids;
+  /** A tab that needs the browser's identity: its content, an identity error or a loading line. */
+  function withIdentity(what: string, render: (userId: string) => ReactNode) {
+    if (identity) return render(identity.user_id);
+    if (!identityReady) return <LoadingStatus label={`${withEul(what)} 불러오는 중…`} />;
+    return (
+      <p className="review-error" role="alert">
+        {identityError || `사용자 정보를 확인할 수 없어 ${withEul(what)} 불러오지 못했어요.`}
+      </p>
+    );
+  }
   const feed = useReviewFeed<UserReviewPage>(
     identity
       ? `/api/reviews?${new URLSearchParams({ scope: 'mine', user_id: identity.user_id })}`
@@ -186,15 +197,9 @@ function UserDashboardContent({
       </div>
       {tab === 'lunch' ? (
         <div className={styles['user-records']}>
-          {identity ? (
-            <LunchCalendar userId={identity.user_id} />
-          ) : identityReady ? (
-            <p className="review-error" role="alert">
-              {identityError || '사용자 정보를 확인할 수 없어 점심 기록을 불러오지 못했어요.'}
-            </p>
-          ) : (
-            <LoadingStatus label="점심 기록을 불러오는 중…" />
-          )}
+          {withIdentity('점심 기록', (userId) => (
+            <LunchCalendar userId={userId} />
+          ))}
         </div>
       ) : tab === 'reviews' ? (
         <section className={styles['user-records']} aria-label="내 리뷰">
@@ -293,18 +298,9 @@ function UserDashboardContent({
         </section>
       ) : tab === 'hidden' ? (
         <section className={styles['user-records']} aria-label="숨긴 식당">
-          {identity ? (
-            <BlacklistList
-              userId={identity.user_id}
-              inactiveClassName={styles['user-restaurant-inactive']}
-            />
-          ) : identityReady ? (
-            <p className="review-error" role="alert">
-              {identityError || '사용자 정보를 확인할 수 없어 숨긴 식당을 불러오지 못했어요.'}
-            </p>
-          ) : (
-            <LoadingStatus label="숨긴 식당을 불러오는 중…" />
-          )}
+          {withIdentity('숨긴 식당', (userId) => (
+            <BlacklistList userId={userId} inactiveClassName={styles['user-restaurant-inactive']} />
+          ))}
         </section>
       ) : (
         <section className={styles['user-records']} aria-label="즐겨찾기 식당">

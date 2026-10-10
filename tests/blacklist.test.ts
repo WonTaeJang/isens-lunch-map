@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DELETE, GET, POST } from '../app/api/blacklist/route';
 import { BlacklistError, blacklistUuid } from '../lib/blacklist/model';
+import { listBlacklistIds } from '../lib/server/blacklist';
 
 const user = '11111111-1111-4111-8111-111111111111';
 const restaurant = '22222222-2222-4222-8222-222222222222';
@@ -120,4 +121,20 @@ test('removing reports whether the restaurant was hidden', async () => {
         );
       },
     );
+});
+
+test("server pages read only the ids of the user's hidden restaurants", async () => {
+  const calls: { sql: string; values: unknown[] }[] = [];
+  const db = {
+    query: async (sql: string, values: unknown[]) => {
+      calls.push({ sql, values });
+      return { rows: [{ restaurant_id: restaurant }] };
+    },
+  } as never;
+  assert.deepEqual(await listBlacklistIds(db, user), [restaurant]);
+  assert.equal(
+    calls[0].sql,
+    'select restaurant_id from public.restaurant_blacklist where user_id=$1',
+  );
+  assert.deepEqual(calls[0].values, [user]);
 });

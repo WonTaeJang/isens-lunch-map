@@ -11,6 +11,9 @@ export type BlacklistedRestaurant = {
   created_at: string;
 };
 
+/** The hidden restaurant ids a server page looked up for the viewer (from the user cookie). */
+export type BlacklistSeed = { owner: string; ids: string[] };
+
 export class BlacklistError extends Error {
   constructor(
     message: string,

@@ -22,6 +22,15 @@ export async function listBlacklist(db: Pool, user: string): Promise<Blacklisted
   return rows.map(present);
 }
 
+/** Only the ids of the user's hidden restaurants, for filtering a page on the server. */
+export async function listBlacklistIds(db: Pool, user: string): Promise<string[]> {
+  const { rows } = await db.query<{ restaurant_id: string }>(
+    'select restaurant_id from public.restaurant_blacklist where user_id=$1',
+    [user],
+  );
+  return rows.map((row) => row.restaurant_id);
+}
+
 /**
  * Hides an active restaurant for the user. Adding it again changes nothing (the primary key
  * (user_id, restaurant_id) keeps one row), so a double click or a second tab is harmless.

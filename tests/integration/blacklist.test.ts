@@ -1,7 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Pool } from 'pg';
-import { addToBlacklist, listBlacklist, removeFromBlacklist } from '../../lib/server/blacklist';
+import {
+  addToBlacklist,
+  listBlacklist,
+  listBlacklistIds,
+  removeFromBlacklist,
+} from '../../lib/server/blacklist';
 
 // Only an explicitly configured test DB is used; production tables are never touched.
 const connectionString = process.env.REVIEW_TEST_DATABASE_URL;
@@ -51,6 +56,8 @@ test(
       const list = await listBlacklist(db, user);
       assert.deepEqual(list.map((row) => row.restaurant_id).sort(), [first, second].sort());
       assert.deepEqual(await listBlacklist(db, other), []);
+      assert.deepEqual((await listBlacklistIds(db, user)).sort(), [first, second].sort());
+      assert.deepEqual(await listBlacklistIds(db, other), []);
 
       await assert.rejects(addToBlacklist(db, user, inactive), /숨길 수 없는 식당/);
       await assert.rejects(addToBlacklist(db, user, crypto.randomUUID()), /숨길 수 없는 식당/);

@@ -829,6 +829,13 @@ td .button {
   border: 1px solid #d8dee1;
   color: #627078;
 }
+/* Reviewed by the viewer: the same tint as the ✓ badge in the lunch list. */
+.restaurant-card-review[data-reviewed] {
+  gap: 4px;
+  border-color: #b9ddd3;
+  background: #eaf5f1;
+  color: #087f73;
+}
 .restaurant-card-directions {
   padding: 0 18px;
   background: #308ff5;

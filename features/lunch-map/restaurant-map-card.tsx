@@ -1,10 +1,9 @@
 'use client';
 
-import { DirectionsIcon } from '@/components/ui/icons';
+import { CheckIcon, DirectionsIcon } from '@/components/ui/icons';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import HideButton from '@/features/blacklist/hide-button';
 import TodayLunchButton from '@/features/lunch-visits/today-lunch-button';
-import ReviewedBadge from '@/features/reviews/reviewed-badge';
 import useVoteState from '@/features/reviews/use-vote-state';
 import RecommendationVote from '@/features/reviews/recommendation-vote';
 import type { ReviewCounts } from '@/lib/reviews/model';
@@ -61,7 +60,6 @@ export default function RestaurantMapCard({
       <div inert={voteBusy} aria-busy={voteBusy || undefined}>
         <div className="restaurant-card-header">
           <h3>{restaurant.name}</h3>
-          {reviewed && <ReviewedBadge />}
         </div>
         <div className="restaurant-card-meta">
           {restaurant.category || '분류 정보 없음'}
@@ -94,13 +92,17 @@ export default function RestaurantMapCard({
             busy={todayLunchBusy}
             onToggle={onTodayLunch}
           />
+          {/* The viewer's review mark lives here rather than beside the name, so names keep to one line. */}
           <button
             type="button"
             className="restaurant-card-review"
-            aria-label={`${restaurant.name} 리뷰 보기`}
+            data-reviewed={reviewed || undefined}
+            aria-label={`${restaurant.name} 리뷰 보기${reviewed ? ', 내 리뷰 작성됨' : ''}`}
+            title={reviewed ? '내 리뷰 작성됨' : undefined}
             onClick={onReviews}
           >
             리뷰
+            {reviewed && <CheckIcon size={14} />}
           </button>
           <a
             className="restaurant-card-directions restaurant-card-icon"

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { HelpIcon, MapIcon, TrophyIcon, UserIcon } from '@/components/ui/icons';
+import NavGradeIcon from '@/features/grade/nav-grade-icon';
 
 export default function SiteHeader() {
   const pathname = usePathname();
@@ -42,7 +43,7 @@ export default function SiteHeader() {
           title="내 페이지"
           aria-current={pathname === '/user' ? 'page' : undefined}
         >
-          <UserIcon size={22} />
+          <NavGradeIcon fallback={<UserIcon size={22} />} />
         </Link>
         <Link
           href="/guide"

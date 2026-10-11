@@ -6,6 +6,7 @@ const DISTANCE_FILTER_OPTIONS = [
   { label: '100m', value: 100 },
   { label: '200m', value: 200 },
   { label: '300m', value: 300 },
+  { label: '500m', value: 500 },
 ] as const;
 
 /**

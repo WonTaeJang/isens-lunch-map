@@ -626,9 +626,19 @@ td .button {
   gap: 6px;
   min-width: 0;
 }
-/* Slightly narrower distance chips, so the row fits a 320px phone too. */
+/* Slightly narrower distance chips; on phones they tighten further so the row stays on one line
+   down to 360px (narrower screens wrap the last chips). */
 .restaurant-filter-controls .distance-filters .filter-chip {
   padding-inline: 8px;
+}
+@media (max-width: 480px) {
+  .restaurant-filter-controls,
+  .restaurant-filter-controls .distance-filters {
+    gap: 4px;
+  }
+  .restaurant-filter-controls .distance-filters .filter-chip {
+    padding-inline: 6px;
+  }
 }
 /* Below the search box; the panel's padding is the space under it, like the 16px above. */
 .restaurant-filters .restaurant-filter-controls {

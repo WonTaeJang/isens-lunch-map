@@ -25,7 +25,15 @@ export default function ReviewLikeButton({ review, disabled = false }: Props) {
   const [busy, setBusy] = useState(false);
   const [pop, setPop] = useState(false);
   if (!review.content.trim()) return null;
-  const label = state.count ? `좋아요 ${state.count}` : '좋아요';
+  // "♡ 좋아요 3" on wide screens; narrow ones drop the word and keep "♡ 3".
+  const label = (
+    <>
+      <span className={styles.word} aria-hidden="true">
+        좋아요
+      </span>
+      {state.count > 0 && <span aria-hidden="true">{state.count}</span>}
+    </>
+  );
 
   if (review.is_mine)
     return (
@@ -35,7 +43,7 @@ export default function ReviewLikeButton({ review, disabled = false }: Props) {
         title="받은 좋아요"
       >
         <HeartIcon size={14} strokeWidth="2" />
-        <span aria-hidden="true">{label}</span>
+        {label}
       </span>
     );
 
@@ -78,7 +86,7 @@ export default function ReviewLikeButton({ review, disabled = false }: Props) {
       onAnimationEnd={() => setPop(false)}
     >
       <HeartIcon size={14} strokeWidth="2" />
-      <span aria-hidden="true">{label}</span>
+      {label}
     </button>
   );
 }

@@ -67,3 +67,9 @@
     animation: none;
   }
 }
+/* Narrow screens: the heart and the count only (the button keeps its full accessible name). */
+@media (max-width: 760px) {
+  .word {
+    display: none;
+  }
+}

@@ -21,6 +21,7 @@ features/
   local-user/                # 로컬 사용자 정보 생성
   reviews/                   # 리뷰 패널·작성 폼·수정/삭제 훅(use-review-actions)
   ranking/                   # 랭킹 목록 UI
+  grade/                     # 사용자 등급 저장·아이콘·등급표·승급 팝업·헤더 아이콘
 lib/                         # features와 서버가 함께 쓰는 코드 (features를 import하지 않음)
   server/                    # 서버 전용 로직
     db.ts                    # DB 연결
@@ -29,6 +30,7 @@ lib/                         # features와 서버가 함께 쓰는 코드 (featu
     distances.ts             # 거리 재측정 미리보기·반영
   reviews/                   # 리뷰 타입·입력 검증·태그 등 정책 상수
   ranking/                   # 랭킹 순위 계산·정책 상수
+  grades/                    # 등급 배점·구간·진행률 계산 (화면·서버 공용)
   admin/                     # 관리자 통계 타입
   restaurant-types.ts        # 공통 데이터 타입
   coordinates.ts             # 좌표 유효성 검사

@@ -65,13 +65,20 @@
   outline-offset: 2px;
 }
 .user-avatar {
-  flex: 0 0 64px;
-  height: 64px;
+  flex: 0 0 72px;
+  height: 72px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   background: #eaf5f1;
   color: #087f73;
+}
+/* The grade crest and its progress ring fill the avatar slot (72px, 56px on phones). */
+button.user-avatar {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 }
 .user-tabs {
   display: flex;
@@ -152,8 +159,8 @@
     font-size: 20px;
   }
   .user-avatar {
-    flex-basis: 48px;
-    height: 48px;
+    flex-basis: 56px;
+    height: 56px;
   }
   .user-records {
     padding: 18px;

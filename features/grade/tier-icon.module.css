@@ -1,0 +1,33 @@
+.icon {
+  display: block;
+  flex: none;
+  overflow: visible;
+}
+/* Diamond and up: a light sweeps across the badge every few seconds. */
+.shine {
+  animation: tier-shine 3.2s ease-in-out infinite;
+}
+@keyframes tier-shine {
+  0% {
+    transform: translateX(0);
+  }
+  45%,
+  100% {
+    transform: translateX(110px);
+  }
+}
+/* Challenger: a soft blue glow that breathes. */
+.icon[data-glow] {
+  animation: tier-glow 2.4s ease-in-out infinite;
+}
+@keyframes tier-glow {
+  50% {
+    filter: drop-shadow(0 0 5px rgb(63 186 255 / 70%));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shine,
+  .icon[data-glow] {
+    animation: none;
+  }
+}

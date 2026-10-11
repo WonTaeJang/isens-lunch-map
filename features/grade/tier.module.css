@@ -1,0 +1,118 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border: 1px solid var(--tier-mid);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tier-light) 45%, white);
+  color: var(--tier-dark);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.current {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+.current strong {
+  display: block;
+  font-size: 20px;
+}
+.next {
+  margin-top: 2px;
+  color: #087f73;
+  font-size: 13px;
+  font-weight: 600;
+}
+.progress {
+  height: 6px;
+  margin-top: 12px;
+  border-radius: 999px;
+  background: #e8eeec;
+  overflow: hidden;
+}
+.progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #127e70;
+}
+.tiers {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tiers li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+.tiers li[aria-current] {
+  background: #edf6f3;
+  font-weight: 700;
+}
+.name {
+  flex: 1;
+  font-size: 14px;
+}
+.min {
+  color: #627078;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.rules {
+  margin-top: 12px;
+  color: #75818a;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* Profile crest with its progress ring (sized by the parent). */
+.ring {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.ring > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+.ring > svg[data-top] {
+  filter: drop-shadow(0 0 3px rgb(63 186 255 / 70%));
+}
+.ring-track,
+.ring-fill {
+  fill: none;
+  stroke-width: 4;
+}
+.ring-track {
+  stroke: #e3e9e7;
+}
+.ring-fill {
+  stroke: var(--tier-mid);
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.8s ease-out;
+}
+/* 6 of 72 units: the 4-unit ring plus a 2-unit gap. */
+.ring-crest {
+  position: absolute;
+  inset: 8.333%;
+}
+.ring-crest svg {
+  width: 100%;
+  height: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ring-fill {
+    transition: none;
+  }
+}

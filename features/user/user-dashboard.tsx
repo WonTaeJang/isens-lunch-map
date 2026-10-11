@@ -7,6 +7,11 @@ import Link from 'next/link';
 import { useRef, useState, type ReactNode } from 'react';
 import Button from '@/components/ui/button';
 import { SettingsIcon, UserIcon } from '@/components/ui/icons';
+import TierBadge from '@/features/grade/tier-badge';
+import PromotionDialog from '@/features/grade/promotion-dialog';
+import TierDialog from '@/features/grade/tier-dialog';
+import TierRing from '@/features/grade/tier-ring';
+import useUserGrade from '@/features/grade/use-user-grade';
 import LoadingStatus from '@/components/ui/loading-status';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import useFavorites from '@/features/favorites/use-favorites';
@@ -70,6 +75,7 @@ function UserDashboardContent({
 }: Props & { identity: LocalIdentity | null; identityReady: boolean; identityError: string }) {
   const [identityEditorOpen, setIdentityEditorOpen] = useState(false);
   const [deviceDialogOpen, setDeviceDialogOpen] = useState(false);
+  const [tierDialogOpen, setTierDialogOpen] = useState(false);
   const profileClicks = useRef({ start: 0, count: 0 });
   function clickProfile() {
     if (!identity || busy || editing) return;
@@ -103,6 +109,7 @@ function UserDashboardContent({
       : null,
   );
   const { page, busy, load } = feed;
+  const grade = useUserGrade(identity?.user_id ?? null, page);
   const loading = !identityReady || feed.loading;
   const actions = useReviewActions<UserReview>({
     identity,
@@ -133,11 +140,28 @@ function UserDashboardContent({
               }
             }}
           >
-            <span className={styles['user-avatar']} aria-hidden="true">
-              <UserIcon size={30} strokeWidth="1.7" />
-            </span>
+            {grade.tier ? (
+              // The grade crest opens the tier table; it never counts toward the card's 5-click shortcut.
+              <button
+                type="button"
+                className={styles['user-avatar']}
+                aria-label="등급표 보기"
+                title="등급표 보기"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setTierDialogOpen(true);
+                }}
+                onKeyDown={(event) => event.stopPropagation()}
+              >
+                <TierRing tier={grade.tier} progress={grade.progress} />
+              </button>
+            ) : (
+              <span className={styles['user-avatar']} aria-hidden="true">
+                <UserIcon size={30} strokeWidth="1.7" />
+              </span>
+            )}
             <div>
-              <p className="subtle">나의 점심 기록</p>
+              {grade.tier && <TierBadge tier={grade.tier} />}
               <h1>
                 {identity ? (
                   <UserName name={identity.user_name} />
@@ -175,6 +199,24 @@ function UserDashboardContent({
           없어요.
         </p>
       </div>
+      {grade.promotion && (
+        <PromotionDialog
+          from={grade.promotion.from}
+          to={grade.promotion.to}
+          onClose={grade.dismissPromotion}
+          onShowTiers={() => {
+            grade.dismissPromotion();
+            setTierDialogOpen(true);
+          }}
+        />
+      )}
+      {tierDialogOpen && grade.tier && (
+        <TierDialog
+          tier={grade.tier}
+          score={grade.score}
+          onClose={() => setTierDialogOpen(false)}
+        />
+      )}
       {deviceDialogOpen && identity && (
         <DeviceLinkDialog identity={identity} onClose={() => setDeviceDialogOpen(false)} />
       )}

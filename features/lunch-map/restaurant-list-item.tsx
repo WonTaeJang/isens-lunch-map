@@ -1,5 +1,4 @@
 'use client';
-import { BowlChopsticksIcon } from '@/components/ui/icons';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import TodayLunchButton from '@/features/lunch-visits/today-lunch-button';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
@@ -59,12 +58,6 @@ export default function RestaurantListItem({
         <div className="restaurant-list-name">
           <h3>{row.name}</h3>
           {reviewed && <ReviewedBadge />}
-          {todayLunch && (
-            <span className="today-lunch-badge">
-              <BowlChopsticksIcon size={12} strokeWidth="2.2" />
-              오늘의 점심
-            </span>
-          )}
         </div>
         <div className="restaurant-list-meta">
           <span className="distance-badge">{formatDistance(row.distance)}</span>

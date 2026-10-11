@@ -594,19 +594,6 @@ td .button {
   display: flex;
   gap: 6px;
 }
-.today-lunch-badge {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: #e6f3f0;
-  color: #127e70;
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-}
 .restaurant-list-item[data-today-lunch]::before {
   content: '';
   position: absolute;

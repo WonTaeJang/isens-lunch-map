@@ -1,6 +1,31 @@
 .user-dashboard {
+  display: flex;
+  flex-direction: column;
   max-width: 780px;
   margin: 32px auto;
+}
+/* One column in reading order, with the storage note (inside .user-side) last. */
+.user-side {
+  display: contents;
+}
+/* Wide screens: profile, progress and the storage note on the left, kept in view while the
+   records on the right scroll. */
+@media (min-width: 1024px) {
+  .user-dashboard {
+    display: grid;
+    grid-template-columns: 340px minmax(0, 1fr);
+    column-gap: 24px;
+    align-items: start;
+    max-width: 1180px;
+  }
+  .user-side {
+    display: block;
+    position: sticky;
+    top: 24px;
+  }
+  .user-main .user-tabs {
+    margin-top: 0;
+  }
 }
 .user-profile {
   display: flex;
@@ -109,6 +134,7 @@
   margin-top: 8px;
 }
 .user-storage-note {
+  order: 1;
   margin-top: 20px;
   color: #75818a;
   font-size: 12px;

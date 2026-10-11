@@ -118,55 +118,63 @@ function UserDashboardContent({
     .sort((a, b) => Number(Boolean(b.active)) - Number(Boolean(a.active)));
   return (
     <div className={styles['user-dashboard']}>
-      <div className={styles['user-profile-wrap']}>
-        <section
-          className={styles['user-profile']}
-          aria-label="내 프로필"
-          tabIndex={0}
-          onClick={clickProfile}
-          onKeyDown={(event) => {
-            if (!event.repeat && (event.key === 'Enter' || event.key === ' ')) {
-              event.preventDefault();
-              clickProfile();
-            }
-          }}
-        >
-          <span className={styles['user-avatar']} aria-hidden="true">
-            <UserIcon size={30} strokeWidth="1.7" />
-          </span>
-          <div>
-            <p className="subtle">나의 점심 기록</p>
-            <h1>
-              {identity ? (
-                <UserName name={identity.user_name} />
-              ) : identityReady ? (
-                '사용자 정보를 확인해 주세요'
-              ) : (
-                '불러오는 중…'
-              )}
-            </h1>
-            <p className="subtle">
-              작성한 리뷰 {page?.total ?? '—'} · 즐겨찾기 {identityReady ? favorites.size : '—'}
-            </p>
-          </div>
-        </section>
-        {/* A sibling, not a child, so the card's 5-click editor shortcut ignores it. */}
-        <Link
-          href="/admin"
-          className={styles['user-admin-link']}
-          aria-label="리스트 관리"
-          title="리스트 관리"
-        >
-          <SettingsIcon size={16} />
-        </Link>
-      </div>
-      {identity && (
-        <div className={styles['user-device-link']}>
-          <button type="button" onClick={() => setDeviceDialogOpen(true)}>
-            다른 기기에서 이어 쓰기
-          </button>
+      {/* Wide screens: profile, progress and the storage note on the left, the record tabs on the right. */}
+      <div className={styles['user-side']}>
+        <div className={styles['user-profile-wrap']}>
+          <section
+            className={styles['user-profile']}
+            aria-label="내 프로필"
+            tabIndex={0}
+            onClick={clickProfile}
+            onKeyDown={(event) => {
+              if (!event.repeat && (event.key === 'Enter' || event.key === ' ')) {
+                event.preventDefault();
+                clickProfile();
+              }
+            }}
+          >
+            <span className={styles['user-avatar']} aria-hidden="true">
+              <UserIcon size={30} strokeWidth="1.7" />
+            </span>
+            <div>
+              <p className="subtle">나의 점심 기록</p>
+              <h1>
+                {identity ? (
+                  <UserName name={identity.user_name} />
+                ) : identityReady ? (
+                  '사용자 정보를 확인해 주세요'
+                ) : (
+                  '불러오는 중…'
+                )}
+              </h1>
+              <p className="subtle">
+                작성한 리뷰 {page?.total ?? '—'} · 즐겨찾기 {identityReady ? favorites.size : '—'}
+              </p>
+            </div>
+          </section>
+          {/* A sibling, not a child, so the card's 5-click editor shortcut ignores it. */}
+          <Link
+            href="/admin"
+            className={styles['user-admin-link']}
+            aria-label="리스트 관리"
+            title="리스트 관리"
+          >
+            <SettingsIcon size={16} />
+          </Link>
         </div>
-      )}
+        {identity && (
+          <div className={styles['user-device-link']}>
+            <button type="button" onClick={() => setDeviceDialogOpen(true)}>
+              다른 기기에서 이어 쓰기
+            </button>
+          </div>
+        )}
+        <UserProgress stats={page} loading={loading} />
+        <p className={styles['user-storage-note']}>
+          이 브라우저에 저장된 사용자 정보예요. 브라우저 데이터를 삭제하면 기존 리뷰를 관리할 수
+          없어요.
+        </p>
+      </div>
       {deviceDialogOpen && identity && (
         <DeviceLinkDialog identity={identity} onClose={() => setDeviceDialogOpen(false)} />
       )}
@@ -181,179 +189,179 @@ function UserDashboardContent({
           onConfirm={actions.confirmDelete}
         />
       )}
-      <UserProgress stats={page} loading={loading} />
-      <div className={styles['user-tabs']} aria-label="내 기록 분류">
-        {TABS.map((item) => (
-          <button
-            type="button"
-            key={item.value}
-            aria-pressed={tab === item.value}
-            disabled={busy || Boolean(editing)}
-            onClick={() => setTab(item.value)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-      {tab === 'lunch' ? (
-        <div className={styles['user-records']}>
-          {withIdentity('점심 기록', (userId) => (
-            <LunchCalendar userId={userId} />
+      <div className={styles['user-main']}>
+        <div className={styles['user-tabs']} aria-label="내 기록 분류">
+          {TABS.map((item) => (
+            <button
+              type="button"
+              key={item.value}
+              aria-pressed={tab === item.value}
+              disabled={busy || Boolean(editing)}
+              onClick={() => setTab(item.value)}
+            >
+              {item.label}
+            </button>
           ))}
         </div>
-      ) : tab === 'reviews' ? (
-        <section className={styles['user-records']} aria-label="내 리뷰">
-          {error && (
-            <div className="review-error" role="alert">
-              {error}{' '}
+        {tab === 'lunch' ? (
+          <div className={styles['user-records']}>
+            {withIdentity('점심 기록', (userId) => (
+              <LunchCalendar userId={userId} />
+            ))}
+          </div>
+        ) : tab === 'reviews' ? (
+          <section className={styles['user-records']} aria-label="내 리뷰">
+            {error && (
+              <div className="review-error" role="alert">
+                {error}{' '}
+                <Button
+                  disabled={loading || busy || Boolean(editing)}
+                  onClick={() => {
+                    setError('');
+                    if (identity) void load();
+                    else window.location.reload();
+                  }}
+                >
+                  다시 불러오기
+                </Button>
+              </div>
+            )}
+            {notice && <p role="status">{notice}</p>}
+            {loading && !page?.hasMore && <LoadingStatus label="내 리뷰를 불러오는 중…" />}
+            {page?.total === 0 && !loading && (
+              <div className="review-empty">
+                아직 작성한 리뷰가 없어요.{' '}
+                <Link href="/" className="text-link">
+                  점심 지도에서 식당 찾아보기
+                </Link>
+              </div>
+            )}
+            <ul className="review-list">
+              {page?.reviews.map((review) => {
+                // A review of a hidden restaurant is only shown, marked 숨김: no link, edit or delete.
+                const isHidden = hidden?.has(review.restaurant_id) ?? false;
+                const usable = review.restaurant_active && !isHidden;
+                return (
+                  <li
+                    className={`review-item${usable ? '' : ` ${styles['user-restaurant-inactive']}`}`}
+                    key={review.id}
+                  >
+                    <div className="review-item-heading">
+                      <h2>
+                        {usable && hasCoordinates(review) ? (
+                          <Link href={restaurantMapHref(review.restaurant_id)}>
+                            {review.restaurant_name}
+                          </Link>
+                        ) : (
+                          review.restaurant_name
+                        )}
+                        {isHidden && <HiddenBadge />}
+                      </h2>
+                      <div className="review-heading-actions">
+                        <RecommendationBadge recommended={review.is_recommended} />
+                        <ReviewActionIcons
+                          disabled={busy || loading || Boolean(editing) || isHidden}
+                          onEdit={() => actions.startEdit(review)}
+                          onDelete={() => actions.startDelete(review)}
+                        />
+                      </div>
+                    </div>
+                    {!review.restaurant_active && <p className="subtle">현재 비활성 식당이에요.</p>}
+                    {review.restaurant_active && !hasCoordinates(review) && (
+                      <p className="subtle">위치 정보 없음 · 지도에 표시되지 않아요</p>
+                    )}
+                    <p className="subtle">
+                      {DATE_FORMAT.format(new Date(reviewTimestamp(review)))}
+                      {review.updated_at && ' · 수정됨'}
+                    </p>
+                    {editing?.id === review.id ? (
+                      <ReviewForm
+                        key={editing.id}
+                        review={editing}
+                        busy={busy || loading}
+                        onReload={() => actions.loadOwnReview(editing.id)}
+                        onCancel={() => actions.setEditing(null)}
+                        onSave={(input, base) => actions.mutate('PATCH', base ?? editing, input)}
+                      />
+                    ) : (
+                      <>
+                        {review.content && <p className="review-content">{review.content}</p>}
+                        <ReviewFooter review={review} />
+                      </>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+            {page?.hasMore && (
               <Button
-                disabled={loading || busy || Boolean(editing)}
-                onClick={() => {
-                  setError('');
-                  if (identity) void load();
-                  else window.location.reload();
-                }}
+                loading={loading}
+                loadingLabel="불러오는 중…"
+                disabled={busy || Boolean(editing)}
+                onClick={() => void load(true)}
               >
-                다시 불러오기
+                더 보기
               </Button>
-            </div>
-          )}
-          {notice && <p role="status">{notice}</p>}
-          {loading && !page?.hasMore && <LoadingStatus label="내 리뷰를 불러오는 중…" />}
-          {page?.total === 0 && !loading && (
-            <div className="review-empty">
-              아직 작성한 리뷰가 없어요.{' '}
-              <Link href="/" className="text-link">
-                점심 지도에서 식당 찾아보기
-              </Link>
-            </div>
-          )}
-          <ul className="review-list">
-            {page?.reviews.map((review) => {
-              // A review of a hidden restaurant is only shown, marked 숨김: no link, edit or delete.
-              const isHidden = hidden?.has(review.restaurant_id) ?? false;
-              const usable = review.restaurant_active && !isHidden;
-              return (
+            )}
+          </section>
+        ) : tab === 'hidden' ? (
+          <section className={styles['user-records']} aria-label="숨긴 식당">
+            {withIdentity('숨긴 식당', (userId) => (
+              <BlacklistList
+                userId={userId}
+                inactiveClassName={styles['user-restaurant-inactive']}
+              />
+            ))}
+          </section>
+        ) : (
+          <section className={styles['user-records']} aria-label="즐겨찾기 식당">
+            {favoriteError && (
+              <p className="review-error" role="alert">
+                {favoriteError}
+              </p>
+            )}
+            {!savedRestaurants.length && (
+              <p className="review-empty">
+                즐겨찾기한 식당이 없어요.{' '}
+                <Link href="/" className="text-link">
+                  식당 찾아보기
+                </Link>
+              </p>
+            )}
+            <ul className="review-list">
+              {savedRestaurants.map((row) => (
                 <li
-                  className={`review-item${usable ? '' : ` ${styles['user-restaurant-inactive']}`}`}
-                  key={review.id}
+                  className={`review-item${row.active ? '' : ` ${styles['user-restaurant-inactive']}`}`}
+                  key={row.id}
                 >
                   <div className="review-item-heading">
-                    <h2>
-                      {usable && hasCoordinates(review) ? (
-                        <Link href={restaurantMapHref(review.restaurant_id)}>
-                          {review.restaurant_name}
-                        </Link>
-                      ) : (
-                        review.restaurant_name
-                      )}
-                      {isHidden && <HiddenBadge />}
-                    </h2>
-                    <div className="review-heading-actions">
-                      <RecommendationBadge recommended={review.is_recommended} />
-                      <ReviewActionIcons
-                        disabled={busy || loading || Boolean(editing) || isHidden}
-                        onEdit={() => actions.startEdit(review)}
-                        onDelete={() => actions.startDelete(review)}
+                    <div className={styles['favorite-title']}>
+                      <FavoriteToggle
+                        restaurantName={row.name}
+                        selected={favorites.has(row.id)}
+                        onClick={() => setFavoriteError(toggleStoredFavorite(row.id) ?? '')}
                       />
+                      <h2>
+                        {row.active && hasCoordinates(row) ? (
+                          <Link href={restaurantMapHref(row.id)}>{row.name}</Link>
+                        ) : (
+                          row.name
+                        )}
+                      </h2>
                     </div>
+                    <span className="distance-badge">{formatDistance(row.distance)}</span>
                   </div>
-                  {!review.restaurant_active && <p className="subtle">현재 비활성 식당이에요.</p>}
-                  {review.restaurant_active && !hasCoordinates(review) && (
-                    <p className="subtle">위치 정보 없음 · 지도에 표시되지 않아요</p>
-                  )}
-                  <p className="subtle">
-                    {DATE_FORMAT.format(new Date(reviewTimestamp(review)))}
-                    {review.updated_at && ' · 수정됨'}
+                  <p className="description">
+                    {row.category} · {row.main_menu}
                   </p>
-                  {editing?.id === review.id ? (
-                    <ReviewForm
-                      key={editing.id}
-                      review={editing}
-                      busy={busy || loading}
-                      onReload={() => actions.loadOwnReview(editing.id)}
-                      onCancel={() => actions.setEditing(null)}
-                      onSave={(input, base) => actions.mutate('PATCH', base ?? editing, input)}
-                    />
-                  ) : (
-                    <>
-                      {review.content && <p className="review-content">{review.content}</p>}
-                      <ReviewFooter review={review} />
-                    </>
-                  )}
+                  <p className="description">{row.address || '주소 확인 필요'}</p>
+                  {!row.active && <p className="subtle">현재 비활성 식당이에요.</p>}
                 </li>
-              );
-            })}
-          </ul>
-          {page?.hasMore && (
-            <Button
-              loading={loading}
-              loadingLabel="불러오는 중…"
-              disabled={busy || Boolean(editing)}
-              onClick={() => void load(true)}
-            >
-              더 보기
-            </Button>
-          )}
-        </section>
-      ) : tab === 'hidden' ? (
-        <section className={styles['user-records']} aria-label="숨긴 식당">
-          {withIdentity('숨긴 식당', (userId) => (
-            <BlacklistList userId={userId} inactiveClassName={styles['user-restaurant-inactive']} />
-          ))}
-        </section>
-      ) : (
-        <section className={styles['user-records']} aria-label="즐겨찾기 식당">
-          {favoriteError && (
-            <p className="review-error" role="alert">
-              {favoriteError}
-            </p>
-          )}
-          {!savedRestaurants.length && (
-            <p className="review-empty">
-              즐겨찾기한 식당이 없어요.{' '}
-              <Link href="/" className="text-link">
-                식당 찾아보기
-              </Link>
-            </p>
-          )}
-          <ul className="review-list">
-            {savedRestaurants.map((row) => (
-              <li
-                className={`review-item${row.active ? '' : ` ${styles['user-restaurant-inactive']}`}`}
-                key={row.id}
-              >
-                <div className="review-item-heading">
-                  <div className={styles['favorite-title']}>
-                    <FavoriteToggle
-                      restaurantName={row.name}
-                      selected={favorites.has(row.id)}
-                      onClick={() => setFavoriteError(toggleStoredFavorite(row.id) ?? '')}
-                    />
-                    <h2>
-                      {row.active && hasCoordinates(row) ? (
-                        <Link href={restaurantMapHref(row.id)}>{row.name}</Link>
-                      ) : (
-                        row.name
-                      )}
-                    </h2>
-                  </div>
-                  <span className="distance-badge">{formatDistance(row.distance)}</span>
-                </div>
-                <p className="description">
-                  {row.category} · {row.main_menu}
-                </p>
-                <p className="description">{row.address || '주소 확인 필요'}</p>
-                {!row.active && <p className="subtle">현재 비활성 식당이에요.</p>}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-      <p className={styles['user-storage-note']}>
-        이 브라우저에 저장된 사용자 정보예요. 브라우저 데이터를 삭제하면 기존 리뷰를 관리할 수
-        없어요.
-      </p>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
     </div>
   );
 }

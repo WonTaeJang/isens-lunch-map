@@ -9,6 +9,8 @@ type Props = {
   title?: ReactNode;
   /** id of a heading rendered inside `children`, when `title` is not used. */
   labelledBy?: string;
+  /** Content kept in the fixed header under the title (e.g. a summary); `children` scroll. */
+  header?: ReactNode;
   /** Card width in px (default 440). */
   width?: number;
   className?: string;
@@ -19,10 +21,14 @@ type Props = {
   children: ReactNode;
 };
 
-/** Centered card dialog shared by the app's simple modals. */
+/**
+ * Centered card dialog shared by the app's simple modals: the title (and `header`) and the
+ * action buttons stay put while only the content between them scrolls.
+ */
 export default function Modal({
   title,
   labelledBy,
+  header,
   width,
   className,
   onClose,
@@ -42,12 +48,17 @@ export default function Modal({
         onClose();
       }}
     >
-      {title && (
-        <h2 id={titleId} className={styles.title}>
-          {title}
-        </h2>
+      {(title || header) && (
+        <div className={styles.header}>
+          {title && (
+            <h2 id={titleId} className={styles.title}>
+              {title}
+            </h2>
+          )}
+          {header}
+        </div>
       )}
-      {children}
+      <div className={styles.body}>{children}</div>
       {actions && <div className={styles.actions}>{actions}</div>}
     </dialog>
   );

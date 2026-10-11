@@ -1,14 +1,36 @@
-/* Centered card dialog. Set --modal-width on a second class to change the width. */
+/* Centered card dialog. Set --modal-width on a second class to change the width.
+   Header and actions stay put; only the body between them scrolls. */
 .modal {
   width: min(var(--modal-width, 440px), calc(100vw - 32px));
   max-height: 85dvh;
-  overflow-y: auto;
+  overflow: hidden;
   margin: auto;
-  padding: 24px;
+  padding: 0;
   border: 1px solid #e4e9eb;
   border-radius: 16px;
   color: #273239;
   background: white;
+}
+.modal[open] {
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  flex: none;
+  padding: 24px 24px 12px;
+}
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 24px 16px;
+}
+.body:first-child {
+  padding-top: 24px;
+}
+.body:last-child {
+  padding-bottom: 24px;
 }
 .modal::backdrop {
   background: #172e3c66;
@@ -19,11 +41,13 @@
 }
 /* Buttons share the width equally. */
 .actions {
+  flex: none;
   display: grid;
   grid-auto-columns: 1fr;
   grid-auto-flow: column;
   gap: 8px;
-  margin-top: 20px;
+  padding: 16px 24px 24px;
+  border-top: 1px solid #eef1f2;
 }
 .actions :global(.button) {
   width: 100%;

@@ -273,7 +273,9 @@ h3 {
   /* Keeps the map's own z-indexes inside it, under the sticky header. */
   isolation: isolate;
   min-width: 0;
-  height: clamp(450px, 64vh, 760px);
+  /* Wide screens: the screen height under the header and the page title (about 126px), with
+     ~24px left below; between 450px and 900px. */
+  height: clamp(450px, calc(100vh - var(--header-height) - 150px), 900px);
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid #e1e7e7;
@@ -471,10 +473,11 @@ th:nth-child(3) {
   .map-layout {
     grid-template-columns: 1fr;
   }
+  /* Fixed heights by width: in-app browsers (e.g. KakaoTalk) resize the page while their bars
+     hide on scroll, so a viewport-height map would keep resizing. */
   .map-panel {
     grid-row: 1;
-    height: 52vh;
-    min-height: 330px;
+    height: 440px;
   }
   .list-empty {
     padding: 28px 15px;
@@ -490,6 +493,13 @@ th:nth-child(3) {
     font-size: 9px;
   }
 }
+/* Most phones: a smaller fixed map (after the 760px rules so it wins). */
+@media (max-width: 480px) {
+  .map-panel {
+    height: 360px;
+  }
+}
+
 .admin-input {
   display: block;
   margin: 10px 0;

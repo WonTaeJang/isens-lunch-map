@@ -208,7 +208,8 @@ function ReviewPanelContent({
                 {review.updated_at && ' · 수정됨'}
               </p>
               {review.content && <p className="review-content">{review.content}</p>}
-              <ReviewFooter review={review} />
+              {/* No 좋아요 while a review is being written or edited. */}
+              <ReviewFooter review={review} likeDisabled={Boolean(editing)} />
             </li>
           ))}
         </ul>

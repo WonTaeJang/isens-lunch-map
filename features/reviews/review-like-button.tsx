@@ -8,14 +8,18 @@ import type { Review } from '@/lib/reviews/model';
 import { likeReview } from './review-api';
 import styles from './review-like-button.module.css';
 
-type Props = { review: Pick<Review, 'id' | 'content' | 'is_mine' | 'like_count' | 'liked'> };
+type Props = {
+  review: Pick<Review, 'id' | 'content' | 'is_mine' | 'like_count' | 'liked'>;
+  /** E.g. while a review is being written or edited in the same list. */
+  disabled?: boolean;
+};
 
 /**
  * 좋아요 for a review with content: other people's reviews get a toggle button, the viewer's own
  * review shows the received count only. Reviews without content (a vote alone) show nothing.
  * Re-mount it (key) when the review's like data is reloaded.
  */
-export default function ReviewLikeButton({ review }: Props) {
+export default function ReviewLikeButton({ review, disabled = false }: Props) {
   const { identity } = useLocalUser();
   const [state, setState] = useState({ liked: review.liked, count: review.like_count });
   const [busy, setBusy] = useState(false);
@@ -66,6 +70,7 @@ export default function ReviewLikeButton({ review }: Props) {
       className={styles.like}
       aria-pressed={state.liked}
       aria-busy={busy || undefined}
+      disabled={disabled}
       aria-label={`리뷰 좋아요 ${state.count}개${state.liked ? ', 누름' : ''}`}
       title={state.liked ? '좋아요 취소' : '좋아요'}
       data-pop={pop || undefined}

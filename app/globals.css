@@ -3,6 +3,7 @@
 :root {
   --background: #f7f8fa;
   --foreground: #202b32;
+  --header-height: 80px;
 }
 @theme inline {
   --color-background: var(--background);
@@ -23,8 +24,10 @@ button:focus-visible {
   outline-offset: 5px;
 }
 .site-header {
-  min-height: 88px;
-  padding: 0 5%;
+  flex: none;
+  height: var(--header-height);
+  /* Same side edges as .page-shell (90% wide, at most 1440px), so the header lines up with the page. */
+  padding: 0 max(5%, calc((100% - 1440px) / 2));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -36,7 +39,7 @@ button:focus-visible {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 21px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.6px;
 }
@@ -52,29 +55,33 @@ button:focus-visible {
   display: grid;
   place-content: center;
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   background: #11796e;
   color: white;
-  border-radius: 13px;
-  font-size: 26px;
+  border-radius: 12px;
+  font-size: 25px;
 }
 .brand-icon span {
   position: absolute;
-  right: 8px;
+  right: 7px;
   top: 0;
   color: #bde779;
-  font-size: 20px;
+  font-size: 19px;
 }
 .main-nav {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
 }
-.main-nav a {
-  padding: 11px 18px;
+/* Menu items are 40px icon buttons. */
+.main-nav a.nav-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   color: #727e86;
   border-radius: 9px;
 }
@@ -391,29 +398,31 @@ th:nth-child(3) {
   font-size: 11px;
 }
 @media (max-width: 760px) {
+  :root {
+    --header-height: 60px;
+  }
   .site-header {
-    padding: 16px 5%;
-    min-height: 76px;
     gap: 10px;
   }
   .brand {
-    font-size: 17px;
+    font-size: 16px;
     gap: 8px;
   }
   .brand-icon {
-    width: 34px;
-    height: 34px;
-    font-size: 23px;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    font-size: 20px;
+  }
+  .brand-icon span {
+    right: 5px;
+    font-size: 15px;
   }
   .brand small {
     display: none;
   }
   .main-nav {
     gap: 2px;
-    font-size: 12px;
-  }
-  .main-nav a {
-    padding: 9px 10px;
   }
   .page-heading {
     padding: 28px 0 23px;
@@ -673,16 +682,6 @@ td .button {
 .map-control-button:disabled {
   opacity: 0.4;
   cursor: default;
-}
-
-.main-nav a.nav-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  flex-shrink: 0;
 }
 
 /* The raised card leaves a transparent host area; only the card should intercept input. */

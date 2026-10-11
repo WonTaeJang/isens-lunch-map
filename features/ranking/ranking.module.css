@@ -117,7 +117,8 @@
   font-weight: 700;
 }
 
-/* Three rankings fit side by side from 1100px; below that only the selected tab is shown. */
+/* Three rankings fit side by side from 1100px; below that they sit in a row and swipe one by
+   one (scroll snap), with the tabs following. */
 @media (min-width: 1100px) {
   .tabs {
     display: none;
@@ -125,10 +126,24 @@
 }
 @media (max-width: 1099px) {
   .columns {
-    grid-template-columns: 1fr;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    /* Height follows the shown ranking (set by RankingTabs), so a short one leaves no gap below. */
+    transition: height 0.2s ease;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
   }
-  .columns > :not([data-active]) {
+  .columns::-webkit-scrollbar {
     display: none;
+  }
+  .columns > * {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import styles from './ranking.module.css';
 
 type Tab = { href: string; title: string };
@@ -28,6 +28,18 @@ export default function RankingTabs({
   const scroller = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(initialIndex);
   const activeRef = useRef(initialIndex);
+  /** The tab a tap is scrolling to; the scroll and fit handlers leave the scroller alone until then. */
+  const travel = useRef<{ index: number; timer: number } | null>(null);
+  /** Shows tab `index` as active and keeps a reload or a shared link on it (?type=). */
+  const select = useCallback(
+    (index: number) => {
+      if (index === activeRef.current) return;
+      activeRef.current = index;
+      setActive(index);
+      window.history.replaceState(window.history.state, '', tabs[index].href);
+    },
+    [tabs],
+  );
 
   // Narrow screens: show the active ranking (the linked ?type= at first, and again after a
   // resize such as rotating a tablet from columns to swiping) and make the scroller as tall as it.
@@ -37,7 +49,7 @@ export default function RankingTabs({
     const fit = () => {
       const step = panelStep(element, tabs.length);
       const panel = element.children[active] as HTMLElement | undefined;
-      if (step && Math.round(element.scrollLeft / step) !== active) {
+      if (step && !travel.current && Math.round(element.scrollLeft / step) !== active) {
         element.scrollLeft = active * step;
       }
       element.style.height = step && panel ? `${panel.offsetHeight}px` : '';
@@ -58,20 +70,42 @@ export default function RankingTabs({
       frame = requestAnimationFrame(() => {
         const step = panelStep(element, tabs.length);
         if (!step) return;
-        const index = Math.min(tabs.length - 1, Math.max(0, Math.round(element.scrollLeft / step)));
-        if (index === activeRef.current) return;
-        activeRef.current = index;
-        setActive(index);
-        // Keep a reload or a shared link on the same ranking.
-        window.history.replaceState(window.history.state, '', tabs[index].href);
+        const moving = travel.current;
+        if (moving) {
+          if (Math.abs(element.scrollLeft - moving.index * step) > 1) return;
+          window.clearTimeout(moving.timer);
+          travel.current = null;
+        }
+        select(Math.min(tabs.length - 1, Math.max(0, Math.round(element.scrollLeft / step))));
       });
     };
     element.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       cancelAnimationFrame(frame);
       element.removeEventListener('scroll', onScroll);
+      if (travel.current) window.clearTimeout(travel.current.timer);
     };
-  }, [tabs]);
+  }, [tabs.length, select]);
+
+  /**
+   * A tab tap: a neighbour slides over; a farther tab jumps there (never sliding past the one in
+   * between) and fades in. With reduced motion everything moves at once.
+   */
+  function goTo(element: HTMLElement, step: number, index: number) {
+    const far = Math.abs(index - activeRef.current) > 1;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (travel.current) window.clearTimeout(travel.current.timer);
+    // A swipe that interrupts the slide takes over after a moment.
+    travel.current = { index, timer: window.setTimeout(() => (travel.current = null), 800) };
+    select(index);
+    element.scrollTo({ left: index * step, behavior: far || reduceMotion ? 'instant' : 'smooth' });
+    if (far && !reduceMotion) {
+      element.children[index]?.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: 200,
+        easing: 'ease-out',
+      });
+    }
+  }
 
   return (
     <>
@@ -86,7 +120,7 @@ export default function RankingTabs({
               const step = element && panelStep(element, tabs.length);
               if (!element || !step) return;
               event.preventDefault();
-              element.scrollTo({ left: index * step, behavior: 'smooth' });
+              goTo(element, step, index);
             }}
           >
             {tab.title}

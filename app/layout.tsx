@@ -48,13 +48,16 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       <body className="min-h-full flex flex-col">
         <LocalUserInitializer />
         <SiteHeader />
-        {children}
-        <footer className="app-version" aria-label={`앱 버전 ${version}`}>
-          v{version} ·{' '}
-          <a href={REPOSITORY_URL} target="_blank" rel="noreferrer">
-            GitHub
-          </a>
-        </footer>
+        {/* Wide screens scroll this area only, so the scrollbar starts below the header. */}
+        <div className="app-scroll">
+          {children}
+          <footer className="app-version" aria-label={`앱 버전 ${version}`}>
+            v{version} ·{' '}
+            <a href={REPOSITORY_URL} target="_blank" rel="noreferrer">
+              GitHub
+            </a>
+          </footer>
+        </div>
         <SnackbarHost />
         <SaveStatus />
       </body>

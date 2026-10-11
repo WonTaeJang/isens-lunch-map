@@ -16,6 +16,7 @@ import {
 } from '@/lib/reviews/model';
 
 import { DAILY_REVIEW_LIMIT, REVIEW_PAGE_SIZE } from '@/lib/reviews/constants';
+import { LIKES_COUNTED_PER_REVIEW } from '@/lib/grades/model';
 const FIELDS = 'id, user_name, content, is_recommended, tags, created_at, updated_at';
 // 좋아요 are counted only in the lists that show them (restaurant reviews, my reviews); other
 // lookups (vote snapshot, conflict reload) leave like_count 0. The review_like PK makes it cheap.
@@ -264,6 +265,13 @@ export async function listUserReviews(
     select distinct restaurant_id from public.lunch_visit where user_id=$1
   )
   select (select count(*)::int from public.review where user_id=$1 and enabled=true) total,
+    (select count(*)::int from public.review
+      where user_id=$1 and enabled=true and coalesce(btrim(content),'')<>'') content_reviews,
+    (select count(*)::int from public.lunch_visit where user_id=$1) lunch_visits,
+    (select coalesce(sum(least(likes, ${LIKES_COUNTED_PER_REVIEW})), 0)::int from (
+      select count(*) likes from public.review_like l join public.review r on r.id=l.review_id
+      where r.user_id=$1 and r.enabled=true group by l.review_id
+    ) per_review) likes_received,
     count(*)::int active_total,
     count(mine.restaurant_id)::int reviewed_active,
     count(lunched.restaurant_id)::int lunched_active,

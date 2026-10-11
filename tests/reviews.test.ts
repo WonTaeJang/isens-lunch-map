@@ -339,12 +339,19 @@ test('user statistics aggregate all active restaurants independently of review p
     visited_active: 35,
     recommended_active: 21,
     not_recommended_active: 9,
+    content_reviews: 30,
+    lunch_visits: 40,
+    likes_received: 7,
   };
   const mock = database((sql, values) => {
     if (sql.includes('with mine as')) {
       assert.deepEqual(values, [user]);
       assert.match(sql, /distinct on \(restaurant_id\)/);
-      assert.equal(sql.match(/enabled=true/g)?.length, 2);
+      assert.equal(sql.match(/enabled=true/g)?.length, 4);
+      // Grade inputs: reviews with content, 오늘의 점심 records and likes capped per review.
+      assert.match(sql, /coalesce\(btrim\(content\),''\)<>''\) content_reviews/);
+      assert.match(sql, /from public.lunch_visit where user_id=\$1\) lunch_visits/);
+      assert.match(sql, /sum\(least\(likes, 5\)\)/);
       assert.match(sql, /where s.active=true/);
       assert.match(sql, /left join mine/);
       // 오늘의 점심 picks join the same count, each restaurant once.

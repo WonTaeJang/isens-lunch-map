@@ -104,6 +104,11 @@ export type UserReviewStats = {
   visited_active: number;
   recommended_active: number;
   not_recommended_active: number;
+  /** For the grade: reviews with content (the rest of `total` are votes alone), 오늘의 점심
+   * records, and likes received counted up to LIKES_COUNTED_PER_REVIEW per review. */
+  content_reviews: number;
+  lunch_visits: number;
+  likes_received: number;
 };
 export type UserReviewPage = UserReviewStats & {
   reviews: UserReview[];

@@ -104,6 +104,13 @@ test(
       assert.equal(withLunch.reviewed_active, 2);
       assert.equal(withLunch.lunched_active, 2);
       assert.equal(withLunch.visited_active, 3);
+      // Grade inputs: every 오늘의 점심 record counts, and reviews with content.
+      assert.equal(withLunch.lunch_visits, 4);
+      const withContent = await db.query(
+        "select count(*)::int n from public.review where user_id=$1 and enabled=true and btrim(coalesce(content,''))<>''",
+        [user],
+      );
+      assert.equal(withLunch.content_reviews, withContent.rows[0].n);
 
       // Likes: one per user and review, only on another user's review with content.
       const fan = crypto.randomUUID();
@@ -126,10 +133,9 @@ test(
       assert.equal(shown.like_count, 2);
       assert.equal(shown.liked, true);
       assert.equal(listed.reviews.find((r) => r.id !== liked.id)?.liked, false);
-      assert.equal(
-        (await listUserReviews(db, user)).reviews.find((r) => r.id === liked.id)?.like_count,
-        2,
-      );
+      const likedStats = await listUserReviews(db, user);
+      assert.equal(likedStats.reviews.find((r) => r.id === liked.id)?.like_count, 2);
+      assert.equal(likedStats.likes_received, 2);
       assert.deepEqual(await setReviewLike(db, { review: liked.id, user: fan }, false), {
         review_id: liked.id,
         liked: false,
@@ -142,6 +148,18 @@ test(
         [liked.id],
       );
       assert.equal(left.rows[0].n, 0);
+      // A review's likes count for the grade up to 5, however many it gets.
+      const popular = await db.query<{ id: string }>(
+        `insert into public.review(restaurant_id,user_id,content,is_recommended) values ($1,$2,'popular',true) returning id`,
+        [nullRated, user],
+      );
+      for (let index = 0; index < 7; index++) {
+        await db.query('insert into public.review_like(review_id,user_id) values ($1,$2)', [
+          popular.rows[0].id,
+          crypto.randomUUID(),
+        ]);
+      }
+      assert.equal((await listUserReviews(db, user)).likes_received, 5);
       // The advisory lock allows exactly one concurrent first review per user/restaurant.
       const newUser = crypto.randomUUID();
       const input = {

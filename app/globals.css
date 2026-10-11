@@ -626,15 +626,26 @@ td .button {
   padding: 16px;
   border-bottom: 1px solid #eef0f2;
 }
+/* Filter chip row (lunch list and random pick): the 즐겨찾기 icon, then the distance chips. */
 .restaurant-filter-controls {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px 14px;
-  margin: 12px 0;
+  align-items: flex-start;
+  gap: 6px;
 }
 .restaurant-filter-controls .distance-filters {
-  margin: 0;
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+/* Slightly narrower distance chips, so the row fits a 320px phone too. */
+.restaurant-filter-controls .distance-filters .filter-chip {
+  padding-inline: 8px;
+}
+/* Below the search box; the panel's padding is the space under it, like the 16px above. */
+.restaurant-filters .restaurant-filter-controls {
+  margin-top: 12px;
 }
 .search-label {
   display: block;
@@ -653,12 +664,6 @@ td .button {
 .restaurant-search:focus-visible {
   outline: 2px solid #127e70;
   outline-offset: 2px;
-}
-.distance-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 12px 0 8px;
 }
 .filter-chip {
   min-height: 36px;
@@ -681,9 +686,11 @@ td .button {
 }
 .favorite-filter-chip {
   display: inline-flex;
+  flex: none;
   align-items: center;
-  gap: 6px;
-  white-space: nowrap;
+  justify-content: center;
+  width: 36px;
+  padding: 0;
 }
 .favorite-filter-chip:hover {
   background: #fffbee;
@@ -695,9 +702,6 @@ td .button {
 }
 .favorite-filter-chip[aria-pressed='true'] svg {
   fill: #ffd338;
-}
-.restaurant-filters .subtle + .subtle {
-  margin-top: 6px;
 }
 .map-controls {
   position: absolute;

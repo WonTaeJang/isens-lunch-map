@@ -1,5 +1,5 @@
 'use client';
-import { DistanceFilter, FavoritesFilter } from './restaurant-filter-controls';
+import { RestaurantFilterChips } from './restaurant-filter-controls';
 
 type Props = {
   query: string;
@@ -31,14 +31,12 @@ export default function RestaurantFilters({
         value={query}
         onChange={(event) => onQueryChange(event.target.value)}
       />
-      <div className="restaurant-filter-controls">
-        <DistanceFilter
-          className="distance-filters"
-          value={maxDistance}
-          onChange={onDistanceChange}
-        />
-        <FavoritesFilter selected={favoritesOnly} onChange={onFavoritesOnlyChange} />
-      </div>
+      <RestaurantFilterChips
+        maxDistance={maxDistance}
+        favoritesOnly={favoritesOnly}
+        onDistanceChange={onDistanceChange}
+        onFavoritesOnlyChange={onFavoritesOnlyChange}
+      />
     </div>
   );
 }

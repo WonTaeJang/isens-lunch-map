@@ -15,7 +15,7 @@ import { hasCoordinates } from '@/lib/coordinates';
 import { formatDistance } from '@/lib/distance';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 import { filterRestaurants, type RestaurantFilters } from './filter-restaurants';
-import { DistanceFilter, FavoritesFilter } from './restaurant-filter-controls';
+import { RestaurantFilterChips } from './restaurant-filter-controls';
 import RestaurantSlot from './restaurant-slot';
 import { getReviewCounts } from '@/lib/reviews/model';
 import { createSlotNames, pickRestaurant } from './random-model';
@@ -94,20 +94,17 @@ export default function RandomRestaurant({
         </button>
       </div>
       <p className="subtle">오늘의 점심을 골라드려요.</p>
+      {/* Same chip row as the lunch list's search filters. */}
       <fieldset className={styles.filters} disabled={busy}>
-        <legend>거리 조건</legend>
-        <DistanceFilter
+        <legend>조건</legend>
+        <span className={`subtle ${styles.count}`}>후보 {candidates.length}곳</span>
+        <RestaurantFilterChips
           className={styles.chips}
-          value={filters.maxDistance}
-          onChange={(maxDistance) => changeFilters({ maxDistance })}
+          maxDistance={filters.maxDistance}
+          favoritesOnly={filters.favoritesOnly}
+          onDistanceChange={(maxDistance) => changeFilters({ maxDistance })}
+          onFavoritesOnlyChange={(favoritesOnly) => changeFilters({ favoritesOnly })}
         />
-        <div className={styles.heading}>
-          <FavoritesFilter
-            selected={filters.favoritesOnly}
-            onChange={(favoritesOnly) => changeFilters({ favoritesOnly })}
-          />
-          <span className="subtle">후보 {candidates.length}곳</span>
-        </div>
       </fieldset>
       {candidates.length ? (
         <>

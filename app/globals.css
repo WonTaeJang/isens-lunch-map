@@ -1123,7 +1123,7 @@ td .button {
   margin-bottom: 8px;
 }
 
-.restaurant-card-reviewed {
+.reviewed-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;

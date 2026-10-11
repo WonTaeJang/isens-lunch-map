@@ -62,12 +62,24 @@
   background: transparent;
   font: inherit;
   font-size: 14px;
+  white-space: nowrap;
   cursor: pointer;
 }
 .user-tabs button[aria-pressed='true'] {
   border-bottom-color: #087f73;
   color: #087f73;
   font-weight: 700;
+}
+/* Narrow screens: four equal tabs across the row (like the ranking tabs) instead of wrapping labels. */
+@media (max-width: 760px) {
+  .user-tabs {
+    gap: 0;
+  }
+  .user-tabs button {
+    flex: 1;
+    min-width: 0;
+    padding-inline: 4px;
+  }
 }
 .user-records {
   background: white;

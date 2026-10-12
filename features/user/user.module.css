@@ -10,7 +10,7 @@
 }
 /* Wide screens: profile, progress and the storage note on the left, kept in view while the
    records on the right scroll. */
-@media (min-width: 1024px) {
+@media (min-width: 1100px) {
   .user-dashboard {
     display: grid;
     grid-template-columns: 340px minmax(0, 1fr);
@@ -99,16 +99,6 @@ button.user-avatar {
   font-weight: 700;
 }
 /* Narrow screens: four equal tabs across the row (like the ranking tabs) instead of wrapping labels. */
-@media (max-width: 760px) {
-  .user-tabs {
-    gap: 0;
-  }
-  .user-tabs button {
-    flex: 1;
-    min-width: 0;
-    padding-inline: 4px;
-  }
-}
 .user-records {
   background: var(--color-surface);
   padding: 24px;
@@ -144,25 +134,6 @@ button.user-avatar {
   color: var(--color-text-subtle);
   font-size: var(--text-sm);
   line-height: 1.8;
-}
-@media (max-width: 760px) {
-  .user-dashboard {
-    margin-top: 20px;
-  }
-  .user-profile {
-    padding: 20px;
-    gap: 14px;
-  }
-  .user-profile h1 {
-    font-size: var(--text-2xl);
-  }
-  .user-avatar {
-    flex-basis: 56px;
-    height: 56px;
-  }
-  .user-records {
-    padding: 18px;
-  }
 }
 
 .user-records .user-restaurant-inactive {
@@ -202,11 +173,6 @@ button.user-avatar {
 .user-progress-heading strong {
   color: var(--color-primary);
   font-size: var(--text-base);
-}
-@media (max-width: 760px) {
-  .user-progress {
-    padding: 20px;
-  }
 }
 
 .favorite-title {
@@ -267,4 +233,35 @@ button.user-avatar {
 /* Button has no outer margin; this is the space it used to get from the global .button. */
 .spaced-button {
   margin-top: 20px;
+}
+/* Phones and narrow windows. */
+@media (max-width: 760px) {
+  .user-tabs {
+    gap: 0;
+  }
+  .user-tabs button {
+    flex: 1;
+    min-width: 0;
+    padding-inline: 4px;
+  }
+  .user-dashboard {
+    margin-top: 20px;
+  }
+  .user-profile {
+    padding: 20px;
+    gap: 14px;
+  }
+  .user-profile h1 {
+    font-size: var(--text-2xl);
+  }
+  .user-avatar {
+    flex-basis: 56px;
+    height: 56px;
+  }
+  .user-records {
+    padding: 18px;
+  }
+  .user-progress {
+    padding: 20px;
+  }
 }

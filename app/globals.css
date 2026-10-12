@@ -3,6 +3,13 @@
  * width, page heading, footer) and the few shared primitives still styled by class name
  * (.button, .filter-chip, .count, .subtle, .description, empty states, .text-input,
  * .error-text). Feature styles live in CSS modules next to their components.
+ *
+ * Breakpoints (media queries cannot read custom properties, so they are written out):
+ *   max-width: 480px   small phones: tighter spacing, smaller map
+ *   max-width: 760px   phones: one column, header 60px, review panel as a bottom sheet
+ *   min-width: 761px   the rest: the page scrolls inside .app-scroll under a fixed header
+ *   min-width: 1100px  wide: the user page in two columns, three rankings side by side
+ *                      (max-width: 1099px for the narrower side)
  */
 
 /*

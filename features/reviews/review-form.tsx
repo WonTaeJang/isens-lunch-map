@@ -4,6 +4,7 @@ import { useReducer, useState } from 'react';
 import { createReviewEditor, reviewEditorReducer } from './review-editor';
 import { ApiError } from './review-api';
 import Button from '@/components/ui/button';
+import styles from './review-form.module.css';
 import { reviewInput, type Review } from '@/lib/reviews/model';
 import { MAX_REVIEW_LENGTH, MAX_REVIEW_TAGS, REVIEW_TAG_GROUPS } from '@/lib/reviews/constants';
 
@@ -30,7 +31,7 @@ export default function ReviewForm({
   const length = Array.from(content.trim()).length;
   return (
     <form
-      className="review-form"
+      className={styles.form}
       onSubmit={async (event) => {
         event.preventDefault();
         if (busy || checking || conflict) return;
@@ -99,7 +100,7 @@ export default function ReviewForm({
       <h3>{base ? '리뷰 수정' : '리뷰 작성'}</h3>
       <fieldset disabled={busy}>
         <legend>이 식당을 추천하나요?</legend>
-        <div className="review-options">
+        <div className={styles.options}>
           <button
             type="button"
             aria-pressed={recommended === true}
@@ -138,11 +139,11 @@ export default function ReviewForm({
             선택 · {tags.length}/{MAX_REVIEW_TAGS}개
           </span>
         </legend>
-        <div className="review-tag-groups">
+        <div className={styles.tagGroups}>
           {REVIEW_TAG_GROUPS.map((group) => (
             <fieldset key={group.value}>
-              <legend className="review-tag-group-label">{group.label}</legend>
-              <div className="review-options">
+              <legend className={styles.tagGroupLabel}>{group.label}</legend>
+              <div className={styles.options}>
                 {group.tags.map((tag) => (
                   <button
                     type="button"
@@ -164,7 +165,7 @@ export default function ReviewForm({
           {error}
         </p>
       )}
-      <div className="review-actions">
+      <div className={styles.actions}>
         <Button
           type="submit"
           loading={busy || checking}

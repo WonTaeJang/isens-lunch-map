@@ -18,6 +18,7 @@ import useFavorites from '@/features/favorites/use-favorites';
 import { toggleStoredFavorite } from '@/features/favorites/favorites-store';
 import ReviewActionIcons from '@/features/reviews/review-action-icons';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
+import list from '@/features/reviews/review-list.module.css';
 import ReviewForm from '@/features/reviews/review-form';
 import ReviewFooter from '@/features/reviews/review-footer';
 import ReviewDeleteDialog from '@/features/reviews/review-delete-dialog';
@@ -271,24 +272,24 @@ function UserDashboardContent({
             {notice && <p role="status">{notice}</p>}
             {loading && !page?.hasMore && <LoadingStatus label="내 리뷰를 불러오는 중…" />}
             {page?.total === 0 && !loading && (
-              <div className="review-empty">
+              <div className={list.empty}>
                 아직 작성한 리뷰가 없어요.{' '}
                 <Link href="/" className="text-link">
                   점심 지도에서 식당 찾아보기
                 </Link>
               </div>
             )}
-            <ul className="review-list">
+            <ul className={`${list.list} ${styles['user-list']}`}>
               {page?.reviews.map((review) => {
                 // A review of a hidden restaurant is only shown, marked 숨김: no link, edit or delete.
                 const isHidden = hidden?.has(review.restaurant_id) ?? false;
                 const usable = review.restaurant_active && !isHidden;
                 return (
                   <li
-                    className={`review-item${usable ? '' : ` ${styles['user-restaurant-inactive']}`}`}
+                    className={`${list.item} ${styles['user-item']}${usable ? '' : ` ${styles['user-restaurant-inactive']}`}`}
                     key={review.id}
                   >
-                    <div className="review-item-heading">
+                    <div className={`${list.itemHeading} ${styles['user-item-heading']}`}>
                       <h2>
                         {usable && hasCoordinates(review) ? (
                           <Link href={restaurantMapHref(review.restaurant_id)}>
@@ -299,8 +300,11 @@ function UserDashboardContent({
                         )}
                         {isHidden && <HiddenBadge />}
                       </h2>
-                      <div className="review-heading-actions">
-                        <RecommendationBadge recommended={review.is_recommended} />
+                      <div className={list.headingActions}>
+                        <RecommendationBadge
+                          recommended={review.is_recommended}
+                          className={list.headingBadge}
+                        />
                         <ReviewActionIcons
                           disabled={busy || loading || Boolean(editing) || isHidden}
                           onEdit={() => actions.startEdit(review)}
@@ -327,8 +331,12 @@ function UserDashboardContent({
                       />
                     ) : (
                       <>
-                        {review.content && <p className="review-content">{review.content}</p>}
-                        <ReviewFooter review={review} />
+                        {review.content && (
+                          <p className={`${list.content} ${styles['user-content']}`}>
+                            {review.content}
+                          </p>
+                        )}
+                        <ReviewFooter review={review} tagsClassName={styles['user-tags']} />
                       </>
                     )}
                   </li>
@@ -351,6 +359,8 @@ function UserDashboardContent({
             {withIdentity('숨긴 식당', (userId) => (
               <BlacklistList
                 userId={userId}
+                listClassName={styles['user-list']}
+                itemClassName={styles['user-item']}
                 inactiveClassName={styles['user-restaurant-inactive']}
               />
             ))}
@@ -363,20 +373,20 @@ function UserDashboardContent({
               </p>
             )}
             {!savedRestaurants.length && (
-              <p className="review-empty">
+              <p className={list.empty}>
                 즐겨찾기한 식당이 없어요.{' '}
                 <Link href="/" className="text-link">
                   식당 찾아보기
                 </Link>
               </p>
             )}
-            <ul className="review-list">
+            <ul className={`${list.list} ${styles['user-list']}`}>
               {savedRestaurants.map((row) => (
                 <li
-                  className={`review-item${row.active ? '' : ` ${styles['user-restaurant-inactive']}`}`}
+                  className={`${list.item} ${styles['user-item']}${row.active ? '' : ` ${styles['user-restaurant-inactive']}`}`}
                   key={row.id}
                 >
-                  <div className="review-item-heading">
+                  <div className={`${list.itemHeading} ${styles['user-item-heading']}`}>
                     <div className={styles['favorite-title']}>
                       <FavoriteToggle
                         restaurantName={row.name}
@@ -393,10 +403,12 @@ function UserDashboardContent({
                     </div>
                     <DistanceBadge distance={row.distance} className={styles['user-distance']} />
                   </div>
-                  <p className="description">
+                  <p className={`description ${styles['user-description']}`}>
                     {row.category} · {row.main_menu}
                   </p>
-                  <p className="description">{row.address || '주소 확인 필요'}</p>
+                  <p className={`description ${styles['user-description']}`}>
+                    {row.address || '주소 확인 필요'}
+                  </p>
                   {!row.active && <p className="subtle">현재 비활성 식당이에요.</p>}
                 </li>
               ))}

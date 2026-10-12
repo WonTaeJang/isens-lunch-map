@@ -11,6 +11,7 @@ import { blacklistStore } from './blacklist-store';
 import { hideBlockReason } from './blacklist-rules';
 import useBlacklist from './use-blacklist';
 import styles from './blacklist-list.module.css';
+import list from '@/features/reviews/review-list.module.css';
 
 /**
  * The user page tab of hidden restaurants. A restaurant shown again keeps its row (eye open)
@@ -18,9 +19,14 @@ import styles from './blacklist-list.module.css';
  */
 export default function BlacklistList({
   userId,
+  listClassName,
+  itemClassName,
   inactiveClassName,
 }: {
   userId: string;
+  /** The user page's spacing for the list and each row. */
+  listClassName?: string;
+  itemClassName?: string;
   /** The user page's look for a deactivated restaurant row. */
   inactiveClassName: string;
 }) {
@@ -54,7 +60,7 @@ export default function BlacklistList({
   if (!rows) return <LoadingStatus label="숨긴 식당을 불러오는 중…" />;
   if (!rows.length)
     return (
-      <p className="review-empty">
+      <p className={list.empty}>
         숨긴 식당이 없어요. 지도 카드의 눈 아이콘으로 안 가는 식당을 숨길 수 있어요.
       </p>
     );
@@ -66,7 +72,7 @@ export default function BlacklistList({
   }
 
   return (
-    <ul className="review-list">
+    <ul className={listClassName ? `${list.list} ${listClassName}` : list.list}>
       {rows.map((row) => {
         const isHidden = ids?.has(row.restaurant_id) ?? true;
         const blocked = isHidden
@@ -78,7 +84,9 @@ export default function BlacklistList({
         return (
           <li
             key={row.restaurant_id}
-            className={`review-item${row.restaurant_active ? '' : ` ${inactiveClassName}`}`}
+            className={[list.item, itemClassName, !row.restaurant_active && inactiveClassName]
+              .filter(Boolean)
+              .join(' ')}
           >
             <div className={styles.row}>
               <div className={styles.name}>

@@ -1,0 +1,25 @@
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+}
+.icon:hover:not(:disabled) {
+  color: var(--color-primary);
+  background: var(--color-primary-subtle);
+}
+.icon:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+.icon:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

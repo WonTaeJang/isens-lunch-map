@@ -1,0 +1,45 @@
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: var(--text-sm);
+  color: var(--color-text-subtle);
+}
+.counts strong {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.counts > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.counts svg {
+  flex-shrink: 0;
+}
+
+/* Colored mode (admin, random pick) colors both sides; elsewhere only the viewer's own choice
+   (data-mine, shown with a filled icon) gets its color. */
+.counts[data-colored] > span:first-child,
+.counts > [data-mine]:first-child {
+  color: var(--color-info);
+}
+.counts[data-colored] > span:last-child,
+.counts > [data-mine]:last-child {
+  color: var(--color-danger);
+}
+.counts[data-colored] {
+  gap: 14px;
+}
+.counts[data-colored] > span {
+  gap: 4px;
+}
+.counts[data-colored] strong,
+.counts > [data-mine] strong {
+  color: inherit;
+}
+.counts[data-colored] strong {
+  font-weight: 400;
+}

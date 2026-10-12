@@ -120,24 +120,26 @@ button.user-avatar {
   border-top: 0;
   border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
 }
-.user-records :global(.review-list) {
+/* Hook classes (user-list, user-item, ...) sit next to the shared review list classes, so these
+   overrides win by specificity rather than by stylesheet order. */
+.user-records .user-list {
   margin: 0;
 }
-.user-records :global(.review-item) {
+.user-records .user-item {
   padding: 20px 12px;
 }
-.user-records :global(.review-item):first-child {
+.user-records .user-item:first-child {
   border-top: 0;
 }
-.user-records :global(.review-item-heading) h2 {
+.user-records .user-item-heading h2 {
   font-size: var(--text-lg);
   overflow-wrap: anywhere;
 }
-.user-records :global(.review-item-heading) a:hover {
+.user-records .user-item-heading a:hover {
   color: var(--color-primary);
   text-decoration: underline;
 }
-.user-records :global(.description) {
+.user-records .user-description {
   margin-top: 8px;
 }
 .user-storage-note {
@@ -171,12 +173,12 @@ button.user-avatar {
   background: var(--color-surface-muted);
   border-radius: var(--radius-md);
 }
-.user-restaurant-inactive :global(.review-item-heading) h2,
-.user-restaurant-inactive :global(.review-content),
-.user-restaurant-inactive :global(.description) {
+.user-restaurant-inactive .user-item-heading h2,
+.user-restaurant-inactive .user-content,
+.user-restaurant-inactive .user-description {
   color: var(--color-text-subtle);
 }
-.user-restaurant-inactive :global(.review-tags) span,
+.user-restaurant-inactive .user-tags span,
 .user-restaurant-inactive .user-distance {
   background: var(--color-border-subtle);
   color: var(--color-text-muted);

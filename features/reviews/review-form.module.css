@@ -1,0 +1,68 @@
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: var(--text-md);
+}
+.form {
+  display: grid;
+  gap: 12px;
+  padding: 20px 0;
+}
+.form h3 {
+  margin: 0;
+}
+.form fieldset {
+  min-width: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.form legend {
+  margin-bottom: 10px;
+  font-size: var(--text-base);
+}
+.form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-md);
+  resize: vertical;
+  font: inherit;
+  font-size: var(--text-base);
+}
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.options button {
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-3xl);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: var(--text-md);
+}
+.options button[aria-pressed='true'] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.options button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.tagGroups {
+  display: grid;
+  gap: 16px;
+}
+.form .tagGroupLabel {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  margin-bottom: 8px;
+}

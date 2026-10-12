@@ -1,5 +1,6 @@
 import RecommendationIcon from './recommendation-icon';
 import type { ReviewCounts } from '@/lib/reviews/model';
+import styles from './review-counts.module.css';
 
 export default function ReviewCountBadges({
   counts,
@@ -12,7 +13,7 @@ export default function ReviewCountBadges({
   mine?: boolean | null;
 }) {
   return (
-    <span className="restaurant-review-counts" data-colored={colored || undefined}>
+    <span className={styles.counts} data-colored={colored || undefined}>
       {[true, false].map((recommended) => {
         const label = recommended ? '추천' : '비추천';
         const count = recommended ? counts?.recommended : counts?.not_recommended;

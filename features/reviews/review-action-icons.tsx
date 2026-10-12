@@ -1,4 +1,5 @@
 import { PencilIcon, TrashIcon } from '@/components/ui/icons';
+import styles from './review-action-icons.module.css';
 
 type Props = { disabled: boolean; onEdit: () => void; onDelete: () => void };
 
@@ -7,7 +8,7 @@ export default function ReviewActionIcons({ disabled, onEdit, onDelete }: Props)
     <>
       <button
         type="button"
-        className="review-action-icon"
+        className={styles.icon}
         aria-label="리뷰 수정"
         title="리뷰 수정"
         disabled={disabled}
@@ -17,7 +18,7 @@ export default function ReviewActionIcons({ disabled, onEdit, onDelete }: Props)
       </button>
       <button
         type="button"
-        className="review-action-icon"
+        className={styles.icon}
         aria-label="리뷰 삭제"
         title="리뷰 삭제"
         disabled={disabled}

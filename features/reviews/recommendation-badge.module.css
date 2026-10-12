@@ -1,0 +1,17 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--text-md);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge svg {
+  flex-shrink: 0;
+}
+.badge.recommended {
+  color: var(--color-info);
+}
+.badge.notRecommended {
+  color: var(--color-danger);
+}

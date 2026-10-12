@@ -13,6 +13,8 @@ import ReviewActionIcons from './review-action-icons';
 import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from './review-form';
 import ReviewFooter from './review-footer';
+import styles from './review-panel.module.css';
+import list from './review-list.module.css';
 import {
   reviewTimestamp,
   type Review,
@@ -98,7 +100,7 @@ function ReviewPanelContent({
   return (
     <dialog
       ref={dialog}
-      className="review-panel"
+      className={styles.panel}
       aria-labelledby="review-panel-title"
       {...backdropClose}
       onCancel={(event) => {
@@ -124,14 +126,14 @@ function ReviewPanelContent({
           onConfirm={actions.confirmDelete}
         />
       )}
-      <header className="review-panel-header">
+      <header className={styles.header}>
         <div>
           <p className="subtle">식당 리뷰</p>
           <h2 id="review-panel-title">{restaurant.name}</h2>
         </div>
         <button
           type="button"
-          className="review-close"
+          className={styles.close}
           aria-label="리뷰 닫기"
           disabled={busy}
           onClick={close}
@@ -139,9 +141,9 @@ function ReviewPanelContent({
           ×
         </button>
       </header>
-      <div className="review-panel-body">
+      <div className={styles.body}>
         {page && (
-          <div className="review-summary">
+          <div className={styles.summary}>
             <strong>리뷰 {page.total}개</strong>
             <RecommendationBar
               recommended={page.recommended}
@@ -182,18 +184,21 @@ function ReviewPanelContent({
         )}
         {loading && !page?.hasMore && <LoadingStatus label="리뷰를 불러오는 중…" />}
         {page?.total === 0 && !loading && (
-          <p className="review-empty">아직 리뷰가 없어요. 첫 점심 후기를 남겨 주세요.</p>
+          <p className={list.empty}>아직 리뷰가 없어요. 첫 점심 후기를 남겨 주세요.</p>
         )}
-        <ul className="review-list">
+        <ul className={list.list}>
           {page?.reviews.map((review) => (
-            <li key={review.id} className="review-item">
-              <div className="review-item-heading">
+            <li key={review.id} className={list.item}>
+              <div className={list.itemHeading}>
                 <strong>
                   {review.user_name ? <UserName name={review.user_name} /> : '익명'}{' '}
                   {review.is_mine && <small>내 리뷰</small>}
                 </strong>
-                <div className="review-heading-actions">
-                  <RecommendationBadge recommended={review.is_recommended} />
+                <div className={list.headingActions}>
+                  <RecommendationBadge
+                    recommended={review.is_recommended}
+                    className={list.headingBadge}
+                  />
                   {review.is_mine && (
                     <ReviewActionIcons
                       disabled={busy || loading || Boolean(editing)}
@@ -207,7 +212,7 @@ function ReviewPanelContent({
                 {DATE_FORMAT.format(new Date(reviewTimestamp(review)))}
                 {review.updated_at && ' · 수정됨'}
               </p>
-              {review.content && <p className="review-content">{review.content}</p>}
+              {review.content && <p className={list.content}>{review.content}</p>}
               {/* No 좋아요 while a review is being written or edited. */}
               <ReviewFooter review={review} likeDisabled={Boolean(editing)} />
             </li>

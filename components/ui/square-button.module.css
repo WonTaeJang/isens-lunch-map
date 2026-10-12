@@ -23,10 +23,6 @@
 .square:not([aria-pressed='true'], :disabled, [aria-disabled='true']):hover {
   background: var(--color-surface-muted);
 }
-.square:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
 /* Disabled, or only looking disabled (aria-disabled) so a tap can still say why. */
 .square:disabled,
 .square[aria-disabled='true'] {

@@ -47,10 +47,6 @@
   background: var(--color-surface);
   font-size: var(--text-md);
 }
-.search:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
 .controls .favoriteChip {
   display: inline-flex;
   flex: none;

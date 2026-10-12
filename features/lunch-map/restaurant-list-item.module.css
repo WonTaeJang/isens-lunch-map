@@ -103,5 +103,5 @@
   pointer-events: auto;
 }
 .target:focus-visible {
-  outline-offset: -3px;
+  outline-offset: var(--focus-ring-offset-inset);
 }

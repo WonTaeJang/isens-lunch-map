@@ -31,10 +31,6 @@
   opacity: var(--disabled-opacity);
   cursor: not-allowed;
 }
-.nav:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
 
 .summary {
   display: grid;

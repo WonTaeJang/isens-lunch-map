@@ -74,7 +74,3 @@
   font-size: var(--text-base);
   border-radius: var(--radius-lg);
 }
-.dialog .actions button:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 3px;
-}

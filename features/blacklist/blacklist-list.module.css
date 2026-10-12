@@ -32,10 +32,6 @@
 .toggle:hover {
   background: var(--color-surface-muted);
 }
-.toggle:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
 .toggle[aria-pressed='true'] {
   border-color: var(--color-primary-border);
   background: var(--color-primary-subtle-strong);

@@ -15,10 +15,6 @@
   color: var(--color-primary);
   background: var(--color-primary-subtle);
 }
-.icon:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
 .icon:disabled {
   opacity: var(--disabled-opacity);
   cursor: not-allowed;

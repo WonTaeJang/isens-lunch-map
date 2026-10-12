@@ -309,7 +309,9 @@
   /* Focus */
   --focus-ring-color: var(--color-primary);
   --focus-ring: 2px solid var(--focus-ring-color);
-  --focus-ring-width-strong: 3px;
+  --focus-ring-offset: 2px;
+  /* For controls drawn edge to edge inside a clipped box (tabs, list rows): the ring sits inside. */
+  --focus-ring-offset-inset: -2px;
 
   /* Disabled icon and chip buttons fade; text buttons (.button) turn gray instead. */
   --disabled-opacity: 0.4;
@@ -383,9 +385,12 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 a:focus-visible,
-button:focus-visible {
-  outline: var(--focus-ring-width-strong) solid var(--focus-ring-color);
-  outline-offset: 5px;
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 .site-header {
   position: sticky;

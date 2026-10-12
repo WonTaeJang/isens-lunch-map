@@ -1,5 +1,12 @@
 @import 'tailwindcss';
 
+/*
+ * Global styles: design tokens, base element styles, the page shell (header, page width,
+ * page heading, footer) and the few shared primitives still styled by class name (.button,
+ * .filter-chip, .count, .subtle, .description, empty states, .admin-input, .review-error).
+ * Feature styles live in CSS modules next to their components.
+ */
+
 :root {
   /*
    * Design tokens. Use these instead of raw values; one-off decorative colors (tier art, the
@@ -425,8 +432,6 @@ h3 {
     font-size: 9px;
   }
 }
-/* Most phones: a smaller fixed map (after the 760px rules so it wins). */
-
 .admin-input {
   display: block;
   margin: 10px 0;

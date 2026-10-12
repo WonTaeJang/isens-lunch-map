@@ -41,6 +41,7 @@
     height: 440px;
   }
 }
+/* Most phones: a smaller fixed map (after the 760px rules so it wins). */
 @media (max-width: 480px) {
   .panel {
     height: 360px;

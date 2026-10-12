@@ -44,7 +44,6 @@
   pointer-events: none;
 }
 
-/* Restaurant reviews: native dialog keeps keyboard focus outside the map. */
 .reviewButton {
   display: block;
   margin-left: auto;

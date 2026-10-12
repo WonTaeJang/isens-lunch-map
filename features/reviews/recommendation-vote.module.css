@@ -8,10 +8,10 @@
   flex: none;
   align-items: stretch;
   height: 24px;
-  border: 1px solid #d8dee1;
-  border-radius: 4px;
-  background: white;
-  color: #627078;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
 }
 .button {
   display: inline-flex;
@@ -22,7 +22,7 @@
   background: transparent;
   color: inherit;
   font: inherit;
-  font-size: 12px;
+  font-size: var(--text-sm);
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
@@ -30,16 +30,16 @@
 }
 /* No overflow:hidden on the pill (the burst reaches past it), so the halves round their own ends. */
 .button:first-child {
-  border-radius: 3px 0 0 3px;
+  border-radius: var(--radius-xs) 0 0 var(--radius-xs);
 }
 .button:last-child {
-  border-radius: 0 3px 3px 0;
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
 }
 .button:hover {
-  background: #f3f5f4;
+  background: var(--color-surface-muted);
 }
 .button:focus-visible {
-  outline: 2px solid #127e70;
+  outline: var(--focus-ring);
   outline-offset: -2px;
 }
 .pill[aria-busy] .button {
@@ -58,16 +58,16 @@
   fill: currentColor;
 }
 .like[aria-pressed='true'] {
-  background: #eef4ff;
-  color: #2563eb;
+  background: var(--color-info-subtle);
+  color: var(--color-info);
 }
 .dislike[aria-pressed='true'] {
-  background: #fef2f2;
-  color: #dc2626;
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
 }
 .divider {
   width: 1px;
-  background: #d8dee1;
+  background: var(--color-border-strong);
 }
 
 /*

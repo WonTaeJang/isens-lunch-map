@@ -2,23 +2,28 @@
   height: calc(var(--slot-row-height) * 3);
   overflow: hidden;
   position: relative;
-  border-radius: 16px;
-  background: #f2f8f5;
+  border-radius: var(--radius-2xl);
+  background: var(--color-primary-subtle);
 }
 .slot::after {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(#f2f8f5 0%, transparent 35%, transparent 65%, #f2f8f5 100%);
+  background: linear-gradient(
+    var(--color-primary-subtle) 0%,
+    transparent 35%,
+    transparent 65%,
+    var(--color-primary-subtle) 100%
+  );
 }
 .selection {
   position: absolute;
   inset: var(--slot-row-height) 8px;
   height: var(--slot-row-height);
-  border: 1px solid #a4d2c4;
-  border-radius: 10px;
-  background: #e4f2ed;
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-primary-subtle-strong);
 }
 .reel {
   position: relative;
@@ -43,7 +48,7 @@
   padding: 20px;
   text-align: center;
   font-weight: 600;
-  color: #11796e;
+  color: var(--color-primary);
 }
 @keyframes spin {
   from {

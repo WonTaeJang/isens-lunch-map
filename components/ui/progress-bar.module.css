@@ -1,13 +1,13 @@
 .track {
   height: 10px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  background: #e9edef;
+  background: var(--color-border-subtle);
   margin-bottom: 8px;
 }
 .track > span {
   display: block;
   height: 100%;
-  background: #128574;
+  background: var(--color-primary);
   border-radius: inherit;
 }

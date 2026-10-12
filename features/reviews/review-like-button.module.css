@@ -7,32 +7,32 @@
   height: 28px;
   margin-left: auto;
   padding: 0 10px;
-  border: 1px solid #d8dee1;
-  border-radius: 999px;
-  background: white;
-  color: #627078;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--text-sm);
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
 }
 .like:hover:where(:not(:disabled)) {
-  background: #f3f5f4;
+  background: var(--color-surface-muted);
 }
 .like:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 .like:focus-visible {
-  outline: 2px solid #127e70;
+  outline: var(--focus-ring);
   outline-offset: 2px;
 }
 .like[aria-pressed='true'] {
-  border-color: #fecdd3;
-  background: #fff1f2;
-  color: #e11d48;
+  border-color: var(--color-like-border);
+  background: var(--color-like-subtle);
+  color: var(--color-like);
 }
 .like[aria-pressed='true'] svg {
   fill: currentColor;
@@ -48,7 +48,7 @@
   border-color: transparent;
   background: transparent;
   padding: 0 2px;
-  color: #9aa6ad;
+  color: var(--color-text-faint);
   cursor: default;
 }
 .readonly:hover {

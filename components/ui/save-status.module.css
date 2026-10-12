@@ -2,7 +2,7 @@
   position: fixed;
   right: max(16px, env(safe-area-inset-right));
   bottom: calc(16px + env(safe-area-inset-bottom));
-  z-index: 1000;
+  z-index: var(--z-toast);
   pointer-events: none;
 }
 .indicator {
@@ -10,11 +10,11 @@
   place-items: center;
   width: 34px;
   height: 34px;
-  border: 1px solid #dce5e1;
+  border: 1px solid var(--color-border-strong);
   border-radius: 50%;
-  background: white;
-  color: #127e70;
-  box-shadow: 0 2px 8px #172c3014;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
 }
 .label {
   position: absolute;

@@ -57,8 +57,8 @@
   }
 }
 .step {
-  color: #75818a;
-  font-size: 13px;
+  color: var(--color-text-subtle);
+  font-size: var(--text-md);
   font-weight: 600;
 }
 .title {
@@ -68,8 +68,8 @@
 }
 .cheer {
   margin-top: 10px;
-  color: #4b5960;
-  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
   line-height: 1.6;
   word-break: keep-all;
   text-wrap: balance;

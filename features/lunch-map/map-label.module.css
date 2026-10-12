@@ -16,12 +16,12 @@
   max-width: 120px;
   padding: 1px 7px;
   overflow: hidden;
-  border: 1px solid #d6dee1;
-  border-radius: 999px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
   background: rgb(255 255 255 / 92%);
-  box-shadow: 0 1px 3px rgb(25 45 48 / 18%);
-  color: #26343d;
-  font-size: 11px;
+  box-shadow: var(--shadow-xs);
+  color: var(--color-text);
+  font-size: var(--text-xs);
   font-weight: 600;
   line-height: 16px;
   text-overflow: ellipsis;

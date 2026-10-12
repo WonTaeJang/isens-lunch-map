@@ -7,10 +7,10 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  border: 1px solid #d8dee1;
-  border-radius: 4px;
-  background: white;
-  color: #627078;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
   cursor: pointer;
 }
 .large {
@@ -23,9 +23,9 @@
   transform: scale(1.25);
 }
 .button[aria-pressed='true'] {
-  border-color: #127e70;
-  background: #127e70;
-  color: white;
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 .button[aria-busy='true'] {
   cursor: progress;
@@ -44,7 +44,7 @@
 }
 .button[data-burst]::after {
   inset: -1px;
-  border: 2px solid #127e70;
+  border: 2px solid var(--color-primary);
   border-radius: inherit;
 }
 .button[data-burst]::before {
@@ -97,11 +97,11 @@
   0% {
     opacity: 0;
     box-shadow:
-      0px -15px #127e70,
+      0px -15px var(--color-primary),
       13px -8px #f2a93b,
-      13px 8px #127e70,
+      13px 8px var(--color-primary),
       0px 15px #f2a93b,
-      -13px 8px #127e70,
+      -13px 8px var(--color-primary),
       -13px -8px #f2a93b;
   }
   15% {
@@ -113,11 +113,11 @@
   100% {
     opacity: 0;
     box-shadow:
-      0px -30px #127e70,
+      0px -30px var(--color-primary),
       26px -15px #f2a93b,
-      26px 15px #127e70,
+      26px 15px var(--color-primary),
       0px 30px #f2a93b,
-      -26px 15px #127e70,
+      -26px 15px var(--color-primary),
       -26px -15px #f2a93b;
   }
 }
@@ -125,11 +125,11 @@
   0% {
     opacity: 0;
     box-shadow:
-      0px -15px #127e70,
+      0px -15px var(--color-primary),
       13px -8px #f2a93b,
-      13px 8px #127e70,
+      13px 8px var(--color-primary),
       0px 15px #f2a93b,
-      -13px 8px #127e70,
+      -13px 8px var(--color-primary),
       -13px -8px #f2a93b;
   }
   15% {
@@ -141,11 +141,11 @@
   100% {
     opacity: 0;
     box-shadow:
-      0px -30px #127e70,
+      0px -30px var(--color-primary),
       26px -15px #f2a93b,
-      26px 15px #127e70,
+      26px 15px var(--color-primary),
       0px 30px #f2a93b,
-      -26px 15px #127e70,
+      -26px 15px var(--color-primary),
       -26px -15px #f2a93b;
   }
 }

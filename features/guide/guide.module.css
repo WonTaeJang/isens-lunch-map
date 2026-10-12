@@ -2,8 +2,8 @@
   display: grid;
   align-content: start;
   gap: 10px;
-  color: #3d4b53;
-  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
   line-height: 1.6;
   word-break: keep-all;
 }
@@ -12,15 +12,15 @@
 }
 .highlight {
   padding: 10px 12px;
-  border-radius: 10px;
-  background: #eef7f4;
-  color: #26343d;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary-subtle);
+  color: var(--color-text);
 }
 .highlight strong {
-  color: #087f73;
+  color: var(--color-primary);
 }
 .warning {
-  color: #b54708;
+  color: var(--color-warning);
 }
 .items {
   display: grid;
@@ -40,9 +40,9 @@
   place-items: center;
   width: 30px;
   height: 30px;
-  border-radius: 8px;
-  background: #eef7f4;
-  color: #127e70;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
 }
 .markers {
   display: flex;
@@ -50,11 +50,11 @@
   gap: 8px 14px;
   margin: 4px 0 0;
   padding: 10px 12px;
-  border-radius: 10px;
-  background: #f5f7f8;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-muted);
   list-style: none;
-  color: #5d6a72;
-  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
 }
 .markers li {
   display: inline-flex;
@@ -78,12 +78,12 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #d8dee1;
+  background: var(--color-border-strong);
 }
 .dots span[data-current] {
   width: 18px;
-  border-radius: 3px;
-  background: #127e70;
+  border-radius: var(--radius-xs);
+  background: var(--color-primary);
 }
 /* Steps slide in from the right on 다음 and from the left on 이전. */
 .viewport {
@@ -126,9 +126,9 @@
 }
 .section {
   padding: 24px;
-  border: 1px solid #e4e9eb;
-  border-radius: 16px;
-  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  background: var(--color-surface);
 }
 .section h2 {
   display: flex;
@@ -143,9 +143,9 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #127e70;
-  color: white;
-  font-size: 13px;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--text-md);
 }
 @media (max-width: 480px) {
   .section {

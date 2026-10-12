@@ -3,10 +3,10 @@
   align-items: center;
   padding: 3px 10px;
   border: 1px solid var(--tier-mid);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--tier-light) 45%, white);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--tier-light) 45%, var(--color-surface));
   color: var(--tier-dark);
-  font-size: 12px;
+  font-size: var(--text-sm);
   font-weight: 700;
   line-height: 1.4;
 }
@@ -18,26 +18,26 @@
 }
 .current strong {
   display: block;
-  font-size: 20px;
+  font-size: var(--text-2xl);
 }
 .next {
   margin-top: 2px;
-  color: #087f73;
-  font-size: 13px;
+  color: var(--color-primary);
+  font-size: var(--text-md);
   font-weight: 600;
 }
 .progress {
   height: 6px;
   margin-top: 12px;
-  border-radius: 999px;
-  background: #e8eeec;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-sunken);
   overflow: hidden;
 }
 .progress span {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #127e70;
+  background: var(--color-primary);
 }
 .tiers {
   margin: 4px 0 0;
@@ -49,25 +49,25 @@
   align-items: center;
   gap: 12px;
   padding: 6px 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
 }
 .tiers li[aria-current] {
-  background: #edf6f3;
+  background: var(--color-primary-subtle);
   font-weight: 700;
 }
 .name {
   flex: 1;
-  font-size: 14px;
+  font-size: var(--text-base);
 }
 .min {
-  color: #627078;
-  font-size: 13px;
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
   font-variant-numeric: tabular-nums;
 }
 .rules {
   margin-top: 12px;
-  color: #75818a;
-  font-size: 11px;
+  color: var(--color-text-subtle);
+  font-size: var(--text-xs);
   line-height: 1.6;
 }
 
@@ -95,7 +95,7 @@
   stroke-width: 4;
 }
 .ring-track {
-  stroke: #e3e9e7;
+  stroke: var(--color-border);
 }
 .ring-fill {
   stroke: var(--tier-mid);

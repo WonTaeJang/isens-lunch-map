@@ -10,10 +10,10 @@
   left: 0;
   width: min(240px, 65vw);
   padding: 8px;
-  border: 1px solid #e1e7e7;
-  border-radius: 6px;
-  background: white;
-  color: #b42318;
-  font-size: 12px;
-  box-shadow: 0 3px 12px #162e3926;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  box-shadow: var(--shadow-md);
 }

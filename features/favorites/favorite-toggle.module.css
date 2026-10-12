@@ -1,6 +1,6 @@
 /* The one favorite button look, shared by the map card, lists, ranking, random pick and user page. */
 .toggle[aria-pressed='true'] {
-  border-color: #e8c44d;
-  background: #fff9df;
-  color: #866500;
+  border-color: var(--color-favorite-border);
+  background: var(--color-favorite-subtle);
+  color: var(--color-favorite-text);
 }

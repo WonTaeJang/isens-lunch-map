@@ -85,7 +85,6 @@
   border-bottom: 1px solid var(--color-border-subtle);
 }
 .table td .cellButton {
-  margin: 0;
   white-space: nowrap;
 }
 
@@ -145,4 +144,8 @@
 /* A deactivated restaurant's name is struck through. */
 .inactiveName {
   text-decoration: line-through;
+}
+/* Button has no outer margin; this is the space it used to get from the global .button. */
+.spacedButton {
+  margin-top: 20px;
 }

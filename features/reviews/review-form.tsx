@@ -53,6 +53,7 @@ export default function ReviewForm({
         <div role="alert" className="error-text">
           <p>다른 곳에서 리뷰가 바뀌었어요. 작성 중인 내용은 아래에 그대로 뒀어요.</p>
           <Button
+            className={styles.spacedButton}
             disabled={busy || checking}
             onClick={async () => {
               setChecking(true);
@@ -85,6 +86,7 @@ export default function ReviewForm({
                 · 태그: {latest.tags.join(', ') || '없음'}
               </p>
               <Button
+                className={styles.spacedButton}
                 disabled={busy || checking}
                 onClick={() => {
                   dispatch({ type: 'accept-version' });
@@ -168,12 +170,18 @@ export default function ReviewForm({
       <div className={styles.actions}>
         <Button
           type="submit"
+          className={styles.spacedButton}
           loading={busy || checking}
           disabled={conflict || length > MAX_REVIEW_LENGTH || recommended === null}
         >
           {base ? '수정' : '등록'}
         </Button>
-        <Button variant="secondary" disabled={busy} onClick={onCancel}>
+        <Button
+          variant="secondary"
+          className={styles.spacedButton}
+          disabled={busy}
+          onClick={onCancel}
+        >
           취소
         </Button>
       </div>

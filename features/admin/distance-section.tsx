@@ -32,7 +32,12 @@ export default function DistanceSection({ busy, preview, message, error, measure
         아이센스 빌딩({OFFICE_ADDRESS})에서 식당 좌표까지의 직선거리를 10m 단위로 다시 계산합니다.
         엑셀 업데이트와 주소 수정 때도 같은 방식으로 자동 계산합니다.
       </p>
-      <Button loading={busy} disabled={!!error} onClick={() => measure('preview')}>
+      <Button
+        className={styles.spacedButton}
+        loading={busy}
+        disabled={!!error}
+        onClick={() => measure('preview')}
+      >
         재측정 결과 보기
       </Button>
       <p role="status" className="description">
@@ -76,7 +81,12 @@ export default function DistanceSection({ busy, preview, message, error, measure
               </table>
             </div>
           )}
-          <Button loading={busy} disabled={!preview.rows.length} onClick={() => measure('apply')}>
+          <Button
+            className={styles.spacedButton}
+            loading={busy}
+            disabled={!preview.rows.length}
+            onClick={() => measure('apply')}
+          >
             재측정 거리 {preview.rows.length}건 반영
           </Button>
         </div>

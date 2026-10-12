@@ -45,6 +45,6 @@
   cursor: progress;
 }
 .toggle[aria-disabled='true'] {
-  opacity: 0.4;
+  opacity: var(--disabled-opacity);
   cursor: not-allowed;
 }

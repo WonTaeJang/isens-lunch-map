@@ -47,7 +47,12 @@ export default function AdminStatistics({ password }: { password: string }) {
     <section className={adminStyles.tableSection} aria-label="리뷰 통계" aria-busy={loading}>
       <div className={styles.heading}>
         <h2>통계</h2>
-        <Button variant="secondary" disabled={loading} onClick={reload}>
+        <Button
+          variant="secondary"
+          className={adminStyles.spacedButton}
+          disabled={loading}
+          onClick={reload}
+        >
           새로고침
         </Button>
       </div>

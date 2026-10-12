@@ -22,7 +22,7 @@
   background: var(--color-surface-muted);
 }
 .like:disabled {
-  opacity: 0.4;
+  opacity: var(--disabled-opacity);
   cursor: not-allowed;
 }
 .like:focus-visible {

@@ -42,7 +42,12 @@ export default function ExcelImportSection({
             className="text-input"
           />
         </label>
-        <Button loading={busy} disabled={!file || !!error} onClick={() => upload('preview')}>
+        <Button
+          className={styles.spacedButton}
+          loading={busy}
+          disabled={!file || !!error}
+          onClick={() => upload('preview')}
+        >
           데이터 검증 및 미리보기
         </Button>
         <small>
@@ -95,7 +100,12 @@ export default function ExcelImportSection({
               </table>
             </div>
           )}
-          <Button loading={busy} disabled={!preview.rows.length} onClick={() => upload('commit')}>
+          <Button
+            className={styles.spacedButton}
+            loading={busy}
+            disabled={!preview.rows.length}
+            onClick={() => upload('commit')}
+          >
             전체 목록을 DB에 반영
           </Button>
         </div>

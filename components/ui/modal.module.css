@@ -39,8 +39,7 @@
   margin: 0;
   font-size: var(--text-xl);
 }
-/* Buttons share the width equally. Every action is a <button>; `.actions > button` outranks the
-   global .button margin without reaching into it with :global(). */
+/* Buttons share the width equally. */
 .actions {
   flex: none;
   display: grid;
@@ -52,5 +51,4 @@
 }
 .actions > button {
   width: 100%;
-  margin: 0;
 }

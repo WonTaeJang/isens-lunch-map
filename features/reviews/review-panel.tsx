@@ -157,6 +157,7 @@ function ReviewPanelContent({
           <div role="alert" className="error-text">
             {error}{' '}
             <Button
+              className={styles.spacedButton}
               disabled={loading || busy || Boolean(editing)}
               onClick={() => {
                 setError('');
@@ -168,7 +169,11 @@ function ReviewPanelContent({
           </div>
         )}
         {page && identity && !editing && (
-          <Button disabled={busy || loading} onClick={() => actions.startEdit(page.mine ?? 'new')}>
+          <Button
+            className={styles.spacedButton}
+            disabled={busy || loading}
+            onClick={() => actions.startEdit(page.mine ?? 'new')}
+          >
             {page.mine ? '내 리뷰 수정' : '리뷰 작성'}
           </Button>
         )}
@@ -220,6 +225,7 @@ function ReviewPanelContent({
         </ul>
         {page?.hasMore && (
           <Button
+            className={styles.spacedButton}
             loading={loading}
             loadingLabel="불러오는 중…"
             disabled={busy || Boolean(editing)}

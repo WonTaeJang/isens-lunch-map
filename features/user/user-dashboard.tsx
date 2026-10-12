@@ -258,6 +258,7 @@ function UserDashboardContent({
               <div className="error-text" role="alert">
                 {error}{' '}
                 <Button
+                  className={styles['spaced-button']}
                   disabled={loading || busy || Boolean(editing)}
                   onClick={() => {
                     setError('');
@@ -345,6 +346,7 @@ function UserDashboardContent({
             </ul>
             {page?.hasMore && (
               <Button
+                className={styles['spaced-button']}
                 loading={loading}
                 loadingLabel="불러오는 중…"
                 disabled={busy || Boolean(editing)}

@@ -52,7 +52,12 @@ export default function AdminGate() {
         />
 
         {error && (
-          <Button loading={reloadBusy} loadingLabel="불러오는 중…" onClick={() => void reload()}>
+          <Button
+            className={styles.spacedButton}
+            loading={reloadBusy}
+            loadingLabel="불러오는 중…"
+            onClick={() => void reload()}
+          >
             목록 다시 불러오기
           </Button>
         )}
@@ -105,7 +110,7 @@ export default function AdminGate() {
 
         <Button
           type="submit"
-          className={styles.loginButton}
+          className={`${styles.loginButton} ${styles.spacedButton}`}
           loading={busy}
           loadingLabel="확인 중…"
           disabled={!password}

@@ -116,9 +116,12 @@
 }
 .actions > button {
   flex: 1;
-  margin-top: 0;
 }
 .empty {
   padding: 28px 0;
   text-align: center;
+}
+/* Button has no outer margin; this is the space it used to get from the global .button. */
+.spacedButton {
+  margin-top: 20px;
 }

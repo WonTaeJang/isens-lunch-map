@@ -185,6 +185,7 @@ export default function RandomRestaurant({
           </p>
           <Button
             variant="secondary"
+            className={styles.spacedButton}
             onClick={() => changeFilters({ maxDistance: null, favoritesOnly: false })}
           >
             필터 초기화

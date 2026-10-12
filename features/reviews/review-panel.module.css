@@ -73,3 +73,7 @@
     padding: 20px;
   }
 }
+/* Button has no outer margin; this is the space it used to get from the global .button. */
+.spacedButton {
+  margin-top: 20px;
+}

@@ -30,6 +30,6 @@
 /* Disabled, or only looking disabled (aria-disabled) so a tap can still say why. */
 .square:disabled,
 .square[aria-disabled='true'] {
-  opacity: 0.4;
+  opacity: var(--disabled-opacity);
   cursor: not-allowed;
 }

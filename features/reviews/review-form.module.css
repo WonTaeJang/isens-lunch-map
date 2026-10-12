@@ -53,8 +53,8 @@
   color: var(--color-text-inverse);
 }
 .options button:disabled {
-  opacity: 0.5;
-  cursor: default;
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
 }
 
 .tagGroups {
@@ -65,4 +65,8 @@
   color: var(--color-text-muted);
   font-size: var(--text-sm);
   margin-bottom: 8px;
+}
+/* Button has no outer margin; this is the space it used to get from the global .button. */
+.spacedButton {
+  margin-top: 20px;
 }

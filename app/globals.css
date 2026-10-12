@@ -311,6 +311,9 @@
   --focus-ring: 2px solid var(--focus-ring-color);
   --focus-ring-width-strong: 3px;
 
+  /* Disabled icon and chip buttons fade; text buttons (.button) turn gray instead. */
+  --disabled-opacity: 0.4;
+
   /* Type scale (one-off display and glyph sizes stay literal) */
   --text-2xs: 10px;
   --text-xs: 11px;
@@ -539,6 +542,11 @@ h3 {
   font-weight: 600;
   letter-spacing: -0.4px;
 }
+/* An empty state's action button sits 20px below the text. */
+.list-empty > .button,
+.table-empty > .button {
+  margin-top: 20px;
+}
 .list-empty p,
 .table-empty p {
   font-size: var(--text-sm);
@@ -590,7 +598,6 @@ h3 {
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   font-weight: 600;
-  margin-top: 20px;
   cursor: pointer;
 }
 .button-primary {

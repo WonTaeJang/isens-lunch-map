@@ -268,3 +268,7 @@ button.user-avatar {
   font-size: var(--text-sm);
   line-height: 1.5;
 }
+/* Button has no outer margin; this is the space it used to get from the global .button. */
+.spaced-button {
+  margin-top: 20px;
+}

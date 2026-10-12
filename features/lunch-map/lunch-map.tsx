@@ -180,7 +180,11 @@ export default function LunchMap({
                 ? '키와 등록 도메인, 네트워크 연결을 확인해 주세요.'
                 : '잠시만 기다려 주세요.'}
           </p>
-          {error && <Button onClick={() => window.location.reload()}>다시 시도</Button>}
+          {error && (
+            <Button className={styles.spacedButton} onClick={() => window.location.reload()}>
+              다시 시도
+            </Button>
+          )}
         </div>
       )}
       {controller &&

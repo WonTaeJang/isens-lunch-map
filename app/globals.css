@@ -4,6 +4,8 @@
   /*
    * Design tokens. Use these instead of raw values; one-off decorative colors (tier art, the
    * today-lunch burst, the snackbar's error tone) stay in their own modules.
+   * Text colors meet WCAG AA (4.5:1) on the light surfaces and tints below; check any new
+   * text/background pairing before adding it.
    */
 
   /* Surfaces */
@@ -17,9 +19,9 @@
   /* Text */
   --color-text: #202b32;
   --color-text-secondary: #4b5860;
-  --color-text-muted: #627078;
-  --color-text-subtle: #74838b; /* captions, meta */
-  --color-text-faint: #9aa4aa; /* decorative icons only, not for text */
+  --color-text-muted: #56636a;
+  --color-text-subtle: #657279; /* captions, meta; lightest gray for text */
+  --color-text-faint: #8a969d; /* icons and placeholders only (3:1), never for text */
   --color-text-inverse: #ffffff;
 
   /* Borders */
@@ -29,7 +31,7 @@
   --color-border-input: #ccd9d5;
 
   /* Brand */
-  --color-primary: #127e70;
+  --color-primary: #11786a;
   --color-primary-strong: #0e6c60; /* hover, pressed */
   --color-primary-subtle: #edf6f3; /* selected rows, tinted badges */
   --color-primary-subtle-strong: #e1f0ea; /* hover on tinted surfaces */
@@ -39,7 +41,7 @@
   /* Status */
   --color-info: #2563eb; /* 추천, Saturday */
   --color-info-subtle: #eef4ff;
-  --color-danger: #dc2626; /* 비추천, Sunday */
+  --color-danger: #d32222; /* 비추천, Sunday */
   --color-danger-subtle: #fef2f2;
   --color-error: #b42318; /* error messages */
   --color-warning: #b54708;
@@ -50,7 +52,7 @@
   --color-favorite-border: #e8c44d;
   --color-favorite-subtle: #fff9df;
   --color-favorite-subtle-hover: #fffbee;
-  --color-like: #e11d48;
+  --color-like: #d31b44;
   --color-like-subtle: #fff1f2;
   --color-like-border: #fecdd3;
 

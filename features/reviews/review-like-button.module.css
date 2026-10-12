@@ -48,7 +48,7 @@
   border-color: transparent;
   background: transparent;
   padding: 0 2px;
-  color: var(--color-text-faint);
+  color: var(--color-text-subtle);
   cursor: default;
 }
 .readonly:hover {

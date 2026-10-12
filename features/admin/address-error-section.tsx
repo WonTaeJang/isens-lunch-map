@@ -2,6 +2,7 @@
 
 import EmptyState from '@/components/ui/empty-state';
 import Button from '@/components/ui/button';
+import styles from './admin.module.css';
 import type { RestaurantRow } from '@/lib/restaurant-types';
 
 type Props = {
@@ -32,8 +33,8 @@ export default function AddressErrorSection({
       <p role="status" className="description">
         {addressMessage}
       </p>
-      <div className="table-scroll">
-        <table>
+      <div className={styles.tableScroll}>
+        <table className={styles.table}>
           <thead>
             <tr>
               <th>식당명</th>
@@ -62,7 +63,7 @@ export default function AddressErrorSection({
                       required
                       disabled={busy}
                     />
-                    <Button type="submit" disabled={busy || !!error}>
+                    <Button type="submit" className={styles.cellButton} disabled={busy || !!error}>
                       주소 검색 및 저장
                     </Button>
                   </form>

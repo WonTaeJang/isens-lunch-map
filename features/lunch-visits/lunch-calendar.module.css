@@ -79,7 +79,6 @@
   color: var(--color-text-faint);
 }
 
-/* Overrides the global admin table styles (min-width, column widths, padding). */
 .grid {
   width: 100%;
   min-width: 0;
@@ -107,13 +106,6 @@
 }
 .grid th:first-child,
 .grid td:first-child .day {
-  color: var(--color-danger);
-}
-.grid th:last-child,
-.grid td:last-child .day {
-  color: var(--color-info);
-}
-.day {
   color: var(--color-danger);
 }
 .grid th:last-child,

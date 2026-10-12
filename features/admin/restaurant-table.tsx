@@ -5,6 +5,7 @@ import Tabs from '@/components/ui/tabs';
 import EmptyState from '@/components/ui/empty-state';
 import CountBadge from '@/components/ui/count-badge';
 import Toggle from '@/components/ui/toggle';
+import styles from './admin.module.css';
 import type { RestaurantRow } from '@/lib/restaurant-types';
 
 const STATUS_TABS = [
@@ -45,7 +46,7 @@ export default function RestaurantTable({
   };
   const tabs = STATUS_TABS.map((item) => ({ ...item, count: error ? '—' : counts[item.value] }));
   return (
-    <section className="table-section">
+    <section className={styles.tableSection}>
       <h2>
         등록된 식당 <CountBadge>{error ? '—' : restaurants.length}</CountBadge>
       </h2>
@@ -56,19 +57,19 @@ export default function RestaurantTable({
         idPrefix="restaurant"
         panelId="restaurant-panel"
         label="식당 분류"
-        className="restaurant-tabs"
+        className={styles.tabs}
       />
       <div
         id="restaurant-panel"
         role="tabpanel"
         aria-labelledby={`restaurant-tab-${activeTab}`}
         tabIndex={0}
-        className="table-scroll"
+        className={styles.tableScroll}
       >
         {activeTab === 'errors' ? (
           errorContent
         ) : (
-          <table>
+          <table className={styles.table}>
             <thead>
               <tr>
                 <th>식당명</th>

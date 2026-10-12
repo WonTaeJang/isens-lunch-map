@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import Button from '@/components/ui/button';
 import PageHeading from '@/components/ui/page-heading';
 import AdminManager from './admin-manager';
+import styles from './admin.module.css';
 import { loadAdminRestaurants } from './admin-api';
 import type { RestaurantRow } from '@/lib/restaurant-types';
 
@@ -59,7 +60,7 @@ export default function AdminGate() {
     );
 
   return (
-    <section className="admin-login">
+    <section className={styles.login}>
       <h1>관리자 페이지</h1>
       <p className="description">관리자 비밀번호를 입력해 주세요.</p>
 
@@ -102,7 +103,13 @@ export default function AdminGate() {
           </p>
         )}
 
-        <Button type="submit" loading={busy} loadingLabel="확인 중…" disabled={!password}>
+        <Button
+          type="submit"
+          className={styles.loginButton}
+          loading={busy}
+          loadingLabel="확인 중…"
+          disabled={!password}
+        >
           확인
         </Button>
       </form>

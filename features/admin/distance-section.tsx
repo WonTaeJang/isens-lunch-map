@@ -1,6 +1,7 @@
 'use client';
 
 import Button from '@/components/ui/button';
+import styles from './admin.module.css';
 import { formatDistance } from '@/lib/distance';
 import { OFFICE_ADDRESS } from '@/lib/office';
 import type { DistanceChange, DistancePreview } from '@/lib/restaurant-types';
@@ -25,7 +26,7 @@ function difference({ before, after }: DistanceChange) {
 /** Recomputes straight-line distances from the office, shows them, then saves on request. */
 export default function DistanceSection({ busy, preview, message, error, measure }: Props) {
   return (
-    <section className="upload-section">
+    <section className={styles.uploadSection}>
       <h2>거리 재측정</h2>
       <p className="description">
         아이센스 빌딩({OFFICE_ADDRESS})에서 식당 좌표까지의 직선거리를 10m 단위로 다시 계산합니다.
@@ -49,8 +50,8 @@ export default function DistanceSection({ busy, preview, message, error, measure
               : '모든 식당의 거리가 이미 최신입니다.'}
           </p>
           {preview.rows.length > 0 && (
-            <div className="table-scroll" style={{ maxHeight: 300 }}>
-              <table className="import-preview-table">
+            <div className={styles.tableScroll} style={{ maxHeight: 300 }}>
+              <table className={`${styles.table} ${styles.preview}`}>
                 <thead>
                   <tr>
                     <th>가맹점명</th>

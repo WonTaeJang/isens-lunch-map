@@ -1,6 +1,7 @@
 'use client';
 
 import Button from '@/components/ui/button';
+import styles from './admin.module.css';
 import type { ImportPreview } from '@/lib/restaurant-types';
 
 type Props = {
@@ -23,13 +24,13 @@ export default function ExcelImportSection({
   upload,
 }: Props) {
   return (
-    <section className="upload-section">
+    <section className={styles.uploadSection}>
       <h2>엑셀로 업데이트</h2>
       <p className="description">
         가맹점명·주소가 같은 식당은 갱신됩니다. 파일에 없는 기존 식당과 취소선 항목은
         비활성화됩니다. 다음 업로드 시 수동 상태보다 엑셀 상태가 우선합니다.
       </p>
-      <div className="upload-placeholder">
+      <div className={styles.uploadPlaceholder}>
         <label className="description">
           전체 식당 목록 (.xlsx, 최대 3MB)
           <input
@@ -69,8 +70,8 @@ export default function ExcelImportSection({
               : '변경사항이 없습니다.'}
           </p>
           {preview.rows.length > 0 && (
-            <div className="table-scroll" style={{ maxHeight: 300 }}>
-              <table className="import-preview-table">
+            <div className={styles.tableScroll} style={{ maxHeight: 300 }}>
+              <table className={`${styles.table} ${styles.preview}`}>
                 <thead>
                   <tr>
                     <th>행</th>

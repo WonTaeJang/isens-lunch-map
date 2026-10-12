@@ -8,6 +8,7 @@ import LoadingStatus from '@/components/ui/loading-status';
 import RecommendationBar from '@/features/reviews/recommendation-bar';
 import { formatPercent, percent } from '@/lib/percent';
 import styles from './admin-statistics.module.css';
+import adminStyles from './admin.module.css';
 
 /** Share of active restaurants covered by one kind of record (reviews, 오늘의 점심). */
 function CoverageProgress({
@@ -43,7 +44,7 @@ export default function AdminStatistics({ password }: { password: string }) {
   const { data, error, loading, reload } = useAdminStatistics(password);
   const maxTag = Math.max(1, ...(data?.tags.map((tag) => tag.count) ?? []));
   return (
-    <section className="table-section" aria-label="리뷰 통계" aria-busy={loading}>
+    <section className={adminStyles.tableSection} aria-label="리뷰 통계" aria-busy={loading}>
       <div className={styles.heading}>
         <h2>통계</h2>
         <Button variant="secondary" disabled={loading} onClick={reload}>

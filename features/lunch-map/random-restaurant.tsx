@@ -12,7 +12,6 @@ import TodayLunchButton from '@/features/lunch-visits/today-lunch-button';
 import useTodayLunchAction from '@/features/lunch-visits/use-today-lunch-action';
 import type { ReviewCounts } from '@/lib/reviews/model';
 import { hasCoordinates } from '@/lib/coordinates';
-import { formatDistance } from '@/lib/distance';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 import { filterRestaurants, type RestaurantFilters } from './filter-restaurants';
 import { RestaurantFilterChips } from './restaurant-filter-controls';
@@ -20,6 +19,7 @@ import RestaurantSlot from './restaurant-slot';
 import { getReviewCounts } from '@/lib/reviews/model';
 import { createSlotNames, pickRestaurant } from './random-model';
 import styles from './random-restaurant.module.css';
+import DistanceBadge from './distance-badge';
 
 export default function RandomRestaurant({
   restaurants,
@@ -137,7 +137,7 @@ export default function RandomRestaurant({
                   </div>
                 </div>
                 <div className={styles.resultMeta}>
-                  <span className="distance-badge">{formatDistance(result.distance)}</span>
+                  <DistanceBadge distance={result.distance} />
                   <span className={styles.resultMenu}>
                     {[result.category, result.main_menu].filter(Boolean).join(' · ') ||
                       '분류 정보 없음'}

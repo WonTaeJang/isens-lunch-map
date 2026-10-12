@@ -1,0 +1,108 @@
+.content {
+  position: relative;
+  padding: 20px 20px 8px;
+  background: var(--color-surface);
+}
+.item {
+  position: relative;
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding-bottom: 8px;
+}
+/* List item: name / [distance] category · menu ... votes / address / actions ... reviews */
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--color-text-subtle);
+  font-size: var(--text-sm);
+}
+.menu {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.address {
+  margin-top: 6px;
+  color: var(--color-text-subtle);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+.actions {
+  display: flex;
+  gap: 6px;
+}
+.item[data-today-lunch]::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 1;
+  width: 3px;
+  background: var(--color-primary);
+  pointer-events: none;
+}
+
+/* Restaurant reviews: native dialog keeps keyboard focus outside the map. */
+.reviewButton {
+  display: block;
+  margin-left: auto;
+  margin-right: 12px;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  padding: 8px;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-left: 20px;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.name h3 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* The selection hit area sits behind the separate, interactive vote controls. */
+.target {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.target:disabled {
+  cursor: default;
+}
+.content .name,
+.content .address,
+.content .meta,
+.content > .noCoords {
+  pointer-events: none;
+}
+.content:has(.target:hover:not(:disabled)),
+.content[data-selected] {
+  background: var(--color-primary-subtle);
+}
+.vote {
+  position: relative;
+  pointer-events: auto;
+}
+.target:focus-visible {
+  outline-offset: -3px;
+}

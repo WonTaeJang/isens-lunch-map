@@ -250,53 +250,6 @@ h1 {
   line-height: 1.3;
   margin-top: 8px;
 }
-.map-layout {
-  display: grid;
-  grid-template-columns: 310px minmax(0, 1fr);
-  gap: 18px;
-}
-.restaurant-panel {
-  display: flex;
-  flex-direction: column;
-  border-radius: var(--radius-2xl);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  overflow: hidden;
-}
-.panel-heading-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.random-pick-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 7px 10px;
-  border: 1px solid var(--color-primary-border);
-  border-radius: var(--radius-md);
-  background: var(--color-primary-subtle);
-  color: var(--color-primary);
-  font-size: var(--text-sm);
-  white-space: nowrap;
-  cursor: pointer;
-}
-.random-pick-button:hover:not(:disabled) {
-  background: var(--color-primary-subtle-strong);
-}
-.random-pick-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.panel-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px 22px;
-  border-bottom: 1px solid var(--color-border-subtle);
-}
 h2 {
   font-size: var(--text-lg);
   font-weight: 700;
@@ -343,8 +296,7 @@ h3 {
 }
 .list-empty p,
 .table-empty p,
-.upload-placeholder p,
-.map-message p {
+.upload-placeholder p {
   font-size: var(--text-sm);
   line-height: 1.9;
   color: var(--color-text-subtle);
@@ -358,35 +310,6 @@ h3 {
 }
 .text-link span {
   margin-left: 8px;
-}
-.map-panel {
-  position: relative;
-  /* Keeps the map's own z-indexes inside it, under the sticky header. */
-  isolation: isolate;
-  min-width: 0;
-  /* Wide screens: the screen height under the header and the page title (about 126px), with
-     ~24px left below; between 450px and 900px. */
-  height: clamp(450px, calc(100vh - var(--header-height) - 150px), 900px);
-  border-radius: var(--radius-2xl);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-sunken);
-}
-.map-canvas {
-  width: 100%;
-  height: 100%;
-}
-.map-message {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 24px;
-  background: var(--color-surface-muted);
-  text-align: center;
 }
 .page-footer {
   display: flex;
@@ -561,15 +484,6 @@ th:nth-child(3) {
   .description {
     font-size: var(--text-sm);
   }
-  .map-layout {
-    grid-template-columns: 1fr;
-  }
-  /* Fixed heights by width: in-app browsers (e.g. KakaoTalk) resize the page while their bars
-     hide on scroll, so a viewport-height map would keep resizing. */
-  .map-panel {
-    grid-row: 1;
-    height: 440px;
-  }
   .list-empty {
     padding: 28px 15px;
   }
@@ -585,11 +499,6 @@ th:nth-child(3) {
   }
 }
 /* Most phones: a smaller fixed map (after the 760px rules so it wins). */
-@media (max-width: 480px) {
-  .map-panel {
-    height: 360px;
-  }
-}
 
 .admin-input {
   display: block;
@@ -640,119 +549,6 @@ td .button {
   background: var(--color-surface-sunken);
   font-size: var(--text-sm);
 }
-
-.distance-badge {
-  flex-shrink: 0;
-  border-radius: var(--radius-sm);
-  padding: 3px 7px;
-  background: var(--color-primary-subtle);
-  color: var(--color-primary);
-  font-size: var(--text-xs);
-  font-weight: 600;
-}
-
-.restaurant-select-content {
-  position: relative;
-  padding: 20px 20px 8px;
-  background: var(--color-surface);
-}
-.restaurant-list-item {
-  position: relative;
-}
-/* List item: name / [distance] category · menu ... votes / address / actions ... reviews */
-.restaurant-list-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  color: var(--color-text-subtle);
-  font-size: var(--text-sm);
-}
-.restaurant-list-menu {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.restaurant-list-address {
-  margin-top: 6px;
-  color: var(--color-text-subtle);
-  font-size: var(--text-sm);
-  line-height: 1.5;
-}
-.restaurant-list-actions {
-  display: flex;
-  gap: 6px;
-}
-.restaurant-list-item[data-today-lunch]::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  z-index: 1;
-  width: 3px;
-  background: var(--color-primary);
-  pointer-events: none;
-}
-.favorite-error {
-  padding: 12px 20px;
-  color: var(--color-error);
-  font-size: var(--text-sm);
-}
-
-.restaurant-filters {
-  padding: 16px;
-  border-bottom: 1px solid var(--color-border-subtle);
-}
-/* Filter chip row (lunch list and random pick): the 즐겨찾기 icon, then the distance chips. */
-.restaurant-filter-controls {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-}
-.restaurant-filter-controls .distance-filters {
-  display: flex;
-  flex: 1;
-  flex-wrap: wrap;
-  gap: 6px;
-  min-width: 0;
-}
-/* Slightly narrower distance chips; on phones they tighten further so the row stays on one line
-   down to 360px (narrower screens wrap the last chips). */
-.restaurant-filter-controls .distance-filters .filter-chip {
-  padding-inline: 8px;
-}
-@media (max-width: 480px) {
-  .restaurant-filter-controls,
-  .restaurant-filter-controls .distance-filters {
-    gap: 4px;
-  }
-  .restaurant-filter-controls .distance-filters .filter-chip {
-    padding-inline: 6px;
-  }
-}
-/* Below the search box; the panel's padding is the space under it, like the 16px above. */
-.restaurant-filters .restaurant-filter-controls {
-  margin-top: 12px;
-}
-.search-label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: var(--text-sm);
-  font-weight: 600;
-}
-.restaurant-search {
-  width: 100%;
-  padding: 11px 12px;
-  border: 1px solid var(--color-border-input);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  font-size: var(--text-md);
-}
-.restaurant-search:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
 .filter-chip {
   min-height: 36px;
   padding: 7px 10px;
@@ -771,213 +567,6 @@ td .button {
   background: var(--color-primary);
   color: var(--color-text-inverse);
   font-weight: 600;
-}
-.favorite-filter-chip {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  padding: 0;
-}
-.favorite-filter-chip:hover {
-  background: var(--color-favorite-subtle-hover);
-}
-.favorite-filter-chip[aria-pressed='true'] {
-  border-color: var(--color-favorite-border);
-  background: var(--color-favorite-subtle);
-  color: var(--color-favorite-text);
-}
-.favorite-filter-chip[aria-pressed='true'] svg {
-  fill: var(--color-favorite);
-}
-.map-controls {
-  position: absolute;
-  z-index: 10;
-  bottom: 8px;
-  right: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.map-control-button {
-  box-sizing: border-box;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  color: var(--color-primary);
-  box-shadow: var(--shadow-sm);
-  cursor: pointer;
-}
-.map-control-button svg {
-  display: block;
-  margin: auto;
-}
-.map-control-button:hover:not(:disabled) {
-  background: var(--color-primary-subtle);
-}
-.map-control-button:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-/* The raised card leaves a transparent host area; only the card should intercept input. */
-.restaurant-map-overlay {
-  pointer-events: none;
-}
-.restaurant-map-card {
-  pointer-events: auto;
-  position: relative;
-  bottom: 48px;
-  width: min(320px, 78vw);
-  padding: 20px;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-xs);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-md);
-  color: var(--color-text);
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-.restaurant-card-saving {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: inherit;
-  background: transparent;
-  cursor: progress;
-  touch-action: none;
-}
-.restaurant-map-card::after {
-  pointer-events: none;
-  content: '';
-  position: absolute;
-  bottom: -7px;
-  left: calc(50% - 6px);
-  width: 12px;
-  height: 12px;
-  background: var(--color-surface);
-  border-right: 1px solid var(--color-border-strong);
-  border-bottom: 1px solid var(--color-border-strong);
-  transform: rotate(45deg);
-}
-.restaurant-card-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding-right: 28px;
-}
-.restaurant-card-header h3 {
-  min-width: 0;
-  margin: 0;
-  font-size: var(--text-lg);
-  font-weight: 700;
-  line-height: 1.4;
-}
-.restaurant-card-close {
-  z-index: 3;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 32px;
-  height: 32px;
-  font-size: 27px;
-  line-height: 1;
-  color: var(--color-text-muted);
-  cursor: pointer;
-}
-.restaurant-card-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-  color: var(--color-text-subtle);
-  font-size: var(--text-sm);
-}
-.restaurant-card-details {
-  margin-top: 8px;
-  font-size: var(--text-md);
-  line-height: 1.2;
-  max-height: 96px;
-  overflow-y: auto;
-}
-.restaurant-card-menu {
-  color: var(--color-text-subtle);
-  margin-top: 4px;
-}
-.restaurant-card-actions {
-  display: flex;
-  gap: 6px;
-  margin-top: 12px;
-}
-.restaurant-card-review,
-.restaurant-card-directions {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 32px;
-  border-radius: var(--radius-xs);
-  font-size: var(--text-md);
-  font-weight: 600;
-  cursor: pointer;
-}
-.restaurant-card-review {
-  flex: 1;
-  border: 1px solid var(--color-border-strong);
-  color: var(--color-text-muted);
-}
-/* Reviewed by the viewer: the same tint as the ✓ badge in the lunch list. */
-.restaurant-card-review[data-reviewed] {
-  gap: 4px;
-  border-color: var(--color-primary-border);
-  background: var(--color-primary-subtle);
-  color: var(--color-primary);
-}
-.restaurant-card-directions {
-  padding: 0 18px;
-  background: #308ff5;
-  color: var(--color-text-inverse);
-}
-.restaurant-card-actions .restaurant-card-icon {
-  flex: 0 0 32px;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-}
-.restaurant-card-status {
-  color: var(--color-text-subtle);
-  font-size: var(--text-xs);
-  margin-top: 8px;
-}
-.restaurant-card-status:empty {
-  display: none;
-}
-
-.restaurant-results {
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-/* Restaurant reviews: native dialog keeps keyboard focus outside the map. */
-.restaurant-list-item {
-  border-bottom: 1px solid var(--color-border-subtle);
-  padding-bottom: 8px;
-}
-.restaurant-review-button {
-  display: block;
-  margin-left: auto;
-  margin-right: 12px;
-  border: 0;
-  background: transparent;
-  color: var(--color-primary);
-  padding: 8px;
-  white-space: nowrap;
-  font-size: var(--text-sm);
-  cursor: pointer;
 }
 .review-panel {
   position: fixed;
@@ -1160,14 +749,6 @@ td .button {
     padding: 20px;
   }
 }
-
-.restaurant-list-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-left: 20px;
-}
 .restaurant-review-counts {
   display: flex;
   flex-wrap: wrap;
@@ -1188,12 +769,6 @@ td .button {
 }
 .restaurant-review-counts svg {
   flex-shrink: 0;
-}
-.restaurant-card-meta {
-  flex-wrap: wrap;
-}
-.restaurant-card-meta .restaurant-card-vote {
-  margin-left: auto;
 }
 
 .recommendation-badge {
@@ -1236,17 +811,6 @@ td .button {
   background: var(--color-primary-subtle);
 }
 
-.restaurant-list-name {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-.restaurant-list-name h3 {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
 .admin-login {
   max-width: 400px;
   margin: 64px auto;
@@ -1268,17 +832,6 @@ td .button {
 .admin-login input,
 .admin-login .button {
   width: 100%;
-}
-
-.restaurant-panel .panel-heading h2 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-}
-.restaurant-panel .panel-heading h2 .count {
-  margin-left: 0;
-  line-height: 1.5;
 }
 
 .review-heading-actions {
@@ -1339,34 +892,4 @@ td .button {
 }
 .restaurant-review-counts[data-colored] strong {
   font-weight: 400;
-}
-
-/* The selection hit area sits behind the separate, interactive vote controls. */
-.restaurant-select-target {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-.restaurant-select-target:disabled {
-  cursor: default;
-}
-.restaurant-select-content .restaurant-list-name,
-.restaurant-select-content .restaurant-list-address,
-.restaurant-select-content .restaurant-list-meta,
-.restaurant-select-content > .subtle {
-  pointer-events: none;
-}
-.restaurant-select-content:has(.restaurant-select-target:hover:not(:disabled)),
-.restaurant-select-content[data-selected] {
-  background: var(--color-primary-subtle);
-}
-.restaurant-list-vote {
-  position: relative;
-  pointer-events: auto;
-}
-.restaurant-select-target:focus-visible {
-  outline-offset: -3px;
 }

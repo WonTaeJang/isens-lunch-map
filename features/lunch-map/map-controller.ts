@@ -24,6 +24,13 @@ export function createMapController(
   container: HTMLElement,
   onSelect: (id: string | null) => void,
   labelClassNames = { anchor: 'restaurant-map-label-anchor', label: 'restaurant-map-label' },
+  cardClassNames = {
+    overlay: 'restaurant-map-overlay',
+    card: 'restaurant-map-card',
+    close: 'restaurant-card-close',
+    header: 'restaurant-card-header',
+    details: 'restaurant-card-details',
+  },
 ) {
   const entries = new Map<string, MarkerEntry>();
   let selectedId: string | null = null;
@@ -72,7 +79,7 @@ export function createMapController(
     selectedFavorite: image('/restaurant-marker-selected-favorite.svg', true),
   };
   const host = document.createElement('div');
-  host.className = 'restaurant-map-overlay';
+  host.className = cardClassNames.overlay;
   const stop = (event: Event) => event.stopPropagation();
   const stopDoubleClick = (event: Event) => {
     event.preventDefault();
@@ -101,22 +108,22 @@ export function createMapController(
   // The office popup looks like the restaurant card. Restaurant cards are rendered by React;
   // this one never changes, so it is built once here.
   const officeHost = document.createElement('div');
-  officeHost.className = 'restaurant-map-overlay';
+  officeHost.className = cardClassNames.overlay;
   const officeCard = document.createElement('article');
-  officeCard.className = 'restaurant-map-card';
+  officeCard.className = cardClassNames.card;
   officeCard.setAttribute('aria-label', '아이센스 빌딩 상세 정보');
   const closeButton = document.createElement('button');
   closeButton.type = 'button';
-  closeButton.className = 'restaurant-card-close';
+  closeButton.className = cardClassNames.close;
   closeButton.setAttribute('aria-label', '상세 정보 닫기');
   closeButton.textContent = '×';
   const officeHeader = document.createElement('div');
-  officeHeader.className = 'restaurant-card-header';
+  officeHeader.className = cardClassNames.header;
   const officeTitle = document.createElement('h3');
   officeTitle.textContent = '아이센스 빌딩';
   officeHeader.append(officeTitle);
   const officeDetails = document.createElement('div');
-  officeDetails.className = 'restaurant-card-details';
+  officeDetails.className = cardClassNames.details;
   const officeAddress = document.createElement('p');
   officeAddress.textContent = OFFICE_ADDRESS;
   officeDetails.append(officeAddress);

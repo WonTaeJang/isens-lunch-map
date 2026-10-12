@@ -1,0 +1,136 @@
+/* The raised card leaves a transparent host area; only the card should intercept input. */
+.overlay {
+  pointer-events: none;
+}
+.card {
+  pointer-events: auto;
+  position: relative;
+  bottom: 48px;
+  width: min(320px, 78vw);
+  padding: 20px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.saving {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  background: transparent;
+  cursor: progress;
+  touch-action: none;
+}
+.card::after {
+  pointer-events: none;
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  left: calc(50% - 6px);
+  width: 12px;
+  height: 12px;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border-strong);
+  border-bottom: 1px solid var(--color-border-strong);
+  transform: rotate(45deg);
+}
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 28px;
+}
+.header h3 {
+  min-width: 0;
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: 1.4;
+}
+.close {
+  z-index: 3;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  font-size: 27px;
+  line-height: 1;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  color: var(--color-text-subtle);
+  font-size: var(--text-sm);
+  flex-wrap: wrap;
+}
+.details {
+  margin-top: 8px;
+  font-size: var(--text-md);
+  line-height: 1.2;
+  max-height: 96px;
+  overflow-y: auto;
+}
+.menu {
+  color: var(--color-text-subtle);
+  margin-top: 4px;
+}
+.actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+.review,
+.directions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 32px;
+  border-radius: var(--radius-xs);
+  font-size: var(--text-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+.review {
+  flex: 1;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-muted);
+}
+/* Reviewed by the viewer: the same tint as the ✓ badge in the lunch list. */
+.review[data-reviewed] {
+  gap: 4px;
+  border-color: var(--color-primary-border);
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+.directions {
+  padding: 0 18px;
+  background: #308ff5;
+  color: var(--color-text-inverse);
+}
+.actions .icon {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+}
+.status {
+  color: var(--color-text-subtle);
+  font-size: var(--text-xs);
+  margin-top: 8px;
+}
+.status:empty {
+  display: none;
+}
+.meta .vote {
+  margin-left: auto;
+}

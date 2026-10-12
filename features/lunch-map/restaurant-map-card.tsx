@@ -9,7 +9,8 @@ import RecommendationVote from '@/features/reviews/recommendation-vote';
 import type { ReviewCounts } from '@/lib/reviews/model';
 import { useState } from 'react';
 import type { MapRestaurant } from '@/lib/restaurant-types';
-import { formatDistance } from '@/lib/distance';
+import DistanceBadge from './distance-badge';
+import styles from './restaurant-map-card.module.css';
 
 type Props = {
   reviewed: boolean;
@@ -43,38 +44,33 @@ export default function RestaurantMapCard({
   const [message, setMessage] = useState<string | null>(null);
   return (
     <article
-      className="restaurant-map-card"
+      className={styles.card}
       aria-label={`${restaurant.name} 상세 정보`}
       onKeyDown={(event) => {
         if (event.key === 'Escape') onClose();
       }}
     >
-      <button
-        type="button"
-        className="restaurant-card-close"
-        aria-label="상세 정보 닫기"
-        onClick={onClose}
-      >
+      <button type="button" className={styles.close} aria-label="상세 정보 닫기" onClick={onClose}>
         ×
       </button>
       <div inert={voteBusy} aria-busy={voteBusy || undefined}>
-        <div className="restaurant-card-header">
+        <div className={styles.header}>
           <h3>{restaurant.name}</h3>
         </div>
-        <div className="restaurant-card-meta">
+        <div className={styles.meta}>
           {restaurant.category || '분류 정보 없음'}
-          <span className="distance-badge">{formatDistance(restaurant.distance)}</span>
+          <DistanceBadge distance={restaurant.distance} />
           <RecommendationVote
             restaurantId={restaurant.id}
             counts={counts}
-            className="restaurant-card-vote"
+            className={styles.vote}
           />
         </div>
-        <div className="restaurant-card-details">
+        <div className={styles.details}>
           <p>{restaurant.address || '주소 확인 필요'}</p>
-          <p className="restaurant-card-menu">대표메뉴 · {restaurant.main_menu || '정보 없음'}</p>
+          <p className={styles.menu}>대표메뉴 · {restaurant.main_menu || '정보 없음'}</p>
         </div>
-        <div className="restaurant-card-actions">
+        <div className={styles.actions}>
           <FavoriteToggle
             restaurantName={restaurant.name}
             selected={favorite}
@@ -95,7 +91,7 @@ export default function RestaurantMapCard({
           {/* The viewer's review mark lives here rather than beside the name, so names keep to one line. */}
           <button
             type="button"
-            className="restaurant-card-review"
+            className={styles.review}
             data-reviewed={reviewed || undefined}
             aria-label={`${restaurant.name} 리뷰 보기${reviewed ? ', 내 리뷰 작성됨' : ''}`}
             title={reviewed ? '내 리뷰 작성됨' : undefined}
@@ -105,7 +101,7 @@ export default function RestaurantMapCard({
             {reviewed && <CheckIcon size={14} />}
           </button>
           <a
-            className="restaurant-card-directions restaurant-card-icon"
+            className={`${styles.directions} ${styles.icon}`}
             aria-label={`${restaurant.name} 길찾기 (새 탭)`}
             title="길찾기"
             href={`https://map.kakao.com/link/to/${encodeURIComponent(restaurant.name)},${Number(restaurant.latitude)},${Number(restaurant.longitude)}`}
@@ -115,11 +111,11 @@ export default function RestaurantMapCard({
             <DirectionsIcon size={20} />
           </a>
         </div>
-        <p className="restaurant-card-status" role="status">
+        <p className={styles.status} role="status">
           {message}
         </p>
       </div>
-      {voteBusy && <div className="restaurant-card-saving" aria-hidden="true" />}
+      {voteBusy && <div className={styles.saving} aria-hidden="true" />}
     </article>
   );
 }

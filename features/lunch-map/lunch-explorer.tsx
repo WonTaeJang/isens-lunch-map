@@ -11,6 +11,7 @@ import { showSnackbar } from '@/components/ui/snackbar';
 import RandomRestaurant from './random-restaurant';
 import RestaurantFilters from './restaurant-filters';
 import RestaurantResults from './restaurant-results';
+import styles from './lunch-explorer.module.css';
 import LunchMap from './lunch-map';
 import useFavorites from '@/features/favorites/use-favorites';
 import useBlacklist from '@/features/blacklist/use-blacklist';
@@ -113,15 +114,15 @@ export default function LunchExplorer({
   }
 
   return (
-    <div ref={layoutRef} className="map-layout" id={LUNCH_MAP_ANCHOR}>
-      <aside className="restaurant-panel" aria-label="식당 목록">
-        <div className="panel-heading">
+    <div ref={layoutRef} className={styles.layout} id={LUNCH_MAP_ANCHOR}>
+      <aside className={styles.panel} aria-label="식당 목록">
+        <div className={styles.heading}>
           <h2>
-            점심 리스트 <CountBadge>{rows.length}</CountBadge>
+            점심 리스트 <CountBadge className={styles.headingCount}>{rows.length}</CountBadge>
           </h2>
-          <div className="panel-heading-actions">
+          <div className={styles.headingActions}>
             <button
-              className="random-pick-button"
+              className={styles.randomPick}
               type="button"
               disabled={!restaurants.length}
               onClick={() => setRandomOpen(true)}
@@ -132,7 +133,7 @@ export default function LunchExplorer({
           </div>
         </div>
         {favoriteError && (
-          <p className="favorite-error" role="alert">
+          <p className={styles.favoriteError} role="alert">
             {favoriteError}
           </p>
         )}

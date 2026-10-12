@@ -14,6 +14,8 @@ import RestaurantMapCard from './restaurant-map-card';
 import { createMapController, type MapController } from './map-controller';
 import { OFFICE_ADDRESS, OFFICE_POSITION } from '@/lib/office';
 import labelStyles from './map-label.module.css';
+import cardStyles from './restaurant-map-card.module.css';
+import styles from './lunch-map.module.css';
 import { withEuro } from '@/lib/korean';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 
@@ -89,6 +91,13 @@ export default function LunchMap({
             containerRef.current,
             (id) => onSelectRef.current(id),
             { anchor: labelStyles.anchor, label: labelStyles.label },
+            {
+              overlay: cardStyles.overlay,
+              card: cardStyles.card,
+              close: cardStyles.close,
+              header: cardStyles.header,
+              details: cardStyles.details,
+            },
           );
           setController(instance);
           setError(false);
@@ -117,14 +126,14 @@ export default function LunchMap({
 
   const ready = Boolean(controller);
   return (
-    <section className="map-panel" aria-label="점심 지도">
+    <section className={styles.panel} aria-label="점심 지도">
       <div
         ref={containerRef}
-        className="map-canvas"
+        className={styles.mapCanvas}
         aria-label={`아이센스 회사 주변 지도: ${OFFICE_ADDRESS}`}
       />
       {ready && (
-        <div className="map-controls">
+        <div className={styles.controls}>
           <MapControlButton
             label="랜덤 추천"
             title="랜덤 추천"
@@ -149,7 +158,7 @@ export default function LunchMap({
         </div>
       )}
       {!ready && (
-        <div className="map-message" role="status">
+        <div className={styles.message} role="status">
           {APP_KEY && !error ? (
             <LoadingSpinner size={40} />
           ) : (
@@ -224,7 +233,7 @@ function MapControlButton({
   return (
     <button
       type="button"
-      className="map-control-button"
+      className={styles.controlButton}
       aria-label={label}
       title={title}
       disabled={disabled}

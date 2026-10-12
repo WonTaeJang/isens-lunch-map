@@ -26,7 +26,7 @@ import { reviewTimestamp, type UserReview, type UserReviewPage } from '@/lib/rev
 import type { RestaurantRow } from '@/lib/restaurant-types';
 import { hasCoordinates } from '@/lib/coordinates';
 import { restaurantMapHref } from '@/lib/map-link';
-import { formatDistance } from '@/lib/distance';
+import DistanceBadge from '@/features/lunch-map/distance-badge';
 import { withEul } from '@/lib/korean';
 
 import useLocalUser from '@/features/local-user/use-local-user';
@@ -391,7 +391,7 @@ function UserDashboardContent({
                         )}
                       </h2>
                     </div>
-                    <span className="distance-badge">{formatDistance(row.distance)}</span>
+                    <DistanceBadge distance={row.distance} className={styles['user-distance']} />
                   </div>
                   <p className="description">
                     {row.category} · {row.main_menu}

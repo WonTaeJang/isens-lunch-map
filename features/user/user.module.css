@@ -177,7 +177,7 @@ button.user-avatar {
   color: var(--color-text-subtle);
 }
 .user-restaurant-inactive :global(.review-tags) span,
-.user-restaurant-inactive :global(.distance-badge) {
+.user-restaurant-inactive .user-distance {
   background: var(--color-border-subtle);
   color: var(--color-text-muted);
 }

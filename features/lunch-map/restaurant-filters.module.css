@@ -1,0 +1,72 @@
+.filters {
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+/* Filter chip row (lunch list and random pick): the 즐겨찾기 icon, then the distance chips. */
+.controls {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.controls .distance {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+/* Slightly narrower distance chips; on phones they tighten further so the row stays on one line
+   down to 360px (narrower screens wrap the last chips). */
+.controls .distance .distanceChip {
+  padding-inline: 8px;
+}
+@media (max-width: 480px) {
+  .controls,
+  .controls .distance {
+    gap: 4px;
+  }
+  .controls .distance .distanceChip {
+    padding-inline: 6px;
+  }
+}
+/* Below the search box; the panel's padding is the space under it, like the 16px above. */
+.filters .controls {
+  margin-top: 12px;
+}
+.searchLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.search {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: var(--text-md);
+}
+.search:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+.controls .favoriteChip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  padding: 0;
+}
+.controls .favoriteChip:hover {
+  background: var(--color-favorite-subtle-hover);
+}
+.controls .favoriteChip[aria-pressed='true'] {
+  border-color: var(--color-favorite-border);
+  background: var(--color-favorite-subtle);
+  color: var(--color-favorite-text);
+}
+.controls .favoriteChip[aria-pressed='true'] svg {
+  fill: var(--color-favorite);
+}

@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import Button from '@/components/ui/button';
 import EmptyState from '@/components/ui/empty-state';
 import RestaurantListItem from './restaurant-list-item';
+import styles from './restaurant-results.module.css';
 import useTodayLunchAction from '@/features/lunch-visits/use-today-lunch-action';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 
@@ -79,7 +80,7 @@ export default function RestaurantResults({
     );
   return (
     <>
-      <ul ref={list} className="restaurant-results">
+      <ul ref={list} className={styles.list}>
         {rows.map((row) => (
           <RestaurantListItem
             reviewed={ownReviews?.has(row.id) ?? false}

@@ -51,7 +51,7 @@ export default function ConfirmDialog({
       <h2 id={titleId}>{title}</h2>
       <p id={descriptionId}>{description}</p>
       {error && (
-        <p className="review-error" role="alert">
+        <p className="error-text" role="alert">
           {error}
         </p>
       )}

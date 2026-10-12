@@ -52,7 +52,7 @@ export default function AdminStatistics({ password }: { password: string }) {
         </Button>
       </div>
       {error && (
-        <p role="alert" className="review-error">
+        <p role="alert" className="error-text">
           {error}
         </p>
       )}

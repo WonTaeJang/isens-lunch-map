@@ -154,7 +154,7 @@ function ReviewPanelContent({
         {storageError && <p className="subtle">{storageError}</p>}
         {notice && <p role="status">{notice}</p>}
         {error && (
-          <div role="alert" className="review-error">
+          <div role="alert" className="error-text">
             {error}{' '}
             <Button
               disabled={loading || busy || Boolean(editing)}

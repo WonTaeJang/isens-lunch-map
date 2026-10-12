@@ -99,7 +99,7 @@ function UserDashboardContent({
     if (identity) return render(identity.user_id);
     if (!identityReady) return <LoadingStatus label={`${withEul(what)} 불러오는 중…`} />;
     return (
-      <p className="review-error" role="alert">
+      <p className="error-text" role="alert">
         {identityError || `사용자 정보를 확인할 수 없어 ${withEul(what)} 불러오지 못했어요.`}
       </p>
     );
@@ -255,7 +255,7 @@ function UserDashboardContent({
         ) : tab === 'reviews' ? (
           <section className={styles['user-records']} aria-label="내 리뷰">
             {error && (
-              <div className="review-error" role="alert">
+              <div className="error-text" role="alert">
                 {error}{' '}
                 <Button
                   disabled={loading || busy || Boolean(editing)}
@@ -368,7 +368,7 @@ function UserDashboardContent({
         ) : (
           <section className={styles['user-records']} aria-label="즐겨찾기 식당">
             {favoriteError && (
-              <p className="review-error" role="alert">
+              <p className="error-text" role="alert">
                 {favoriteError}
               </p>
             )}

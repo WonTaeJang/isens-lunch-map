@@ -28,6 +28,10 @@
   color: var(--color-text-subtle);
   margin-top: 12px;
 }
+/* Import and distance previews: a short scroll box. */
+.previewScroll {
+  max-height: 300px;
+}
 .tableScroll {
   overflow-x: auto;
   margin-top: 20px;
@@ -137,4 +141,8 @@
 .login input,
 .login .loginButton {
   width: 100%;
+}
+/* A deactivated restaurant's name is struck through. */
+.inactiveName {
+  text-decoration: line-through;
 }

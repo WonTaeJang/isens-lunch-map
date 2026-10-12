@@ -39,7 +39,7 @@ export default function ExcelImportSection({
             accept=".xlsx"
             disabled={busy}
             onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
-            className="admin-input"
+            className="text-input"
           />
         </label>
         <Button loading={busy} disabled={!file || !!error} onClick={() => upload('preview')}>
@@ -70,7 +70,7 @@ export default function ExcelImportSection({
               : '변경사항이 없습니다.'}
           </p>
           {preview.rows.length > 0 && (
-            <div className={styles.tableScroll} style={{ maxHeight: 300 }}>
+            <div className={`${styles.tableScroll} ${styles.previewScroll}`}>
               <table className={`${styles.table} ${styles.preview}`}>
                 <thead>
                   <tr>

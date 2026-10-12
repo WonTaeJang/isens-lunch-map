@@ -10,7 +10,8 @@
   isolation: isolate;
   min-width: 0;
   /* Wide screens: the screen height under the header and the page title (about 126px), with
-     ~24px left below; between 450px and 900px. */
+     ~24px left below (126 + 24 = 150px); between 450px and 900px. 100vh rather than 100dvh, so
+     the map keeps its height while a browser toolbar shows or hides. */
   height: clamp(450px, calc(100vh - var(--header-height) - 150px), 900px);
   border-radius: var(--radius-2xl);
   overflow: hidden;

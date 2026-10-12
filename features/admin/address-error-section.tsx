@@ -55,7 +55,7 @@ export default function AddressErrorSection({
                     }}
                   >
                     <input
-                      className="admin-input"
+                      className="text-input"
                       aria-label={`${row.name} 수정 주소`}
                       value={addresses[row.id] ?? row.address ?? ''}
                       onChange={(event) => onAddressChange(row.id, event.target.value)}

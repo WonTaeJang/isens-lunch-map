@@ -50,7 +50,7 @@ export default function DistanceSection({ busy, preview, message, error, measure
               : '모든 식당의 거리가 이미 최신입니다.'}
           </p>
           {preview.rows.length > 0 && (
-            <div className={styles.tableScroll} style={{ maxHeight: 300 }}>
+            <div className={`${styles.tableScroll} ${styles.previewScroll}`}>
               <table className={`${styles.table} ${styles.preview}`}>
                 <thead>
                   <tr>

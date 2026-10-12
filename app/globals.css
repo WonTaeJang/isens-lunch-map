@@ -1,8 +1,8 @@
 /*
  * Global styles: the reset, design tokens, base element styles, the page shell (header, page
  * width, page heading, footer) and the few shared primitives still styled by class name
- * (.button, .filter-chip, .count, .subtle, .description, empty states, .admin-input,
- * .review-error). Feature styles live in CSS modules next to their components.
+ * (.button, .filter-chip, .count, .subtle, .description, empty states, .text-input,
+ * .error-text). Feature styles live in CSS modules next to their components.
  */
 
 /*
@@ -670,7 +670,8 @@ h3 {
     font-size: 9px;
   }
 }
-.admin-input {
+/* Text, search and password fields. */
+.text-input {
   display: block;
   margin: 10px 0;
   padding: 10px;
@@ -698,7 +699,8 @@ h3 {
   color: var(--color-text-inverse);
   font-weight: 600;
 }
-.review-error {
+/* Error message under a form or above a list (role="alert"). */
+.error-text {
   color: var(--color-error);
   font-size: var(--text-base);
 }

@@ -53,7 +53,7 @@ export default function BlacklistList({
 
   if (error)
     return (
-      <p className="review-error" role="alert">
+      <p className="error-text" role="alert">
         {error}
       </p>
     );

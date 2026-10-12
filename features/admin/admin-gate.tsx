@@ -87,7 +87,7 @@ export default function AdminGate() {
 
         <input
           id="admin-password"
-          className="admin-input"
+          className="text-input"
           type="password"
           autoComplete="current-password"
           required
@@ -98,7 +98,7 @@ export default function AdminGate() {
         />
 
         {error && (
-          <p id="admin-login-error" className="review-error" role="alert">
+          <p id="admin-login-error" className="error-text" role="alert">
             {error}
           </p>
         )}

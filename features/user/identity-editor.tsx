@@ -53,7 +53,7 @@ export default function IdentityEditor({
         <label htmlFor="identity-id">user_id</label>
         <input
           id="identity-id"
-          className="admin-input"
+          className="text-input"
           value={userId}
           onChange={(event) => setUserId(event.target.value)}
           autoComplete="off"
@@ -63,14 +63,14 @@ export default function IdentityEditor({
         <label htmlFor="identity-name">user_name</label>
         <input
           id="identity-name"
-          className="admin-input"
+          className="text-input"
           value={userName}
           onChange={(event) => setUserName(event.target.value)}
           autoComplete="off"
           required
         />
         {error && (
-          <p className="review-error" role="alert">
+          <p className="error-text" role="alert">
             {error}
           </p>
         )}

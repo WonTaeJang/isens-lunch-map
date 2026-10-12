@@ -82,9 +82,7 @@ export default function RestaurantTable({
             <tbody>
               {visibleRestaurants.map((row) => (
                 <tr key={row.id}>
-                  <td style={{ textDecoration: row.active ? 'none' : 'line-through' }}>
-                    {row.name}
-                  </td>
+                  <td className={row.active ? undefined : styles.inactiveName}>{row.name}</td>
                   <td>
                     {row.category}
                     <br />

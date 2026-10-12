@@ -50,7 +50,7 @@ export default function ReviewForm({
       }}
     >
       {conflict && (
-        <div role="alert" className="review-error">
+        <div role="alert" className="error-text">
           <p>다른 곳에서 리뷰가 바뀌었어요. 작성 중인 내용은 아래에 그대로 뒀어요.</p>
           <Button
             disabled={busy || checking}
@@ -161,7 +161,7 @@ export default function ReviewForm({
         </div>
       </fieldset>
       {error && (
-        <p role="alert" className="review-error">
+        <p role="alert" className="error-text">
           {error}
         </p>
       )}

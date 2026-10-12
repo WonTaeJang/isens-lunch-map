@@ -94,7 +94,7 @@ export default function LunchCalendar({ userId }: { userId: string }) {
       </dl>
 
       {current && 'error' in current && (
-        <div className="review-error" role="alert">
+        <div className="error-text" role="alert">
           {current.error}{' '}
           <Button variant="secondary" onClick={() => setAttempt((value) => value + 1)}>
             다시 불러오기

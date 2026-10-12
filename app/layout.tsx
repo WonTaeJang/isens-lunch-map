@@ -44,8 +44,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="ko" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
+    <html lang="ko">
+      <body>
         <LocalUserInitializer />
         <SiteHeader />
         {/* Wide screens scroll this area only, so the scrollbar starts below the header. */}

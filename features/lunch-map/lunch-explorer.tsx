@@ -84,18 +84,24 @@ export default function LunchExplorer({
   function resetFilters() {
     changeFilters(DEFAULT_FILTERS);
   }
-  function selectFromList(id: string) {
+  function selectRestaurant(id: string) {
     setSelectedId(id);
     setFocusRequest({ id });
     if (window.matchMedia('(max-width: 760px)').matches)
       layoutRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  /** A pick from the list: an active search is cleared (other filters stay) so the map and the
+   * list show the restaurant among its neighbors. */
+  function selectFromList(id: string) {
+    if (filters.query) setFilters((current) => ({ ...current, query: '' }));
+    selectRestaurant(id);
   }
   /** Selects a restaurant and shows it on the map, clearing the filters only if they hide it.
    * Returns false when the restaurant is not on the map at all (e.g. deactivated). */
   function showRestaurant(id: string) {
     if (!restaurants.some((row) => row.id === id)) return false;
     if (!rows.some((row) => row.id === id)) setFilters(DEFAULT_FILTERS);
-    selectFromList(id);
+    selectRestaurant(id);
     return true;
   }
   function showTodayLunch(id: string) {
@@ -144,6 +150,7 @@ export default function LunchExplorer({
           favoritesOnly={filters.favoritesOnly}
           favorites={favorites}
           selectedId={visibleSelectedId}
+          focusRequest={focusRequest}
           onSelect={selectFromList}
           onFavorite={favoriteFromList}
           onReset={resetFilters}

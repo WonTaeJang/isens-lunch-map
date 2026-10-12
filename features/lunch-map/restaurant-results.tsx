@@ -1,6 +1,7 @@
 import { getReviewCounts } from '@/lib/reviews/model';
 import type { ReviewCounts } from '@/lib/reviews/model';
 import Link from 'next/link';
+import { useEffect, useRef } from 'react';
 import Button from '@/components/ui/button';
 import EmptyState from '@/components/ui/empty-state';
 import RestaurantListItem from './restaurant-list-item';
@@ -16,6 +17,8 @@ type Props = {
   favoritesOnly: boolean;
   favorites: ReadonlySet<string>;
   selectedId: string | null;
+  /** The map's focus request: the list also scrolls to that restaurant when it is out of view. */
+  focusRequest: { id: string } | null;
   onSelect: (id: string) => void;
   onFavorite: (id: string) => void;
   onReviews: (id: string) => void;
@@ -30,12 +33,25 @@ export default function RestaurantResults({
   favoritesOnly,
   favorites,
   selectedId,
+  focusRequest,
   onSelect,
   onFavorite,
   onReviews,
   onReset,
 }: Props) {
   const todayLunch = useTodayLunchAction();
+  const list = useRef<HTMLUListElement>(null);
+  // Only the list's own scroll area moves (the page is left alone), and only when the row is
+  // not already fully visible, so picking a row on screen does not shift the list.
+  useEffect(() => {
+    const box = list.current;
+    const item =
+      focusRequest && box?.querySelector(`[data-restaurant-id="${CSS.escape(focusRequest.id)}"]`);
+    if (!box || !item) return;
+    const view = box.getBoundingClientRect();
+    const rect = item.getBoundingClientRect();
+    if (rect.top < view.top || rect.bottom > view.bottom) box.scrollTop += rect.top - view.top;
+  }, [focusRequest]);
   if (!total)
     return (
       <EmptyState
@@ -63,7 +79,7 @@ export default function RestaurantResults({
     );
   return (
     <>
-      <ul className="restaurant-results">
+      <ul ref={list} className="restaurant-results">
         {rows.map((row) => (
           <RestaurantListItem
             reviewed={ownReviews?.has(row.id) ?? false}

@@ -45,7 +45,11 @@ export default function RestaurantListItem({
 }) {
   const menu = [row.category, row.main_menu].filter(Boolean).join(' · ');
   return (
-    <li className="restaurant-list-item" data-today-lunch={todayLunch || undefined}>
+    <li
+      className="restaurant-list-item"
+      data-restaurant-id={row.id}
+      data-today-lunch={todayLunch || undefined}
+    >
       <div className="restaurant-select-content" data-selected={selected || undefined}>
         <button
           type="button"

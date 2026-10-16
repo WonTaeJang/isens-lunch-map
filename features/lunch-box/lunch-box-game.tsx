@@ -52,6 +52,7 @@ export default function LunchBoxGame({
   const [phase, setPhase] = useState<'shuffle' | 'choose' | 'opening' | 'result'>('shuffle');
   const [closing, setClosing] = useState(false);
   const locked = useRef(false);
+  const skipPress = useRef<'shuffle' | 'opening' | null>(null);
   const [pressed, setPressed] = useState<number | null>(null);
   const press = useRef<{ index: number; pointerId: number } | null>(null);
   function cancelPress() {
@@ -162,12 +163,14 @@ export default function LunchBoxGame({
 
   function select(index: number) {
     if (locked.current || phase !== 'choose') return;
+    skipPress.current = null;
     cancelPress();
     locked.current = true;
     setSelected(index);
     setPhase(window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'result' : 'opening');
   }
   function again() {
+    skipPress.current = null;
     setBoxes(createBoxes(candidates, winner?.restaurant.id));
     cancelPress();
     setSelected(null);
@@ -285,8 +288,22 @@ export default function LunchBoxGame({
               type="button"
               className={styles.shuffleSkip}
               aria-label="연출 건너뛰기"
+              onPointerDown={(event) => {
+                if (event.isPrimary && event.button === 0) skipPress.current = phase;
+              }}
+              onPointerCancel={() => {
+                skipPress.current = null;
+              }}
+              onPointerLeave={() => {
+                skipPress.current = null;
+              }}
               onClick={(event) => {
                 event.stopPropagation();
+                // Mobile can deliver the box's delayed click to this newly mounted overlay.
+                // Only a new press on the skip control (or keyboard/AT activation) may skip.
+                const deliberate = event.detail === 0 || skipPress.current === phase;
+                skipPress.current = null;
+                if (!deliberate) return;
                 cancelPress();
                 setPhase(phase === 'opening' ? 'result' : 'choose');
               }}

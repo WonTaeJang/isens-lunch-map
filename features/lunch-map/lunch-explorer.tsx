@@ -1,8 +1,10 @@
 'use client';
 
-import { DiceIcon } from '@/components/ui/icons';
+import { SlotIcon, GiftBoxIcon } from '@/components/ui/icons';
+import dynamic from 'next/dynamic';
+import type { BoxHistoryEntry } from '@/features/lunch-box/model';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReviewCounts } from '@/lib/reviews/model';
 import useOwnReviews from '@/features/reviews/use-own-reviews';
 import ReviewPanel from '@/features/reviews/review-panel';
@@ -19,6 +21,8 @@ import { toggleStoredFavorite } from '@/features/favorites/favorites-store';
 import { DEFAULT_FILTERS, filterRestaurants } from './filter-restaurants';
 import type { MapRestaurant } from '@/lib/restaurant-types';
 import { LUNCH_MAP_ANCHOR } from '@/lib/map-link';
+
+const LunchBoxGame = dynamic(() => import('@/features/lunch-box/lunch-box-game'), { ssr: false });
 
 export default function LunchExplorer({
   restaurants: allRestaurants,
@@ -66,7 +70,11 @@ export default function LunchExplorer({
     linkedId ? { id: linkedId } : null,
   );
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [randomOpen, setRandomOpen] = useState(false);
+  const [boxHistory, setBoxHistory] = useState<BoxHistoryEntry[]>([]);
+  const recordBox = useCallback((entry: BoxHistoryEntry) => {
+    setBoxHistory((current) => [entry, ...current]);
+  }, []);
+  const [activeGame, setActiveGame] = useState<'slot' | 'box' | null>(null);
   const favorites = useFavorites();
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
   const rows = useMemo(
@@ -125,10 +133,23 @@ export default function LunchExplorer({
               className={styles.randomPick}
               type="button"
               disabled={!restaurants.length}
-              onClick={() => setRandomOpen(true)}
+              aria-label="슬롯 뽑기 게임 열기"
+              title="슬롯 뽑기"
+              aria-haspopup="dialog"
+              onClick={() => setActiveGame('slot')}
             >
-              <DiceIcon size={16} />
-              랜덤 추천
+              <SlotIcon size={24} />
+            </button>
+            <button
+              className={styles.randomPick}
+              type="button"
+              disabled={!restaurants.length}
+              aria-label="점심 상자 게임 열기"
+              title="점심 상자"
+              aria-haspopup="dialog"
+              onClick={() => setActiveGame('box')}
+            >
+              <GiftBoxIcon size={20} />
             </button>
           </div>
         </div>
@@ -169,7 +190,7 @@ export default function LunchExplorer({
         onFavorite={toggleStoredFavorite}
         onReviews={openReviews}
         randomDisabled={!restaurants.length}
-        onRandom={() => setRandomOpen(true)}
+        onRandom={() => setActiveGame(Math.random() < 0.5 ? 'slot' : 'box')}
         onShowTodayLunch={showTodayLunch}
       />
       {reviewRestaurant && !hidden?.has(reviewRestaurant.id) && (
@@ -179,16 +200,31 @@ export default function LunchExplorer({
           onClose={() => setReviewRestaurant(null)}
         />
       )}
-      {randomOpen && (
+      {activeGame === 'box' && (
+        <LunchBoxGame
+          history={boxHistory}
+          onRecord={recordBox}
+          restaurants={restaurants}
+          reviewCounts={reviewCounts}
+          favorites={favorites}
+          initialFilters={filters}
+          onClose={() => setActiveGame(null)}
+          onSelect={(id) => {
+            setActiveGame(null);
+            showRestaurant(id);
+          }}
+        />
+      )}
+      {activeGame === 'slot' && (
         <RandomRestaurant
           restaurants={restaurants}
           reviewedIds={reviewedIds}
           reviewCounts={reviewCounts}
           initialFilters={filters}
           favorites={favorites}
-          onClose={() => setRandomOpen(false)}
+          onClose={() => setActiveGame(null)}
           onSelect={(id) => {
-            setRandomOpen(false);
+            setActiveGame(null);
             showRestaurant(id);
           }}
         />

@@ -232,3 +232,22 @@ export function DiceIcon(props: IconProps) {
     </Icon>
   );
 }
+
+export function SlotIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="3" y="5" width="16" height="15" rx="2" />
+      <path d="M6 9h10v7H6zM9.3 9v7m3.4-7v7M8 3h6M19 15h2V8" />
+      <circle cx="21" cy="6" r="1.5" />
+    </Icon>
+  );
+}
+export function GiftBoxIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="3" y="8" width="18" height="4" rx="1" />
+      <path d="M5 12v9h14v-9M12 8v13" />
+      <path d="M12 8H8a2.5 2.5 0 1 1 2.4-3.2L12 8Zm0 0h4a2.5 2.5 0 1 0-2.4-3.2L12 8Z" />
+    </Icon>
+  );
+}

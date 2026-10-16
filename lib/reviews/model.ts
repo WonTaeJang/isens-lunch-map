@@ -83,9 +83,20 @@ export type ReviewCounts = Record<string, { recommended: number; not_recommended
 /** The viewer's own review per restaurant: true 추천, false 비추천, null neither. */
 export type OwnRecommendations = Record<string, boolean | null>;
 
+// Keep fallback identity stable within a server snapshot. Vote consumers use a new counts
+// object to detect server refreshes; ordinary list renders must not trigger another lookup.
+const emptyCountsBySnapshot = new WeakMap<ReviewCounts, ReviewCounts[string]>();
+
 // A failed query stays unknown; a missing restaurant has no reviews.
 export function getReviewCounts(counts: ReviewCounts | null, restaurantId: string) {
-  return counts === null ? null : (counts[restaurantId] ?? { recommended: 0, not_recommended: 0 });
+  if (counts === null) return null;
+  if (counts[restaurantId]) return counts[restaurantId];
+  let empty = emptyCountsBySnapshot.get(counts);
+  if (!empty) {
+    empty = Object.freeze({ recommended: 0, not_recommended: 0 });
+    emptyCountsBySnapshot.set(counts, empty);
+  }
+  return empty;
 }
 
 export type UserReview = Review & {

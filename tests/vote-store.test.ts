@@ -41,3 +41,28 @@ test('an older lookup cannot replace a completed write and rejected writes retai
   assert.equal(store.get('a:u').vote?.recommended, 2);
   assert.equal(store.get('a:u').pending, undefined);
 });
+
+test('empty review counts avoid repeat lookups on rerender but refresh with server data', async () => {
+  const { getReviewCounts } = await import('../lib/reviews/model');
+  let calls = 0;
+  const store = createVoteStore((async () => {
+    calls++;
+    return vote;
+  }) as never);
+  const snapshot = {};
+  let previous: unknown;
+  // Match the vote hook's counts dependency after a restaurant has been loaded.
+  async function render(counts: object) {
+    const next = getReviewCounts(counts as never, 'a');
+    if (next !== previous) await store.load('a:u', 'a', 'u', true);
+    previous = next;
+  }
+  await render(snapshot);
+  await render(snapshot);
+  await render(snapshot);
+  assert.equal(calls, 1);
+  await render({});
+  assert.equal(calls, 2);
+  await render({ a: { recommended: 2, not_recommended: 1 } });
+  assert.equal(calls, 3);
+});

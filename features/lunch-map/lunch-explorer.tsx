@@ -2,8 +2,9 @@
 
 import { SlotIcon, GiftBoxIcon } from '@/components/ui/icons';
 import dynamic from 'next/dynamic';
+import type { BoxHistoryEntry } from '@/features/lunch-box/model';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReviewCounts } from '@/lib/reviews/model';
 import useOwnReviews from '@/features/reviews/use-own-reviews';
 import ReviewPanel from '@/features/reviews/review-panel';
@@ -69,6 +70,10 @@ export default function LunchExplorer({
     linkedId ? { id: linkedId } : null,
   );
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [boxHistory, setBoxHistory] = useState<BoxHistoryEntry[]>([]);
+  const recordBox = useCallback((entry: BoxHistoryEntry) => {
+    setBoxHistory((current) => [entry, ...current]);
+  }, []);
   const [activeGame, setActiveGame] = useState<'slot' | 'box' | null>(null);
   const favorites = useFavorites();
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
@@ -197,6 +202,8 @@ export default function LunchExplorer({
       )}
       {activeGame === 'box' && (
         <LunchBoxGame
+          history={boxHistory}
+          onRecord={recordBox}
           restaurants={restaurants}
           reviewCounts={reviewCounts}
           favorites={favorites}

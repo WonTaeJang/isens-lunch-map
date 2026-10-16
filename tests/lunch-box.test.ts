@@ -1,6 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createBoxes, getBoxCandidates, pickBoxColor } from '../features/lunch-box/model';
+import {
+  boxPosition,
+  countBoxColors,
+  createBoxes,
+  getBoxCandidates,
+  pickBoxColor,
+  type BoxHistoryEntry,
+} from '../features/lunch-box/model';
 import { DEFAULT_FILTERS } from '../features/lunch-map/filter-restaurants';
 import type { MapRestaurant } from '../lib/restaurant-types';
 
@@ -78,4 +85,29 @@ test('effect distribution is blue 60%, purple 30%, gold 9%, rainbow 1%', () => {
   const counts = { blue: 0, purple: 0, gold: 0, rainbow: 0 };
   for (let i = 0; i < 10000; i++) counts[pickBoxColor((i + 0.5) / 10000)]++;
   assert.deepEqual(counts, { blue: 6000, purple: 3000, gold: 900, rainbow: 100 });
+});
+
+test('history counts every draw even when the same restaurant repeats', () => {
+  assert.deepEqual(countBoxColors([]), { blue: 0, purple: 0, gold: 0, rainbow: 0 });
+  const entries: BoxHistoryEntry[] = ['blue', 'gold', 'blue', 'rainbow'].map((color, index) => ({
+    id: String(index),
+    restaurant: rows[0],
+    color: color as BoxHistoryEntry['color'],
+    position: '가운데',
+    counts: null,
+  }));
+  assert.deepEqual(countBoxColors(entries), { blue: 2, purple: 0, gold: 1, rainbow: 1 });
+  assert.equal(entries.length, 4);
+});
+
+test('history position follows the displayed layout for one, two and three boxes', () => {
+  assert.equal(boxPosition(0, 1), '가운데');
+  assert.deepEqual(
+    [0, 1].map((i) => boxPosition(i, 2)),
+    ['왼쪽', '오른쪽'],
+  );
+  assert.deepEqual(
+    [0, 1, 2].map((i) => boxPosition(i, 3)),
+    ['왼쪽', '가운데', '오른쪽'],
+  );
 });

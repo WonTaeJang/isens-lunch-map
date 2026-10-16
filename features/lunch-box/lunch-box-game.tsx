@@ -12,17 +12,28 @@ import { CloseIcon } from '@/components/ui/icons';
 import useModalDialog from '@/components/ui/use-modal-dialog';
 import { hasCoordinates } from '@/lib/coordinates';
 import type { MapRestaurant } from '@/lib/restaurant-types';
-import { createBoxes, getBoxCandidates, type LunchBox } from './model';
+import {
+  boxPosition,
+  createBoxes,
+  getBoxCandidates,
+  type BoxHistoryEntry,
+  type LunchBox,
+} from './model';
 import styles from './lunch-box.module.css';
+import BoxHistory from './box-history';
 
 export default function LunchBoxGame({
   onClose,
   initialFilters,
+  history,
+  onRecord,
   restaurants,
   reviewCounts,
   favorites,
   onSelect,
 }: {
+  history: BoxHistoryEntry[];
+  onRecord: (entry: BoxHistoryEntry) => void;
   onClose: () => void;
   initialFilters: RestaurantFilters;
   restaurants: MapRestaurant[];
@@ -49,6 +60,7 @@ export default function LunchBoxGame({
   }
   const boxRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const resultRef = useRef<HTMLHeadingElement>(null);
+  const recorded = useRef<LunchBox | null>(null);
   const winner = selected === null ? null : boxes[selected];
 
   const candidates = getBoxCandidates(restaurants, filters, favorites, categories);
@@ -125,8 +137,16 @@ export default function LunchBoxGame({
     return () => window.clearTimeout(timer);
   }, [phase]);
   useEffect(() => {
-    if (phase === 'result') resultRef.current?.focus();
-  }, [phase]);
+    if (phase !== 'result' || !winner || selected === null || recorded.current === winner) return;
+    recorded.current = winner;
+    resultRef.current?.focus();
+    onRecord({
+      ...winner,
+      id: crypto.randomUUID(),
+      position: boxPosition(selected, boxes.length),
+      counts: getReviewCounts(reviewCounts, winner.restaurant.id),
+    });
+  }, [phase, winner, selected, boxes.length, reviewCounts, onRecord]);
   useEffect(() => {
     if (!closing) return;
     const timer = window.setTimeout(onClose, 420);
@@ -429,6 +449,7 @@ export default function LunchBoxGame({
             </>
           )}
         </div>
+        <BoxHistory entries={history} onSelect={onSelect} />
         <footer className={styles.footer}>
           <p>
             <span>블루 60% · 퍼플 30% · 골드 9% · 무지개 1%</span>

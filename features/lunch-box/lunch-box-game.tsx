@@ -307,9 +307,7 @@ export default function LunchBoxGame({
                 cancelPress();
                 setPhase(phase === 'opening' ? 'result' : 'choose');
               }}
-            >
-              <span>연출 건너뛰기 →</span>
-            </button>
+            />
           )}
           {!boxes.length ? (
             <div className={styles.message} role="status">

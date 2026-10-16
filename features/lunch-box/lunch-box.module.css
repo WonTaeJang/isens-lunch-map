@@ -830,14 +830,6 @@
   touch-action: manipulation;
   color: var(--box-text-muted);
 }
-.shuffleSkip span {
-  position: absolute;
-  bottom: 12px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: var(--text-sm);
-}
 .shuffleSkip:focus-visible {
   outline: var(--focus-ring);
   outline-offset: -12px;

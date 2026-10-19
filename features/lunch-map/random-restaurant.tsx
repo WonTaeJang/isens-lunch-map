@@ -1,5 +1,6 @@
 'use client';
 
+import { prefersReducedMotion } from '@/lib/motion';
 import { CloseIcon } from '@/components/ui/icons';
 
 import { useId, useRef, useState } from 'react';
@@ -59,7 +60,7 @@ export default function RandomRestaurant({
     if (drawing.current) return;
     const chosen = pickRestaurant(candidates, result?.id);
     if (!chosen) return;
-    if (candidates.length === 1 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (candidates.length === 1 || prefersReducedMotion()) {
       setReel(null);
       setResult(chosen);
       return;

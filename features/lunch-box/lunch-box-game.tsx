@@ -1,5 +1,6 @@
 'use client';
 
+import { prefersReducedMotion } from '@/lib/motion';
 import Button from '@/components/ui/button';
 import FilterChip from '@/components/ui/filter-chip';
 import {
@@ -88,7 +89,7 @@ export default function LunchBoxGame({
   useEffect(() => {
     if (phase !== 'shuffle') return;
     let cancelled = false;
-    if (boxes.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (boxes.length < 2 || prefersReducedMotion()) {
       const timer = window.setTimeout(() => setPhase('choose'), 0);
       return () => window.clearTimeout(timer);
     }
@@ -165,7 +166,7 @@ export default function LunchBoxGame({
     cancelPress();
     locked.current = true;
     setSelected(index);
-    setPhase(window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'result' : 'opening');
+    setPhase(prefersReducedMotion() ? 'result' : 'opening');
   }
   function again() {
     skipPress.current = null;

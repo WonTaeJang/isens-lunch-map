@@ -1,5 +1,6 @@
 import 'server-only';
 import type { Pool, PoolClient } from 'pg';
+import { withTransaction } from './db';
 import { encodeReviewCursor, type ReviewCursor } from './review-cursor';
 import {
   decodeTags,
@@ -153,9 +154,7 @@ export async function mutateReview(db: Pool, method: string, body: Record<string
   const name = typeof body.user_name === 'string' ? body.user_name.trim() : '';
   if (method === 'POST' && (!name || Array.from(name).length > 60))
     throw new ReviewError('닉네임 정보를 확인해 주세요.');
-  const client = await db.connect();
-  try {
-    await client.query('begin');
+  return withTransaction(db, async (client) => {
     let target = restaurant;
     if (method === 'POST') {
       // Serialize all submissions by the same author so the duplicate and daily-limit checks
@@ -226,14 +225,8 @@ export async function mutateReview(db: Pool, method: string, body: Record<string
       target = result.rows[0].restaurant_id;
     }
     const vote = await getReviewVote(client, target!, user);
-    await client.query('commit');
     return { restaurant_id: target!, ...vote };
-  } catch (error) {
-    await client.query('rollback');
-    throw error;
-  } finally {
-    client.release();
-  }
+  });
 }
 
 // Aggregate once for the list instead of requesting reviews for every restaurant.

@@ -1,5 +1,6 @@
 'use client';
 
+import { prefersReducedMotion } from '@/lib/motion';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import styles from './ranking.module.css';
 
@@ -93,7 +94,7 @@ export default function RankingTabs({
    */
   function goTo(element: HTMLElement, step: number, index: number) {
     const far = Math.abs(index - activeRef.current) > 1;
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduceMotion = prefersReducedMotion();
     if (travel.current) window.clearTimeout(travel.current.timer);
     // A swipe that interrupts the slide takes over after a moment.
     travel.current = { index, timer: window.setTimeout(() => (travel.current = null), 800) };

@@ -2,7 +2,7 @@ import 'server-only';
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import type { PoolClient } from 'pg';
 import { RequestError } from '@/lib/request-error';
-import { getDb } from './db';
+import { getDb, withTransaction } from './db';
 import { errorResponse, isSameOrigin } from './api-route';
 import { SELECT_ALL_RESTAURANTS_SQL, type Restaurant } from './restaurants';
 
@@ -49,21 +49,12 @@ export async function writeLocked<T>(
   staleMessage: string,
   write: (client: PoolClient, rows: Restaurant[]) => Promise<T>,
 ): Promise<T> {
-  const client = await getDb().connect();
-  try {
-    await client.query('BEGIN');
+  return withTransaction(getDb(), async (client) => {
     await client.query('LOCK TABLE public.restaurants IN EXCLUSIVE MODE');
     const { rows } = await client.query<Restaurant>(SELECT_ALL_RESTAURANTS_SQL);
     if (revision(rows) !== expected) throw new AdminError(staleMessage);
-    const result = await write(client, rows);
-    await client.query('COMMIT');
-    return result;
-  } catch (error) {
-    await client.query('ROLLBACK');
-    throw error;
-  } finally {
-    client.release();
-  }
+    return write(client, rows);
+  });
 }
 
 /** A failed admin request: see `errorResponse` (AdminError keeps its message and status). */

@@ -95,7 +95,7 @@ test('new reviews lock per author, preserve false, store text JSON and start wit
       (call) => call.sql.includes('pg_advisory_xact_lock') && call.values[0] === `review:${user}`,
     ),
   );
-  assert.equal(mock.calls.at(-1)?.sql, 'commit');
+  assert.equal(mock.calls.at(-1)?.sql, 'COMMIT');
   assert.equal(mock.released(), true);
 });
 test('daily limit counts every review created today, including deleted ones', async () => {
@@ -122,7 +122,7 @@ test('daily limit counts every review created today, including deleted ones', as
       mock.calls.some((call) => call.sql.startsWith('insert')),
       allowed,
     );
-    assert.equal(mock.calls.at(-1)?.sql, allowed ? 'commit' : 'rollback');
+    assert.equal(mock.calls.at(-1)?.sql, allowed ? 'COMMIT' : 'ROLLBACK');
     assert.equal(mock.released(), true);
   }
 });
@@ -149,9 +149,9 @@ test('duplicates, inactive restaurants and failed inserts roll back without comm
       };
     });
     await assert.rejects(mutateReview(mock.db, 'POST', input));
-    assert.equal(mock.calls.at(-1)?.sql, 'rollback');
+    assert.equal(mock.calls.at(-1)?.sql, 'ROLLBACK');
     assert.equal(
-      mock.calls.some((call) => call.sql === 'commit'),
+      mock.calls.some((call) => call.sql === 'COMMIT'),
       false,
     );
     assert.equal(mock.released(), true);
@@ -163,7 +163,7 @@ test('edit and delete scope writes to supplied owner and timestamp; stale or wro
     const saved = await mutateReview(mock.db, method, { ...input, id, version });
     assert.equal(saved.restaurant_id, restaurant);
     assert.equal(saved.not_recommended, 1);
-    assert.equal(mock.calls.at(-1)?.sql, 'commit');
+    assert.equal(mock.calls.at(-1)?.sql, 'COMMIT');
     mock.calls.shift();
     assert.match(mock.calls[0].sql, /id=\$1 and user_id=\$2/);
     assert.match(

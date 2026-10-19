@@ -24,3 +24,8 @@ export async function requestJson<T>(
   if (body === null) throw new ApiError('서버 응답을 읽지 못했어요.', response.status);
   return body as T;
 }
+
+/** Request options sending `body` as JSON with `method`. */
+export function jsonBody(method: string, body: unknown): RequestInit {
+  return { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+}

@@ -6,7 +6,7 @@ import type {
   ImportSummary,
   RestaurantRow,
 } from '@/lib/restaurant-types';
-import { requestJson } from '@/lib/request-json';
+import { jsonBody, requestJson } from '@/lib/request-json';
 
 export type RestaurantUpdate =
   | { action?: 'active'; id: string; active: boolean; previous: boolean }
@@ -38,10 +38,7 @@ function send<T>(
   body: FormData | object,
   url = RESTAURANTS_URL,
 ) {
-  const init: RequestInit =
-    body instanceof FormData
-      ? { method, body }
-      : { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+  const init: RequestInit = body instanceof FormData ? { method, body } : jsonBody(method, body);
   return adminRequest<T>(password, url, SAVE_FAILED, init);
 }
 

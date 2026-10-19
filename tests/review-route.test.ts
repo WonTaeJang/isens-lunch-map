@@ -108,11 +108,11 @@ test('writes return the saved vote only after commit; limit and snapshot failure
             not_recommended: 0,
             mine: method === 'DELETE' ? null : mine,
           });
-          assert.equal(calls.at(-1), 'commit');
+          assert.equal(calls.at(-1), 'COMMIT');
         } else {
           assert.equal(response.status, scenario === 'limit' ? 429 : 500);
-          assert.equal(calls.at(-1), 'rollback');
-          assert.ok(!calls.includes('commit'));
+          assert.equal(calls.at(-1), 'ROLLBACK');
+          assert.ok(!calls.includes('COMMIT'));
         }
       }
     }

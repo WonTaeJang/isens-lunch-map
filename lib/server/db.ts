@@ -1,5 +1,5 @@
 import 'server-only';
-import { Pool } from 'pg';
+import { Pool, type PoolClient } from 'pg';
 import { readFileSync } from 'node:fs';
 
 const globalForDb = globalThis as unknown as { lunchDb?: Pool };
@@ -23,4 +23,24 @@ export function getDb() {
   pool.on('error', () => console.error('Database idle connection failed'));
   globalForDb.lunchDb = pool;
   return pool;
+}
+
+/** Runs `work` in one transaction on its own connection: committed if it resolves, rolled back if
+ * it throws (the error is rethrown). */
+export async function withTransaction<T>(
+  db: Pick<Pool, 'connect'>,
+  work: (client: PoolClient) => Promise<T>,
+): Promise<T> {
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await work(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 }

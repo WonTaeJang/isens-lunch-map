@@ -1,5 +1,5 @@
 import type { ReviewLikeState, ReviewWriteResult } from '@/lib/reviews/model';
-import { requestJson } from '@/lib/request-json';
+import { jsonBody, requestJson } from '@/lib/request-json';
 
 export { ApiError } from '@/lib/request-json';
 
@@ -15,11 +15,7 @@ function sendJson<T>(
   body: object,
   request = reviewRequest,
 ) {
-  return request<T>(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+  return request<T>(url, jsonBody(method, body));
 }
 
 /** Creates, edits or deletes a review through /api/reviews. */

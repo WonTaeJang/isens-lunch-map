@@ -1,5 +1,6 @@
 'use client';
 
+import { addressLabel, categoryLabel } from '@/lib/restaurant-labels';
 import { CheckIcon, ChevronLeftIcon, DirectionsIcon } from '@/components/ui/icons';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import HideButton from '@/features/blacklist/hide-button';
@@ -73,7 +74,7 @@ export default function RestaurantMapCard({
           <h3>{restaurant.name}</h3>
         </div>
         <div className={styles.meta}>
-          {restaurant.category || '분류 정보 없음'}
+          {categoryLabel(restaurant.category)}
           <DistanceBadge distance={restaurant.distance} />
           <RecommendationVote
             restaurantId={restaurant.id}
@@ -82,7 +83,7 @@ export default function RestaurantMapCard({
           />
         </div>
         <div className={styles.details}>
-          <p>{restaurant.address || '주소 확인 필요'}</p>
+          <p>{addressLabel(restaurant.address)}</p>
           <p className={styles.menu}>대표메뉴 · {restaurant.main_menu || '정보 없음'}</p>
         </div>
         <div className={styles.actions}>

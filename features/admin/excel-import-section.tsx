@@ -1,5 +1,6 @@
 'use client';
 
+import { addressLabel } from '@/lib/restaurant-labels';
 import Button from '@/components/ui/button';
 import styles from './admin.module.css';
 import type { ImportPreview } from '@/lib/admin/preview-types';
@@ -91,7 +92,7 @@ export default function ExcelImportSection({
                     <tr key={row.key}>
                       <td>{row.row ?? '—'}</td>
                       <td>{row.name}</td>
-                      <td>{row.address ?? '주소 확인 필요'}</td>
+                      <td>{addressLabel(row.address)}</td>
                       <td>{row.active ? '활성' : '비활성'}</td>
                       <td>{row.changes.join(' · ')}</td>
                     </tr>

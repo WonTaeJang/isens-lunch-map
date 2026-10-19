@@ -1,5 +1,6 @@
 'use client';
 
+import { menuLine } from '@/lib/restaurant-labels';
 import { prefersReducedMotion } from '@/lib/motion';
 import { CloseIcon } from '@/components/ui/icons';
 
@@ -130,10 +131,7 @@ export default function RandomRestaurant({
                 </div>
                 <div className={styles.resultMeta}>
                   <DistanceBadge distance={result.distance} />
-                  <span className={styles.resultMenu}>
-                    {[result.category, result.main_menu].filter(Boolean).join(' · ') ||
-                      '분류 정보 없음'}
-                  </span>
+                  <span className={styles.resultMenu}>{menuLine(result)}</span>
                   <div className={styles.resultActions}>
                     <FavoriteButton
                       restaurantId={result.id}

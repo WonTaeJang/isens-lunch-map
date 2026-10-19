@@ -1,5 +1,6 @@
 'use client';
 
+import { addressLabel } from '@/lib/restaurant-labels';
 import type { ReactNode } from 'react';
 import Tabs from '@/components/ui/tabs';
 import EmptyState from '@/components/ui/empty-state';
@@ -88,7 +89,7 @@ export default function RestaurantTable({
                     <br />
                     {row.main_menu}
                   </td>
-                  <td>{row.address || '주소 확인 필요'}</td>
+                  <td>{addressLabel(row.address)}</td>
                   <td>{row.distance === null ? '—' : `${row.distance}m`}</td>
                   <td>
                     <Toggle

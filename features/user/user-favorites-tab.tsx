@@ -1,5 +1,6 @@
 'use client';
 
+import { addressLabel } from '@/lib/restaurant-labels';
 import Link from 'next/link';
 import { useState } from 'react';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
@@ -64,9 +65,7 @@ export default function UserFavoritesTab({
             <p className={`description ${styles.userDescription}`}>
               {row.category} · {row.main_menu}
             </p>
-            <p className={`description ${styles.userDescription}`}>
-              {row.address || '주소 확인 필요'}
-            </p>
+            <p className={`description ${styles.userDescription}`}>{addressLabel(row.address)}</p>
             {!row.active && <p className="subtle">현재 비활성 식당이에요.</p>}
           </li>
         ))}

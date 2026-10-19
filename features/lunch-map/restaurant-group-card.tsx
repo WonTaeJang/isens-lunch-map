@@ -1,5 +1,6 @@
 'use client';
 
+import { addressLabel, categoryLabel } from '@/lib/restaurant-labels';
 import { BookmarkIcon, BowlChopsticksIcon } from '@/components/ui/icons';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
 import type { MapRestaurant } from '@/lib/restaurant-types';
@@ -46,7 +47,7 @@ export default function RestaurantGroupCard({
       </div>
       <div className={cardStyles.meta}>
         <DistanceBadge distance={rows[0].distance} />
-        <span className={styles.address}>{rows[0].address || '주소 확인 필요'}</span>
+        <span className={styles.address}>{addressLabel(rows[0].address)}</span>
       </div>
       <ul className={styles.list}>
         {favoritesFirst(rows, favorites).map((row) => {
@@ -71,7 +72,7 @@ export default function RestaurantGroupCard({
                   </Mark>
                 )}
                 {reviewedIds?.has(row.id) && <ReviewedBadge />}
-                <span className={styles.category}>{row.category || '분류 정보 없음'}</span>
+                <span className={styles.category}>{categoryLabel(row.category)}</span>
               </button>
             </li>
           );

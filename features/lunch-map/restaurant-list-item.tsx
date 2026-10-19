@@ -1,4 +1,5 @@
 'use client';
+import { addressLabel, menuLine } from '@/lib/restaurant-labels';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import TodayLunchButton from '@/features/lunch-visits/today-lunch-button';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
@@ -44,7 +45,6 @@ export default function RestaurantListItem({
   onReviews: () => void;
   onTodayLunch: () => Promise<{ chosen: boolean }>;
 }) {
-  const menu = [row.category, row.main_menu].filter(Boolean).join(' · ');
   return (
     <li
       className={styles.item}
@@ -66,7 +66,7 @@ export default function RestaurantListItem({
         </div>
         <div className={styles.meta}>
           <DistanceBadge distance={row.distance} />
-          <span className={styles.menu}>{menu || '분류 정보 없음'}</span>
+          <span className={styles.menu}>{menuLine(row)}</span>
           <RecommendationVote
             restaurantId={row.id}
             counts={counts}
@@ -75,7 +75,7 @@ export default function RestaurantListItem({
             className={styles.vote}
           />
         </div>
-        <p className={styles.address}>{row.address || '주소 확인 필요'}</p>
+        <p className={styles.address}>{addressLabel(row.address)}</p>
         {!hasCoordinates(row) && (
           <span className={`subtle ${styles.noCoords}`}>
             위치 정보 없음 · 지도에 표시되지 않아요

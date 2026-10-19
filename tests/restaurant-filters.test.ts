@@ -50,3 +50,13 @@ test('search, distance and favorite conditions combine and reset returns all row
     2,
   );
 });
+
+test('empty restaurant fields show the shared labels', async () => {
+  const { addressLabel, categoryLabel, menuLine } = await import('../lib/restaurant-labels');
+  assert.equal(categoryLabel(null), '분류 정보 없음');
+  assert.equal(categoryLabel('한식'), '한식');
+  assert.equal(addressLabel(''), '주소 확인 필요');
+  assert.equal(menuLine({ category: '한식', main_menu: '국수' }), '한식 · 국수');
+  assert.equal(menuLine({ category: null, main_menu: '국수' }), '국수');
+  assert.equal(menuLine({ category: '', main_menu: null }), '분류 정보 없음');
+});

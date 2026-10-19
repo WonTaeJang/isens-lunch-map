@@ -1,5 +1,6 @@
 'use client';
 
+import { categoryLabel } from '@/lib/restaurant-labels';
 import { useEffect, useState } from 'react';
 import { EyeIcon, EyeOffIcon } from '@/components/ui/icons';
 import LoadingStatus from '@/components/ui/loading-status';
@@ -92,7 +93,7 @@ export default function BlacklistList({
               <div className={styles.name}>
                 <h2>{row.restaurant_name}</h2>
                 <p className="subtle">
-                  {row.restaurant_category || '분류 정보 없음'}
+                  {categoryLabel(row.restaurant_category)}
                   {!row.restaurant_active && ' · 현재 비활성 식당이에요'}
                 </p>
               </div>

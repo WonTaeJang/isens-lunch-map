@@ -1,5 +1,6 @@
 'use client';
 
+import { menuLine } from '@/lib/restaurant-labels';
 import { useId, useMemo, useState } from 'react';
 import ModalDialog from '@/components/ui/modal-dialog';
 import Button from '@/components/ui/button';
@@ -121,11 +122,7 @@ function HistoryDialog({
                 </div>
                 <h3>{entry.restaurant.name}</h3>
                 <div className={styles.metadata}>
-                  <p className={styles.menu}>
-                    {[entry.restaurant.category, entry.restaurant.main_menu]
-                      .filter(Boolean)
-                      .join(' · ') || '분류 정보 없음'}
-                  </p>
+                  <p className={styles.menu}>{menuLine(entry.restaurant)}</p>
                   <div className={styles.stats}>
                     <DistanceBadge distance={entry.restaurant.distance} />
                     <span className={styles.votes}>

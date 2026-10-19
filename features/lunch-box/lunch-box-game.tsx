@@ -1,5 +1,6 @@
 'use client';
 
+import { menuLine } from '@/lib/restaurant-labels';
 import { prefersReducedMotion } from '@/lib/motion';
 import Button from '@/components/ui/button';
 import FilterChip from '@/components/ui/filter-chip';
@@ -435,11 +436,7 @@ export default function LunchBoxGame({
                   <h3 ref={resultRef} tabIndex={-1}>
                     {winner.restaurant.name}
                   </h3>
-                  <p className={styles.menu}>
-                    {[winner.restaurant.category, winner.restaurant.main_menu]
-                      .filter(Boolean)
-                      .join(' · ') || '분류 정보 없음'}
-                  </p>
+                  <p className={styles.menu}>{menuLine(winner.restaurant)}</p>
                   <div className={styles.resultStats}>
                     <DistanceBadge distance={winner.restaurant.distance} />
                     <ReviewCountBadges

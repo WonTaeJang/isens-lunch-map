@@ -165,3 +165,23 @@ test('statistics client forwards authentication and abort signal and surfaces er
     globalThis.fetch = previous;
   }
 });
+
+test('game statistics read totals and the last 7 Korean days from game_play_daily', async () => {
+  const { getGameStatistics } = await import('../lib/server/admin-statistics');
+  let seen = '';
+  const games = {
+    totals: { slot: 3, lunch_box: 1 },
+    recentDays: [{ date: '2026-10-19', slot: 2, lunch_box: 1 }],
+  };
+  const result = await getGameStatistics({
+    query: async (sql: string) => {
+      seen = sql;
+      return { rows: [games] };
+    },
+  } as never);
+  assert.deepEqual(result, games);
+  assert.match(seen, /generate_series\(0, 6\)/);
+  assert.match(seen, /Asia\/Seoul/);
+  assert.match(seen, /left join public\.game_play_daily g on g\.play_date=days\.play_date/);
+  assert.match(seen, /filter \(where g\.game='slot'\), 0\)::int slot/);
+});

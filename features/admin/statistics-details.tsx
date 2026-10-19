@@ -6,10 +6,11 @@ import {
 } from '@/lib/ranking/constants';
 import type { AdminStatistics } from '@/lib/admin/statistics-types';
 import styles from './admin-statistics.module.css';
+import GameStatisticsSection from './game-statistics';
+import DayBarChart from './day-bar-chart';
 
 export default function StatisticsDetails({ data }: { data: AdminStatistics }) {
   const total = data.recentDays.reduce((sum, day) => sum + day.count, 0);
-  const max = Math.max(1, ...data.recentDays.map((day) => day.count));
   return (
     <>
       <div className={styles.section}>
@@ -18,20 +19,17 @@ export default function StatisticsDetails({ data }: { data: AdminStatistics }) {
           <strong>총 {total.toLocaleString()}개</strong>
         </div>
         <p className="subtle">한국 시간 · 오늘 포함 · 작성일 기준 · 삭제된 리뷰 제외</p>
-        <ol className={styles.days} aria-label="최근 7일 날짜별 리뷰 수">
-          {data.recentDays.map((day) => (
-            <li key={day.date} aria-label={`${day.date} 리뷰 ${day.count}개`}>
-              <strong aria-hidden="true">{day.count}</strong>
-              <div className={styles.dayTrack} aria-hidden="true">
-                <span style={{ height: `${(day.count / max) * 100}%` }} />
-              </div>
-              <time dateTime={day.date} aria-hidden="true">
-                {day.date.slice(5).replace('-', '/')}
-              </time>
-            </li>
-          ))}
-        </ol>
+        <DayBarChart
+          label="최근 7일 날짜별 리뷰 수"
+          days={data.recentDays.map((day) => ({
+            date: day.date,
+            label: `${day.date} 리뷰 ${day.count}개`,
+            summary: String(day.count),
+            bars: [{ value: day.count }],
+          }))}
+        />
       </div>
+      <GameStatisticsSection games={data.games} />
       <div className={styles.section}>
         <h3>리뷰 많은 식당 TOP 10</h3>
         <p className="subtle">전체 기간 · 비활성 식당 포함 · 같은 개수는 식당명 순</p>

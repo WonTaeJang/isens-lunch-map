@@ -7,13 +7,16 @@ import {
   RECOMMENDATION_SMOOTHING,
 } from '@/lib/ranking/constants';
 import type { Pool } from 'pg';
-import type { AdminStatistics } from '@/lib/admin/statistics-types';
+import { KOREAN_TODAY_SQL } from './db';
+import type { AdminStatistics, GameStatistics } from '@/lib/admin/statistics-types';
 import { REVIEW_TAGS } from '@/lib/reviews/constants';
 import { decodeTags } from '@/lib/reviews/model';
 
-type Summary = Omit<AdminStatistics, 'tags'> & { tagGroups: { tags: unknown; count: number }[] };
+type Summary = Omit<AdminStatistics, 'tags' | 'games'> & {
+  tagGroups: { tags: unknown; count: number }[];
+};
 
-export async function getAdminStatistics(db: Pool): Promise<AdminStatistics> {
+export async function getAdminStatistics(db: Pool): Promise<Omit<AdminStatistics, 'games'>> {
   const { rows } = await db.query<Summary>(
     `
     with days as (
@@ -68,4 +71,29 @@ export async function getAdminStatistics(db: Pool): Promise<AdminStatistics> {
       count: counts.get(value) ?? 0,
     })).sort((a, b) => b.count - a.count),
   };
+}
+
+/** Game plays: totals per game and the last 7 Korean days (today included, empty days as 0). */
+export async function getGameStatistics(db: Pick<Pool, 'query'>): Promise<GameStatistics> {
+  const { rows } = await db.query<GameStatistics>(`
+    with days as (
+      select ${KOREAN_TODAY_SQL} - offset_day as play_date
+      from generate_series(0, 6) offset_day
+    ), daily as (
+      select days.play_date,
+        coalesce(sum(g.plays) filter (where g.game='slot'), 0)::int slot,
+        coalesce(sum(g.plays) filter (where g.game='lunch_box'), 0)::int lunch_box
+      from days left join public.game_play_daily g on g.play_date=days.play_date
+      group by days.play_date
+    )
+    select
+      (select jsonb_build_object(
+          'slot', coalesce(sum(plays) filter (where game='slot'), 0)::int,
+          'lunch_box', coalesce(sum(plays) filter (where game='lunch_box'), 0)::int)
+        from public.game_play_daily) totals,
+      (select jsonb_agg(jsonb_build_object('date', to_char(play_date, 'YYYY-MM-DD'),
+          'slot', slot, 'lunch_box', lunch_box) order by play_date)
+        from daily) "recentDays"
+  `);
+  return rows[0];
 }

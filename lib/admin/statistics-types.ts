@@ -1,3 +1,5 @@
+import type { Game } from '@/lib/game-plays/model';
+
 export type AdminStatistics = {
   users: number;
   reviews: number;
@@ -29,4 +31,12 @@ export type AdminStatistics = {
     rank: number;
   }[];
   tags: { value: string; label: string; count: number }[];
+  /** Game plays (game_play_daily); null when they could not be read. */
+  games: GameStatistics | null;
+};
+
+/** Plays of the slot game and the lunch box, all time and per day for the last 7 Korean days. */
+export type GameStatistics = {
+  totals: Record<Game, number>;
+  recentDays: ({ date: string } & Record<Game, number>)[];
 };

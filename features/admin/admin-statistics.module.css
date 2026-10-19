@@ -118,3 +118,49 @@
 .scoreDetails strong {
   margin-left: 0;
 }
+/* Game plays: two bars per day, slot first, in the legend's colors. */
+.gameHeading {
+  margin-top: 24px;
+}
+.gameHeading h3 {
+  margin-bottom: 0;
+}
+.legend {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-subtle);
+  font-size: var(--text-sm);
+}
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend span {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+.gameTrack {
+  gap: 3px;
+  padding: 0 4px;
+}
+.gameTrack span {
+  width: auto;
+  flex: 1;
+}
+.slotBar,
+.gameTrack .slotBar {
+  background: var(--color-primary);
+}
+.boxBar,
+.gameTrack .boxBar {
+  background: #e0a43a; /* the lunch box's gold */
+}
+.gameCounts {
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}

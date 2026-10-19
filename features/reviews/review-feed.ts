@@ -1,3 +1,4 @@
+import { createListeners } from '@/lib/listeners';
 import { reviewRequest, writeReview, type ReviewWriteMethod } from './review-api';
 
 type Page = { reviews: { id: string }[]; hasMore: boolean; nextCursor: string | null };
@@ -11,10 +12,10 @@ export function createReviewFeed<P extends Page>(
   let active = false;
   let generation = 0;
   let read: AbortController | null = null;
-  const listeners = new Set<() => void>();
+  const listeners = createListeners();
   function publish(patch: Partial<typeof initial>) {
     snapshot = { ...snapshot, ...patch };
-    listeners.forEach((listener) => listener());
+    listeners.emit();
   }
   function invalidate() {
     generation++;
@@ -58,12 +59,7 @@ export function createReviewFeed<P extends Page>(
     }
   }
   return {
-    subscribe(listener: () => void) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
+    subscribe: listeners.subscribe,
     getSnapshot: () => snapshot,
     getServerSnapshot: () => initial,
     start() {

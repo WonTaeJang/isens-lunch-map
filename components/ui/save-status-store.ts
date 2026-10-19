@@ -1,18 +1,14 @@
+import { createListeners } from '@/lib/listeners';
 /** Tracks saves independently of the card that started them. */
 export function createSaveStatusStore() {
   let state: 'saving' | 'saved' | null = null;
   let pending = 0;
   let failed = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
-  const listeners = new Set<() => void>();
-  const emit = () => listeners.forEach((listener) => listener());
+  const listeners = createListeners();
+  const emit = listeners.emit;
   return {
-    subscribe(listener: () => void) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
+    subscribe: listeners.subscribe,
     getSnapshot: () => state,
     getServerSnapshot: () => null,
     begin() {

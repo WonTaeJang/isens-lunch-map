@@ -1,3 +1,4 @@
+import { createListeners } from '@/lib/listeners';
 import { isUuid } from '@/lib/uuid';
 import { userCookie } from '@/lib/user-cookie';
 
@@ -10,20 +11,15 @@ export function createLocalUserStore(read: () => Promise<LocalIdentity>) {
   let snapshot = initial;
   let generation = 0;
   let pending: Promise<void> | null = null;
-  const listeners = new Set<() => void>();
+  const listeners = createListeners();
   function publish(next: typeof initial) {
     snapshot = next;
-    listeners.forEach((listener) => listener());
+    listeners.emit();
   }
   return {
     getSnapshot: () => snapshot,
     getServerSnapshot: () => initial,
-    subscribe(listener: () => void) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
+    subscribe: listeners.subscribe,
     initialize(force = false) {
       if (!force && (pending || snapshot.ready)) return pending ?? Promise.resolve();
       const token = ++generation;

@@ -1,5 +1,6 @@
 'use client';
 
+import { createListeners } from '@/lib/listeners';
 import { useSyncExternalStore } from 'react';
 import { isTierId, tierRank, type PromotedTierId, type TierId } from '@/lib/grades/model';
 
@@ -68,23 +69,18 @@ function getSnapshot() {
 /** A rise to a higher tier, waiting to be celebrated (kept in memory until dismissed). */
 export type Promotion = { from: TierId; to: PromotedTierId };
 let promotion: Promotion | null = null;
-const promotionListeners = new Set<() => void>();
+const promotionListeners = createListeners();
 
 function setPromotion(next: Promotion | null) {
   promotion = next;
-  for (const listener of promotionListeners) listener();
+  promotionListeners.emit();
 }
 
 export function dismissPromotion() {
   setPromotion(null);
 }
 
-function subscribePromotion(onChange: () => void) {
-  promotionListeners.add(onChange);
-  return () => {
-    promotionListeners.delete(onChange);
-  };
-}
+const subscribePromotion = promotionListeners.subscribe;
 
 /** The promotion not yet celebrated, if any. */
 export function usePromotion() {

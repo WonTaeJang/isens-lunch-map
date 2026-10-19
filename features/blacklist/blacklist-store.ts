@@ -1,3 +1,4 @@
+import { createListeners } from '@/lib/listeners';
 import type { BlacklistedRestaurant } from '@/lib/blacklist/model';
 import { blacklistApi, type BlacklistApi } from './blacklist-api';
 
@@ -25,7 +26,7 @@ export function visibleBlacklist(
  */
 export function createBlacklistStore(api: BlacklistApi = blacklistApi) {
   let snapshot: Blacklist | null = null;
-  const listeners = new Set<() => void>();
+  const listeners = createListeners();
   const running = new Map<string, Promise<BlacklistedRestaurant[]>>();
   /** Every hidden row loaded on this page, so ones shown again keep their row until a reload. */
   let seen: { owner: string; rows: Map<string, BlacklistedRestaurant> } | null = null;
@@ -33,7 +34,7 @@ export function createBlacklistStore(api: BlacklistApi = blacklistApi) {
   const changedDuringLoad = new Map<string, Map<string, boolean>>();
   function publish(next: Blacklist) {
     snapshot = next;
-    listeners.forEach((listener) => listener());
+    listeners.emit();
   }
   function withId(owner: string, id: string, hidden: boolean) {
     changedDuringLoad.get(owner)?.set(id, hidden);
@@ -43,12 +44,7 @@ export function createBlacklistStore(api: BlacklistApi = blacklistApi) {
     publish({ owner, ids });
   }
   const store = {
-    subscribe(listener: () => void) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
+    subscribe: listeners.subscribe,
     getSnapshot: () => snapshot,
     getServerSnapshot: (): Blacklist | null => null,
     /**

@@ -1,3 +1,4 @@
+import { createListeners } from '@/lib/listeners';
 import type { OwnRecommendations } from '@/lib/reviews/model';
 import { reviewRequest } from './review-api';
 
@@ -14,7 +15,7 @@ export type OwnReviews = {
  */
 export function createOwnReviewsStore(request: typeof reviewRequest = reviewRequest) {
   let snapshot: OwnReviews | null = null;
-  const listeners = new Set<() => void>();
+  const listeners = createListeners();
   const running = new Map<string, Promise<void>>();
   let revision = 0;
   const changes = new Map<
@@ -35,7 +36,7 @@ export function createOwnReviewsStore(request: typeof reviewRequest = reviewRequ
         else choices.set(restaurantId, change.choice);
       });
       snapshot = { owner, ids: new Set(choices.keys()), choices };
-      listeners.forEach((listener) => listener());
+      listeners.emit();
     } catch {
       // Marks are optional; keep what was shown.
     } finally {
@@ -51,14 +52,9 @@ export function createOwnReviewsStore(request: typeof reviewRequest = reviewRequ
       if (choice === undefined) choices.delete(restaurantId);
       else choices.set(restaurantId, choice);
       snapshot = { owner, ids: new Set(choices.keys()), choices };
-      listeners.forEach((listener) => listener());
+      listeners.emit();
     },
-    subscribe(listener: () => void) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
+    subscribe: listeners.subscribe,
     getSnapshot: () => snapshot,
     getServerSnapshot: (): OwnReviews | null => null,
     load(owner: string) {

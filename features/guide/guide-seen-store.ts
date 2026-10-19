@@ -1,12 +1,13 @@
 'use client';
 
+import { createListeners } from '@/lib/listeners';
 import { useSyncExternalStore } from 'react';
 
 // 처음 방문 안내는 브라우저마다 한 번만 띄웁니다.
 const GUIDE_SEEN_KEY = 'guide_seen';
 
 export function createGuideSeenStore(storage: () => Pick<Storage, 'getItem' | 'setItem'>) {
-  const listeners = new Set<() => void>();
+  const listeners = createListeners();
   return {
     isSeen() {
       try {
@@ -21,14 +22,9 @@ export function createGuideSeenStore(storage: () => Pick<Storage, 'getItem' | 's
       } catch {
         /* Storage unavailable: isSeen() already treats this browser as seen. */
       }
-      listeners.forEach((listener) => listener());
+      listeners.emit();
     },
-    subscribe(listener: () => void) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
+    subscribe: listeners.subscribe,
   };
 }
 

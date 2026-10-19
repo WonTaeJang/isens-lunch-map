@@ -1,3 +1,4 @@
+import { createListeners } from '@/lib/listeners';
 import type { LunchVisit } from '@/lib/lunch-visits/model';
 import { lunchVisitApi } from './lunch-visit-api';
 
@@ -25,13 +26,13 @@ export function createTodayLunchStore(
 ) {
   let state = initial;
   let loading: { owner: string; controller: AbortController } | null = null;
-  const listeners = new Set<() => void>();
+  const listeners = createListeners();
   // One page-visibility listener for all consumers (title, map, list, random pick): a page left
   // open past midnight, or changed in another tab, reloads once when it comes back.
   let stopWatching: (() => void) | null = null;
   function publish(patch: Partial<TodayLunchState>) {
     state = { ...state, ...patch };
-    listeners.forEach((listener) => listener());
+    listeners.emit();
   }
   function load(owner: string) {
     loading?.controller.abort();
@@ -53,12 +54,12 @@ export function createTodayLunchStore(
     getSnapshot: () => state,
     getServerSnapshot: () => initial,
     subscribe(listener: () => void) {
-      listeners.add(listener);
+      const unsubscribe = listeners.subscribe(listener);
       stopWatching ??= watchVisibility(() => {
         if (state.owner) load(state.owner);
       });
       return () => {
-        listeners.delete(listener);
+        unsubscribe();
         if (listeners.size === 0) {
           stopWatching?.();
           stopWatching = null;

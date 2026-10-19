@@ -1,3 +1,4 @@
+import { createListeners } from '@/lib/listeners';
 export type SnackbarTone = 'default' | 'error';
 /** A button in the snackbar (e.g. 되돌리기); pressing it also hides the snackbar. */
 export type SnackAction = { label: string; onClick: () => void };
@@ -19,8 +20,8 @@ export function createSnackbarStore(timers: Timers = browserTimers) {
   let current: Snack | null = null;
   let sequence = 0;
   let timer: unknown = null;
-  const listeners = new Set<() => void>();
-  const emit = () => listeners.forEach((listener) => listener());
+  const listeners = createListeners();
+  const emit = listeners.emit;
   function hide(id?: number) {
     if (current === null || (id !== undefined && current.id !== id)) return;
     if (timer !== null) timers.clear(timer);
@@ -43,12 +44,7 @@ export function createSnackbarStore(timers: Timers = browserTimers) {
       return snack.id;
     },
     hide,
-    subscribe(listener: () => void) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
+    subscribe: listeners.subscribe,
     getSnapshot: () => current,
     getServerSnapshot: (): Snack | null => null,
   };

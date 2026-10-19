@@ -1,3 +1,4 @@
+import { createListeners } from '@/lib/listeners';
 import type { ReviewVote } from '@/lib/reviews/model';
 import { reviewRequest } from './review-api';
 
@@ -9,21 +10,16 @@ export function createVoteStore(request: typeof reviewRequest = reviewRequest) {
   const states = new Map<string, State>();
   const running = new Map<string, Promise<ReviewVote | null>>();
   const versions = new Map<string, number>();
-  const listeners = new Set<() => void>();
+  const listeners = createListeners();
   const get = (key: string) => states.get(key) ?? empty;
   const set = (key: string, patch: Partial<State>) => {
     states.set(key, { ...get(key), ...patch });
-    listeners.forEach((listener) => listener());
+    listeners.emit();
   };
   return {
     get,
     getServerSnapshot: () => empty,
-    subscribe(listener: () => void) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
+    subscribe: listeners.subscribe,
     load(key: string, restaurantId: string, userId: string, refresh = false) {
       const state = get(key);
       if (state.pending !== undefined || (!refresh && state.vote))

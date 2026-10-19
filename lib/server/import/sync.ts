@@ -6,7 +6,7 @@ import { adminSignature, AdminError, writeLocked } from '@/lib/server/admin';
 import { officeDistance, parseDistance } from '@/lib/distance';
 import { identity, type ImportRow } from './parser';
 import type { Restaurant } from '@/lib/server/restaurants';
-import type { ImportPreview } from '@/lib/restaurant-types';
+import type { ImportPreview } from '@/lib/admin/preview-types';
 
 export function previewToken(file: Buffer, rev: string) {
   return adminSignature(file, rev);

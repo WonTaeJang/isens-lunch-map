@@ -1,7 +1,7 @@
 import 'server-only';
 import { hasCoordinates } from '@/lib/coordinates';
 import { officeDistance, parseDistance } from '@/lib/distance';
-import type { DistanceChange, DistancePreview } from '@/lib/restaurant-types';
+import type { DistanceChange, DistancePreview } from '@/lib/admin/preview-types';
 import { revision, writeLocked } from './admin';
 import { AdminError } from './admin';
 import type { Restaurant } from './restaurants';

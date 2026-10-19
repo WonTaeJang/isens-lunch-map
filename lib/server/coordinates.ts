@@ -7,7 +7,7 @@ import type {
   CoordinateChange,
   CoordinateFailure,
   CoordinatePreview,
-} from '@/lib/restaurant-types';
+} from '@/lib/admin/preview-types';
 import { adminSignature, revision, writeLocked } from './admin';
 import { STALE_REMEASURE } from './distances';
 import { AddressNotFoundError, geocode, geocodingDeadline } from './import/geocoder';

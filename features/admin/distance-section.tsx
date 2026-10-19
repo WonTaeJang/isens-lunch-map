@@ -4,7 +4,7 @@ import styles from './admin.module.css';
 import RemeasureSection from './remeasure-section';
 import { formatDistance } from '@/lib/distance';
 import { OFFICE_ADDRESS } from '@/lib/office';
-import type { DistanceChange, DistancePreview } from '@/lib/restaurant-types';
+import type { DistanceChange, DistancePreview } from '@/lib/admin/preview-types';
 
 type Props = {
   busy: boolean;

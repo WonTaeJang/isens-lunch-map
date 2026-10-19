@@ -1,11 +1,11 @@
 'use client';
 import { useRef, useState, useTransition } from 'react';
+import type { RestaurantRow as Row } from '@/lib/restaurant-types';
 import type {
-  RestaurantRow as Row,
   ImportPreview as Preview,
   DistancePreview,
   CoordinatePreview,
-} from '@/lib/restaurant-types';
+} from '@/lib/admin/preview-types';
 import {
   updateRestaurant,
   previewImport,

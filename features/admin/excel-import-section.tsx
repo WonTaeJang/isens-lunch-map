@@ -2,7 +2,7 @@
 
 import Button from '@/components/ui/button';
 import styles from './admin.module.css';
-import type { ImportPreview } from '@/lib/restaurant-types';
+import type { ImportPreview } from '@/lib/admin/preview-types';
 
 type Props = {
   busy: boolean;

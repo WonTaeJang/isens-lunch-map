@@ -1,11 +1,11 @@
 import type { AdminStatistics } from '@/lib/admin/statistics-types';
+import type { RestaurantRow } from '@/lib/restaurant-types';
 import type {
   CoordinatePreview,
   DistancePreview,
   ImportPreview,
   ImportSummary,
-  RestaurantRow,
-} from '@/lib/restaurant-types';
+} from '@/lib/admin/preview-types';
 import { jsonBody, requestJson } from '@/lib/request-json';
 
 export type RestaurantUpdate =

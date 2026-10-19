@@ -6,7 +6,7 @@ import type {
   CoordinateChange,
   CoordinateFailure,
   CoordinatePreview,
-} from '@/lib/restaurant-types';
+} from '@/lib/admin/preview-types';
 
 type Props = {
   busy: boolean;

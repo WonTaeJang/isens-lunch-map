@@ -2,6 +2,9 @@ import 'server-only';
 import { Pool, type PoolClient } from 'pg';
 import { readFileSync } from 'node:fs';
 
+/** Today's date in Korea (Asia/Seoul), as SQL: visits, game plays and statistics count by it. */
+export const KOREAN_TODAY_SQL = "(now() at time zone 'Asia/Seoul')::date";
+
 const globalForDb = globalThis as unknown as { lunchDb?: Pool };
 
 export function getDb() {

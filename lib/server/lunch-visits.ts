@@ -1,9 +1,10 @@
 import 'server-only';
+import { KOREAN_TODAY_SQL } from './db';
 import type { Pool } from 'pg';
 import { LunchVisitError, type LunchVisit } from '@/lib/lunch-visits/model';
 
 // The visit date is always decided by the server in Korean time, never by the browser.
-const TODAY = "(now() at time zone 'Asia/Seoul')::date";
+const TODAY = KOREAN_TODAY_SQL;
 const FIELDS = `v.id, v.restaurant_id, s.name restaurant_name, s.category restaurant_category,
   s.active restaurant_active,
   v.visit_date::text visit_date, v.created_at, v.updated_at`;

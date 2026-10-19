@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import ExcelJS from 'exceljs';
 import { parseWorkbook, identity } from '../lib/server/import/parser';
 import { plan, previewChanges, synchronize } from '../lib/server/import/sync';
-import { revision } from '../lib/server/admin-writes';
+import { revision } from '../lib/server/admin';
 import { mockDb as fakeDb } from './helpers/restaurants';
 import type { Restaurant } from '../lib/server/restaurants';
 

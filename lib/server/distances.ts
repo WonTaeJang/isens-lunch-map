@@ -2,8 +2,8 @@ import 'server-only';
 import { hasCoordinates } from '@/lib/coordinates';
 import { officeDistance, parseDistance } from '@/lib/distance';
 import type { DistanceChange, DistancePreview } from '@/lib/restaurant-types';
-import { revision, writeLocked } from './admin-writes';
-import { ImportError } from './import/parser';
+import { revision, writeLocked } from './admin';
+import { AdminError } from './admin';
 import type { Restaurant } from './restaurants';
 
 // 거리 재측정: 저장된 좌표로 아이센스 빌딩 기준 직선거리를 다시 계산합니다.
@@ -42,7 +42,7 @@ export function previewDistances(rows: Restaurant[]): DistancePreview {
 
 /** Saves the previewed distances. Fails when any restaurant changed after the preview. */
 export async function applyDistances(expected: unknown) {
-  if (typeof expected !== 'string') throw new ImportError('재측정 요청이 올바르지 않습니다.');
+  if (typeof expected !== 'string') throw new AdminError('재측정 요청이 올바르지 않습니다.');
   return writeLocked(expected, STALE_REMEASURE, async (client, rows) => {
     const changes = distanceChanges(rows);
     for (const change of changes)

@@ -84,9 +84,9 @@ test('admin API shows its own message when the server answers with a non-JSON pa
 });
 
 test('admin errors keep their own status; unexpected ones are logged as 500 without details', async () => {
-  const { adminErrorResponse } = await import('../lib/server/admin-writes');
-  const { ImportError } = await import('../lib/server/import/parser');
-  const own = adminErrorResponse(new ImportError('비밀번호가 올바르지 않습니다.', 401), '실패');
+  const { adminErrorResponse } = await import('../lib/server/admin');
+  const { AdminError } = await import('../lib/server/admin');
+  const own = adminErrorResponse(new AdminError('비밀번호가 올바르지 않습니다.', 401), '실패');
   assert.equal(own.status, 401);
   assert.deepEqual(await own.json(), { error: '비밀번호가 올바르지 않습니다.' });
 

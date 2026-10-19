@@ -1,16 +1,16 @@
 import { expireRestaurantCache, getRestaurantRows, getRestaurants } from '@/lib/server/restaurants';
 import { isUuid } from '@/lib/uuid';
 import { getDb } from '@/lib/server/db';
-import { ImportError, parseWorkbook } from '@/lib/server/import/parser';
+import { PRIVATE_NO_STORE } from '@/lib/server/api-route';
+import { parseWorkbook } from '@/lib/server/import/parser';
 import {
-  authorize,
   plan,
   previewChanges,
   previewToken,
   synchronize,
   correctAddress,
 } from '@/lib/server/import/sync';
-import { adminErrorResponse, revision } from '@/lib/server/admin-writes';
+import { AdminError, adminErrorResponse, authorize, revision } from '@/lib/server/admin';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -18,9 +18,9 @@ export async function POST(request: Request) {
   try {
     authorize(request);
     if (Number(request.headers.get('content-length')) > 3.5 * 1024 * 1024)
-      throw new ImportError('파일은 3MB 이하로 업로드해 주세요.');
+      throw new AdminError('파일은 3MB 이하로 업로드해 주세요.');
     const form = await request.formData().catch(() => {
-      throw new ImportError('요청 형식이 올바르지 않습니다.');
+      throw new AdminError('요청 형식이 올바르지 않습니다.');
     });
     const file = form.get('file');
     if (
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       !file.name.toLowerCase().endsWith('.xlsx') ||
       file.size > 3 * 1024 * 1024
     )
-      throw new ImportError('3MB 이하의 .xlsx 파일만 지원합니다. .xls는 .xlsx로 저장해 주세요.');
+      throw new AdminError('3MB 이하의 .xlsx 파일만 지원합니다. .xls는 .xlsx로 저장해 주세요.');
     const buffer = Buffer.from(await file.arrayBuffer());
     const incoming = await parseWorkbook(buffer);
     const existing = await getRestaurants(getDb());
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       form.get('revision') !== rev ||
       form.get('token') !== previewToken(buffer, rev)
     )
-      throw new ImportError('파일 또는 DB가 변경되었습니다. 다시 미리보기를 실행해 주세요.');
+      throw new AdminError('파일 또는 DB가 변경되었습니다. 다시 미리보기를 실행해 주세요.');
     const summary = await synchronize(incoming, existing, rev);
     expireRestaurantCache();
     return Response.json({ summary });
@@ -61,20 +61,20 @@ export async function PATCH(request: Request) {
   try {
     authorize(request);
     const body = await request.json().catch(() => null);
-    if (!body || typeof body !== 'object') throw new ImportError('요청 형식이 올바르지 않습니다.');
+    if (!body || typeof body !== 'object') throw new AdminError('요청 형식이 올바르지 않습니다.');
     if (body.action === 'address') {
       await correctAddress(body.id, body.address, body.previousAddress);
       expireRestaurantCache();
       return Response.json({ ok: true });
     }
     if (!isUuid(body.id) || typeof body.active !== 'boolean' || typeof body.previous !== 'boolean')
-      throw new ImportError('상태 변경 요청이 올바르지 않습니다.');
+      throw new AdminError('상태 변경 요청이 올바르지 않습니다.');
     const result = await getDb().query(
       'update public.restaurants set active=$1, updated_at=now() where id=$2 and coalesce(active,false)=$3 returning id',
       [body.active, body.id, body.previous],
     );
     if (!result.rowCount)
-      throw new ImportError('다른 작업에서 상태가 변경되었습니다. 새로고침 후 다시 시도해 주세요.');
+      throw new AdminError('다른 작업에서 상태가 변경되었습니다. 새로고침 후 다시 시도해 주세요.');
     expireRestaurantCache();
     return Response.json({ ok: true });
   } catch (error) {
@@ -83,7 +83,7 @@ export async function PATCH(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const headers = { 'Cache-Control': 'private, no-store' };
+  const headers = PRIVATE_NO_STORE;
   try {
     authorize(request);
     return Response.json({ restaurants: await getRestaurantRows(getDb()) }, { headers });

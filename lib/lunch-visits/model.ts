@@ -1,5 +1,5 @@
 // 오늘의 점심 기록: 서버 검증과 화면에서 함께 쓰는 타입과 입력 검증
-import { isUuid } from '@/lib/uuid';
+import { RequestError, requireUuid } from '@/lib/request-error';
 
 export type LunchVisit = {
   id: string;
@@ -13,18 +13,10 @@ export type LunchVisit = {
   updated_at: string | null;
 };
 
-export class LunchVisitError extends Error {
-  constructor(
-    message: string,
-    public status = 400,
-  ) {
-    super(message);
-  }
-}
+export class LunchVisitError extends RequestError {}
 
 export function visitUuid(value: unknown): string {
-  if (!isUuid(value)) throw new LunchVisitError('식별 정보가 올바르지 않아요.');
-  return value.toLowerCase();
+  return requireUuid(value, LunchVisitError);
 }
 export function visitUserName(value: unknown): string {
   const name = typeof value === 'string' ? value.trim() : '';

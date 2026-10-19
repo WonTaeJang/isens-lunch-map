@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { formatDistance, officeDistance, parseDistance } from '../lib/distance';
 import { OFFICE_POSITION } from '../lib/office';
 import { applyDistances, distanceChanges, previewDistances } from '../lib/server/distances';
-import { revision } from '../lib/server/admin-writes';
+import { revision } from '../lib/server/admin';
 import { mockDb, restaurant as makeRestaurant } from './helpers/restaurants';
 import type { Restaurant } from '../lib/server/restaurants';
 

@@ -8,7 +8,7 @@ import {
   type FoundCoordinates,
 } from '../lib/server/coordinates';
 import { AddressNotFoundError, GeocodingUnavailableError } from '../lib/server/import/geocoder';
-import { revision } from '../lib/server/admin-writes';
+import { revision } from '../lib/server/admin';
 import { mockDb, restaurant as makeRestaurant } from './helpers/restaurants';
 import type { Restaurant } from '../lib/server/restaurants';
 

@@ -8,10 +8,10 @@ import type {
   CoordinateFailure,
   CoordinatePreview,
 } from '@/lib/restaurant-types';
-import { adminSignature, revision, writeLocked } from './admin-writes';
+import { adminSignature, revision, writeLocked } from './admin';
 import { STALE_REMEASURE } from './distances';
 import { AddressNotFoundError, geocode, geocodingDeadline } from './import/geocoder';
-import { ImportError } from './import/parser';
+import { AdminError } from './admin';
 import type { Restaurant } from './restaurants';
 
 // 좌표 재측정: 저장된 주소로 카카오 좌표를 다시 받아 지금 좌표와 비교합니다.
@@ -143,11 +143,11 @@ export async function applyCoordinates(body: unknown) {
   const { revision: expected, token, changes } = (body ?? {}) as Record<string, unknown>;
   const updates = parseUpdates(changes);
   if (typeof expected !== 'string' || typeof token !== 'string' || !updates)
-    throw new ImportError('재측정 요청이 올바르지 않습니다.');
+    throw new AdminError('재측정 요청이 올바르지 않습니다.');
   const signed = Buffer.from(sign(expected, updates));
   const given = Buffer.from(token);
   if (signed.length !== given.length || !timingSafeEqual(signed, given))
-    throw new ImportError('재측정 결과가 올바르지 않습니다. 다시 재측정해 주세요.');
+    throw new AdminError('재측정 결과가 올바르지 않습니다. 다시 재측정해 주세요.');
   return writeLocked(expected, STALE_REMEASURE, async (client) => {
     for (const update of updates)
       await client.query(

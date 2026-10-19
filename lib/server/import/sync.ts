@@ -1,25 +1,13 @@
 import 'server-only';
 import { isUuid } from '@/lib/uuid';
 import { geocode, geocodingDeadline, validCoordinates, AddressNotFoundError } from './geocoder';
-import { createHash, timingSafeEqual } from 'node:crypto';
 import { getDb } from '@/lib/server/db';
-import { adminSignature, writeLocked } from '@/lib/server/admin-writes';
+import { adminSignature, AdminError, writeLocked } from '@/lib/server/admin';
 import { officeDistance, parseDistance } from '@/lib/distance';
-import { identity, ImportError, type ImportRow } from './parser';
+import { identity, type ImportRow } from './parser';
 import type { Restaurant } from '@/lib/server/restaurants';
 import type { ImportPreview } from '@/lib/restaurant-types';
 
-export function authorize(request: Request) {
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) throw new ImportError('서버에 ADMIN_PASSWORD를 설정해 주세요.', 500);
-  const given = request.headers.get('x-admin-password') ?? '';
-  const hash = (s: string) => createHash('sha256').update(s).digest();
-  if (!timingSafeEqual(hash(expected), hash(given)))
-    throw new ImportError('관리자 비밀번호가 올바르지 않습니다.', 401);
-  const origin = request.headers.get('origin');
-  if (origin && origin !== new URL(request.url).origin)
-    throw new ImportError('허용되지 않은 요청입니다.', 403);
-}
 export function previewToken(file: Buffer, rev: string) {
   return adminSignature(file, rev);
 }
@@ -28,7 +16,7 @@ function matchRows(incoming: ImportRow[], existing: Restaurant[]) {
   for (const row of existing) {
     const key = identity(row);
     if (lookup.has(key))
-      throw new ImportError(
+      throw new AdminError(
         'DB에 이름과 주소가 같은 중복 식당이 있습니다. 중복을 정리한 뒤 다시 시도해 주세요.',
       );
     lookup.set(key, row);
@@ -46,7 +34,7 @@ function matchRows(incoming: ImportRow[], existing: Restaurant[]) {
         (missingAddress.length !== 1 ||
           incoming.filter((other) => nameKey(other.name) === nameKey(row.name)).length !== 1)
       ) {
-        throw new ImportError(
+        throw new AdminError(
           `${row.name}: 주소가 없는 동명 식당이 있어 비교할 수 없습니다. 관리자에서 주소를 먼저 입력해 주세요.`,
         );
       }
@@ -199,7 +187,7 @@ export async function correctAddress(id: unknown, address: unknown, previousAddr
     address.length > 500 ||
     (previousAddress !== null && typeof previousAddress !== 'string')
   ) {
-    throw new ImportError('식당과 수정할 주소를 확인해 주세요.');
+    throw new AdminError('식당과 수정할 주소를 확인해 주세요.');
   }
   const coordinates = await geocode(address.trim());
   const result = await getDb().query(
@@ -216,7 +204,7 @@ export async function correctAddress(id: unknown, address: unknown, previousAddr
     ],
   );
   if (!result.rowCount)
-    throw new ImportError(
+    throw new AdminError(
       '식당이 삭제되었거나 주소가 변경되었습니다. 새로고침 후 다시 시도해 주세요.',
     );
 }

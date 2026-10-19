@@ -1,9 +1,9 @@
 import 'server-only';
 import { hasCoordinates } from '@/lib/coordinates';
-import { ImportError } from './parser';
+import { AdminError } from '../admin';
 
-export class AddressNotFoundError extends ImportError {}
-export class GeocodingUnavailableError extends ImportError {}
+export class AddressNotFoundError extends AdminError {}
+export class GeocodingUnavailableError extends AdminError {}
 
 const GEOCODING_DEADLINE_MS = 200_000;
 

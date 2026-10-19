@@ -1,5 +1,5 @@
 import { MAX_REVIEW_LENGTH, MAX_REVIEW_TAGS, REVIEW_TAGS } from './constants';
-import { isUuid } from '@/lib/uuid';
+import { RequestError, requireUuid } from '@/lib/request-error';
 
 export type Review = {
   id: string;
@@ -40,17 +40,9 @@ export function reviewTimestamp(review: Pick<Review, 'created_at' | 'updated_at'
 export function reviewTarget(review: Review | null) {
   return { id: review?.id, version: review ? reviewTimestamp(review) : undefined };
 }
-export class ReviewError extends Error {
-  constructor(
-    message: string,
-    public status = 400,
-  ) {
-    super(message);
-  }
-}
+export class ReviewError extends RequestError {}
 export function uuid(value: unknown): string {
-  if (!isUuid(value)) throw new ReviewError('식별 정보가 올바르지 않아요.');
-  return value.toLowerCase();
+  return requireUuid(value, ReviewError);
 }
 export function reviewInput(value: Record<string, unknown>) {
   const content = typeof value.content === 'string' ? value.content.trim() : '';

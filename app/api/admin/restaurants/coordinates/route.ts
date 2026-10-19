@@ -1,7 +1,7 @@
 import { getDb } from '@/lib/server/db';
-import { adminErrorResponse } from '@/lib/server/admin-writes';
+import { adminErrorResponse, authorize } from '@/lib/server/admin';
+import { PRIVATE_NO_STORE } from '@/lib/server/api-route';
 import { applyCoordinates, previewCoordinates } from '@/lib/server/coordinates';
-import { authorize } from '@/lib/server/import/sync';
 import { expireRestaurantCache, getRestaurants } from '@/lib/server/restaurants';
 
 export const runtime = 'nodejs';
@@ -10,7 +10,7 @@ export const maxDuration = 300;
 
 /** Coordinates found again from each stored address, for review; nothing is saved. */
 export async function GET(request: Request) {
-  const headers = { 'Cache-Control': 'private, no-store' };
+  const headers = PRIVATE_NO_STORE;
   try {
     authorize(request);
     return Response.json(await previewCoordinates(await getRestaurants(getDb())), { headers });

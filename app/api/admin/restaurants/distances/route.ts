@@ -1,14 +1,14 @@
 import { getDb } from '@/lib/server/db';
-import { adminErrorResponse } from '@/lib/server/admin-writes';
+import { adminErrorResponse, authorize } from '@/lib/server/admin';
+import { PRIVATE_NO_STORE } from '@/lib/server/api-route';
 import { applyDistances, previewDistances } from '@/lib/server/distances';
-import { authorize } from '@/lib/server/import/sync';
 import { expireRestaurantCache, getRestaurants } from '@/lib/server/restaurants';
 
 export const runtime = 'nodejs';
 
 /** Recomputed distances for review; nothing is saved. */
 export async function GET(request: Request) {
-  const headers = { 'Cache-Control': 'private, no-store' };
+  const headers = PRIVATE_NO_STORE;
   try {
     authorize(request);
     return Response.json(previewDistances(await getRestaurants(getDb())), { headers });

@@ -1,10 +1,10 @@
-import { authorize } from '@/lib/server/import/sync';
 import { getDb } from '@/lib/server/db';
 import { getAdminStatistics } from '@/lib/server/admin-statistics';
-import { adminErrorResponse } from '@/lib/server/admin-writes';
+import { adminErrorResponse, authorize } from '@/lib/server/admin';
+import { PRIVATE_NO_STORE } from '@/lib/server/api-route';
 
 export const runtime = 'nodejs';
-const headers = { 'Cache-Control': 'private, no-store' };
+const headers = PRIVATE_NO_STORE;
 export async function GET(request: Request) {
   try {
     authorize(request);

@@ -2,6 +2,7 @@ import 'server-only';
 import { createHash, createHmac } from 'node:crypto';
 import type { PoolClient } from 'pg';
 import { getDb } from './db';
+import { logUnexpectedError } from './api-route';
 import { ImportError } from './import/parser';
 import { SELECT_ALL_RESTAURANTS_SQL, type Restaurant } from './restaurants';
 
@@ -51,10 +52,13 @@ export async function writeLocked<T>(
   }
 }
 
-/** A failed admin request: our own (ImportError) message, or `fallback` for anything else. */
+/**
+ * A failed admin request: our own (ImportError) message with its status, or for anything else
+ * (a DB failure, a bug) a logged 500 with `fallback`, so driver details never reach the browser.
+ */
 export function adminErrorResponse(error: unknown, fallback: string, init?: ResponseInit) {
-  return Response.json(
-    { error: error instanceof ImportError ? error.message : fallback },
-    { status: 400, ...init },
-  );
+  if (error instanceof ImportError)
+    return Response.json({ error: error.message }, { ...init, status: error.status });
+  logUnexpectedError('Admin request failed', error);
+  return Response.json({ error: fallback }, { ...init, status: 500 });
 }

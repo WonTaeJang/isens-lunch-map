@@ -15,7 +15,7 @@ import type { Restaurant } from '../lib/server/restaurants';
 process.env.ADMIN_PASSWORD ??= 'test-password';
 
 const BUILDING = { latitude: '37.4900000', longitude: '127.0100000' };
-// About 4 m north of BUILDING, like a row moved by docs/duplicate-coordinates.md.
+// About 4 m north of BUILDING, like a row moved by the old 4 m spread SQL.
 const SPREAD = { latitude: '37.4900359', longitude: '127.0100000' };
 // Well under 1 m away: the same place.
 const NUDGED = { latitude: '37.4900001', longitude: '127.0100000' };

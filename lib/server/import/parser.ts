@@ -3,7 +3,15 @@ import ExcelJS from 'exceljs';
 // A '거리' column is ignored: distance is computed from coordinates (see officeDistance).
 const WORKBOOK_FIELDS = ['가맹점명', '주소', '카테고리', '대표메뉴'] as const;
 
-export class ImportError extends Error {}
+/** An admin request error: its message is shown to the administrator, sent with `status`. */
+export class ImportError extends Error {
+  constructor(
+    message: string,
+    public status = 400,
+  ) {
+    super(message);
+  }
+}
 export type ImportRow = {
   name: string;
   address: string;

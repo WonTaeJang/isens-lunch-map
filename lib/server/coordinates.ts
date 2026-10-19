@@ -15,7 +15,7 @@ import { ImportError } from './import/parser';
 import type { Restaurant } from './restaurants';
 
 // 좌표 재측정: 저장된 주소로 카카오 좌표를 다시 받아 지금 좌표와 비교합니다.
-// 엑셀 업데이트는 기존 좌표를 그대로 쓰므로, SQL로 좌표를 옮겼거나(docs/duplicate-coordinates.md)
+// 엑셀 업데이트는 기존 좌표를 그대로 쓰므로, SQL로 좌표를 옮겼거나(예전 4m 펼치기 등)
 // 카카오 결과가 바뀐 경우 이 기능으로 맞춥니다. 저장할 때는 거리도 같은 좌표로 다시 계산합니다.
 // 주소를 하나로 찾지 못한 식당은 좌표를 바꾸지 않고 따로 보여 줍니다(엑셀 가져오기와 달리 지우지 않음).
 

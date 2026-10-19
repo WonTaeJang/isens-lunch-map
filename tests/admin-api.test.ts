@@ -67,3 +67,44 @@ test('admin list rejects unauthenticated requests before accessing the database'
     else process.env.ADMIN_PASSWORD = original;
   }
 });
+
+test('admin API shows its own message when the server answers with a non-JSON page', async () => {
+  const { previewCoordinates } = await import('../features/admin/admin-api');
+  const previous = globalThis.fetch;
+  globalThis.fetch = async () =>
+    new Response('<html>Gateway Timeout</html>', {
+      status: 504,
+      headers: { 'Content-Type': 'text/html' },
+    });
+  try {
+    await assert.rejects(previewCoordinates('test-password'), /좌표를 재측정하지 못했습니다/);
+  } finally {
+    globalThis.fetch = previous;
+  }
+});
+
+test('admin errors keep their own status; unexpected ones are logged as 500 without details', async () => {
+  const { adminErrorResponse } = await import('../lib/server/admin-writes');
+  const { ImportError } = await import('../lib/server/import/parser');
+  const own = adminErrorResponse(new ImportError('비밀번호가 올바르지 않습니다.', 401), '실패');
+  assert.equal(own.status, 401);
+  assert.deepEqual(await own.json(), { error: '비밀번호가 올바르지 않습니다.' });
+
+  const logged: unknown[] = [];
+  const original = console.error;
+  console.error = (...args: unknown[]) => logged.push(args);
+  try {
+    const failure = Object.assign(new Error('password=secret host=db'), { code: '57P01' });
+    const response = adminErrorResponse(failure, '처리에 실패했습니다.', {
+      headers: { 'Cache-Control': 'private, no-store' },
+    });
+    assert.equal(response.status, 500);
+    assert.equal(response.headers.get('Cache-Control'), 'private, no-store');
+    assert.deepEqual(await response.json(), { error: '처리에 실패했습니다.' });
+    assert.equal(logged.length, 1);
+    assert.doesNotMatch(JSON.stringify(logged), /secret/);
+    assert.match(JSON.stringify(logged), /57P01/);
+  } finally {
+    console.error = original;
+  }
+});

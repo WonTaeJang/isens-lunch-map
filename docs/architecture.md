@@ -238,13 +238,17 @@ exactly one place are listed separately and keep their coordinates; a service fa
 aborts the preview. The preview carries an HMAC token (keyed by `ADMIN_PASSWORD`) over
 the revision and the listed coordinates, and the save (POST) writes exactly those,
 with distances recomputed by `officeDistance`, in one locked transaction, rejecting a
-changed token or any restaurant changed after the preview. Running it undoes the 4 m
-spread from `docs/duplicate-coordinates.md`.
+changed token or any restaurant changed after the preview. It also undoes coordinates
+moved by hand, such as the old 4 m spread; `docs/duplicate-coordinates.md` lists
+restaurants that share coordinates.
 
 Import, 거리 재측정 and 좌표 재측정 share `lib/server/admin-writes.ts`: `revision` hashes
 all rows for the preview, `adminSignature` signs previews with `ADMIN_PASSWORD`,
 `writeLocked` runs the save under the table lock and rolls back when the revision no
-longer matches, and `adminErrorResponse` turns `ImportError` messages into 400 responses.
+longer matches, and `adminErrorResponse` sends an `ImportError` message with its status
+(400 by default, 401 for a wrong password, 403 for another origin) and logs anything else
+as a 500 with a generic message. The admin client reads every response through `requestJson`,
+so a non-JSON reply such as a gateway timeout shows a readable error.
 
 `npm test` checks parsing and synchronization with a mock database.
 `npm run db:check` checks the real DB read-only.

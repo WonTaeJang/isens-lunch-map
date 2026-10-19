@@ -19,7 +19,9 @@ export async function POST(request: Request) {
     authorize(request);
     if (Number(request.headers.get('content-length')) > 3.5 * 1024 * 1024)
       throw new ImportError('파일은 3MB 이하로 업로드해 주세요.');
-    const form = await request.formData();
+    const form = await request.formData().catch(() => {
+      throw new ImportError('요청 형식이 올바르지 않습니다.');
+    });
     const file = form.get('file');
     if (
       !(file instanceof File) ||
@@ -58,7 +60,8 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     authorize(request);
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== 'object') throw new ImportError('요청 형식이 올바르지 않습니다.');
     if (body.action === 'address') {
       await correctAddress(body.id, body.address, body.previousAddress);
       expireRestaurantCache();
@@ -83,18 +86,10 @@ export async function GET(request: Request) {
   const headers = { 'Cache-Control': 'private, no-store' };
   try {
     authorize(request);
-  } catch (error) {
-    return Response.json(
-      { error: error instanceof ImportError ? error.message : '인증에 실패했습니다.' },
-      { status: 401, headers },
-    );
-  }
-  try {
     return Response.json({ restaurants: await getRestaurantRows(getDb()) }, { headers });
-  } catch {
-    return Response.json(
-      { error: '식당 목록을 불러오지 못했습니다. 다시 시도해 주세요.' },
-      { status: 500, headers },
-    );
+  } catch (error) {
+    return adminErrorResponse(error, '식당 목록을 불러오지 못했습니다. 다시 시도해 주세요.', {
+      headers,
+    });
   }
 }

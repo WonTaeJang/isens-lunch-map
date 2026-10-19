@@ -136,9 +136,16 @@ test('empty statistics includes zero counts for all supported tags', async () =>
 
 test('statistics endpoint rejects unauthenticated requests before database access', async () => {
   const { GET } = await import('../app/api/admin/statistics/route');
-  const response = await GET(new Request('http://localhost/api/admin/statistics'));
-  assert.equal(response.status, 401);
-  assert.equal(response.headers.get('cache-control'), 'no-store');
+  const original = process.env.ADMIN_PASSWORD;
+  process.env.ADMIN_PASSWORD = 'test-password';
+  try {
+    const response = await GET(new Request('http://localhost/api/admin/statistics'));
+    assert.equal(response.status, 401);
+    assert.equal(response.headers.get('cache-control'), 'private, no-store');
+  } finally {
+    if (original === undefined) delete process.env.ADMIN_PASSWORD;
+    else process.env.ADMIN_PASSWORD = original;
+  }
 });
 
 test('statistics client forwards authentication and abort signal and surfaces errors', async () => {

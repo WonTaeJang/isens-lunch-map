@@ -11,14 +11,14 @@ import type { ImportPreview } from '@/lib/restaurant-types';
 
 export function authorize(request: Request) {
   const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) throw new ImportError('서버에 ADMIN_PASSWORD를 설정해 주세요.');
+  if (!expected) throw new ImportError('서버에 ADMIN_PASSWORD를 설정해 주세요.', 500);
   const given = request.headers.get('x-admin-password') ?? '';
   const hash = (s: string) => createHash('sha256').update(s).digest();
   if (!timingSafeEqual(hash(expected), hash(given)))
-    throw new ImportError('관리자 비밀번호가 올바르지 않습니다.');
+    throw new ImportError('관리자 비밀번호가 올바르지 않습니다.', 401);
   const origin = request.headers.get('origin');
   if (origin && origin !== new URL(request.url).origin)
-    throw new ImportError('허용되지 않은 요청입니다.');
+    throw new ImportError('허용되지 않은 요청입니다.', 403);
 }
 export function previewToken(file: Buffer, rev: string) {
   return adminSignature(file, rev);

@@ -6,6 +6,7 @@ import type {
   ImportSummary,
   RestaurantRow,
 } from '@/lib/restaurant-types';
+import { requestJson } from '@/lib/request-json';
 
 export type RestaurantUpdate =
   | { action?: 'active'; id: string; active: boolean; previous: boolean }
@@ -16,48 +17,46 @@ type CommitResult = { summary: ImportSummary & { addressErrors: number } };
 const RESTAURANTS_URL = '/api/admin/restaurants';
 const DISTANCES_URL = '/api/admin/restaurants/distances';
 const COORDINATES_URL = '/api/admin/restaurants/coordinates';
+const SAVE_FAILED = '요청에 실패했습니다. 다시 시도해 주세요.';
 
-async function request<T>(
+/**
+ * An admin API call with the password header. Uses the shared JSON request, so a response that is
+ * not JSON (e.g. a gateway timeout page during a long lookup) shows `failure` instead of a parse error.
+ */
+function adminRequest<T>(password: string, url: string, failure: string, init: RequestInit = {}) {
+  return requestJson<T>(
+    url,
+    { ...init, headers: { ...init.headers, 'x-admin-password': password } },
+    failure,
+  );
+}
+
+/** Sends a form (multipart, with its own boundary) or a JSON body. */
+function send<T>(
   password: string,
   method: 'POST' | 'PATCH',
   body: FormData | object,
   url = RESTAURANTS_URL,
-): Promise<T> {
-  const headers: Record<string, string> = { 'x-admin-password': password };
-  const isForm = body instanceof FormData;
-  if (!isForm) headers['Content-Type'] = 'application/json';
-  const response = await fetch(url, {
-    method,
-    headers,
-    body: isForm ? body : JSON.stringify(body),
-  });
-  const result = await response.json();
-  if (!response.ok)
-    throw new Error(
-      typeof result.error === 'string' ? result.error : '요청에 실패했습니다. 다시 시도해 주세요.',
-    );
-  return result as T;
+) {
+  const init: RequestInit =
+    body instanceof FormData
+      ? { method, body }
+      : { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+  return adminRequest<T>(password, url, SAVE_FAILED, init);
 }
 
 export function updateRestaurant(password: string, body: RestaurantUpdate) {
-  return request<{ ok: boolean }>(password, 'PATCH', body);
+  return send<{ ok: boolean }>(password, 'PATCH', body);
 }
 export function previewImport(password: string, form: FormData) {
-  return request<ImportPreview>(password, 'POST', form);
+  return send<ImportPreview>(password, 'POST', form);
 }
 export function commitImport(password: string, form: FormData) {
-  return request<CommitResult>(password, 'POST', form);
+  return send<CommitResult>(password, 'POST', form);
 }
 
-async function load<T>(password: string, url: string, failure: string, signal?: AbortSignal) {
-  const response = await fetch(url, {
-    headers: { 'x-admin-password': password },
-    cache: 'no-store',
-    signal,
-  });
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.error || failure);
-  return result as T;
+function load<T>(password: string, url: string, failure: string, signal?: AbortSignal) {
+  return adminRequest<T>(password, url, failure, { signal });
 }
 
 /** Recomputes every distance from the office for review; nothing is saved. */
@@ -65,7 +64,7 @@ export function previewDistances(password: string) {
   return load<DistancePreview>(password, DISTANCES_URL, '거리를 재측정하지 못했습니다.');
 }
 export function applyDistances(password: string, revision: string) {
-  return request<{ updated: number }>(password, 'POST', { revision }, DISTANCES_URL);
+  return send<{ updated: number }>(password, 'POST', { revision }, DISTANCES_URL);
 }
 
 /** Looks up every stored address again for review; nothing is saved. */
@@ -74,7 +73,7 @@ export function previewCoordinates(password: string) {
 }
 /** Saves exactly the previewed coordinates (and their distances). */
 export function applyCoordinates(password: string, preview: CoordinatePreview) {
-  return request<{ updated: number }>(
+  return send<{ updated: number }>(
     password,
     'POST',
     {

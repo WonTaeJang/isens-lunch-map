@@ -1,5 +1,5 @@
 // 오늘의 점심 기록: 서버 검증과 화면에서 함께 쓰는 타입과 입력 검증
-import { RequestError, requireUuid } from '@/lib/request-error';
+import { RequestError, requireUserName, requireUuid } from '@/lib/request-error';
 
 export type LunchVisit = {
   id: string;
@@ -19,10 +19,7 @@ export function visitUuid(value: unknown): string {
   return requireUuid(value, LunchVisitError);
 }
 export function visitUserName(value: unknown): string {
-  const name = typeof value === 'string' ? value.trim() : '';
-  if (!name || Array.from(name).length > 60)
-    throw new LunchVisitError('닉네임 정보를 확인해 주세요.');
-  return name;
+  return requireUserName(value, LunchVisitError);
 }
 
 /** Calendar month, YYYY-MM (Korean dates). */

@@ -1,6 +1,7 @@
 import 'server-only';
 import type { Pool, PoolClient } from 'pg';
 import { withTransaction } from './db';
+import { requireUserName } from '@/lib/request-error';
 import { encodeReviewCursor, type ReviewCursor } from './review-cursor';
 import {
   decodeTags,
@@ -143,89 +144,88 @@ export async function getReviewVote(
   };
 }
 
-export async function mutateReview(db: Pool, method: string, body: Record<string, unknown>) {
+/** POST creates, PATCH edits and DELETE removes the user's review (from /api/reviews). */
+export function mutateReview(db: Pool, method: string, body: Record<string, unknown>) {
+  return method === 'POST' ? createReview(db, body) : changeReview(db, method, body);
+}
+
+async function createReview(db: Pool, body: Record<string, unknown>) {
   const user = uuid(body.user_id);
-  const restaurant = method === 'POST' ? uuid(body.restaurant_id) : null;
-  const id = method === 'POST' ? null : uuid(body.id);
+  const restaurant = uuid(body.restaurant_id);
+  const input = reviewInput(body);
+  const name = requireUserName(body.user_name, ReviewError);
+  return withTransaction(db, async (client) => {
+    // Serialize all submissions by the same author so the duplicate and daily-limit checks
+    // cannot both pass for concurrent requests.
+    await client.query('select pg_advisory_xact_lock(hashtextextended($1,0))', [`review:${user}`]);
+    const exists = await client.query(
+      'select id from public.review where restaurant_id=$1 and user_id=$2 and enabled=true limit 1',
+      [restaurant, user],
+    );
+    if (exists.rowCount)
+      throw new ReviewError('이미 작성한 리뷰가 있어요. 기존 리뷰를 수정해 주세요.', 409);
+    const available = await client.query(
+      'select id from public.restaurants where id=$1 and active=true for share',
+      [restaurant],
+    );
+    if (!available.rowCount) throw new ReviewError('지금은 리뷰를 작성할 수 없는 식당이에요.', 404);
+    // Deleted (enabled=false) reviews still count, so deleting never frees a daily slot.
+    const today = await client.query<{ count: number }>(
+      `select count(*)::int count from public.review
+    where user_id=$1
+      and created_at >= ((now() at time zone 'Asia/Seoul')::date::timestamp at time zone 'Asia/Seoul')`,
+      [user],
+    );
+    if ((today.rows[0]?.count ?? 0) >= DAILY_REVIEW_LIMIT)
+      throw new ReviewError(
+        `하루에 작성할 수 있는 리뷰 ${DAILY_REVIEW_LIMIT}개를 모두 사용했어요.`,
+        429,
+      );
+    await client.query(
+      `insert into public.review (restaurant_id,user_id,user_name,content,is_recommended,tags,updated_at)
+    values ($1,$2,$3,$4,$5,$6,null)`,
+      [restaurant, user, name, input.content, input.is_recommended, JSON.stringify(input.tags)],
+    );
+    const vote = await getReviewVote(client, restaurant, user);
+    return { restaurant_id: restaurant, ...vote };
+  });
+}
+
+/** PATCH or DELETE of the review `id`, only while it is still the `version` the user saw. */
+async function changeReview(db: Pool, method: string, body: Record<string, unknown>) {
+  const user = uuid(body.user_id);
+  const id = uuid(body.id);
   const version = typeof body.version === 'string' ? body.version : '';
-  if (method !== 'POST' && (!version || !Number.isFinite(Date.parse(version))))
+  if (!version || !Number.isFinite(Date.parse(version)))
     throw new ReviewError('리뷰를 새로 불러온 뒤 다시 시도해 주세요.');
   const input = method === 'DELETE' ? null : reviewInput(body);
-  const name = typeof body.user_name === 'string' ? body.user_name.trim() : '';
-  if (method === 'POST' && (!name || Array.from(name).length > 60))
-    throw new ReviewError('닉네임 정보를 확인해 주세요.');
   return withTransaction(db, async (client) => {
-    let target = restaurant;
-    if (method === 'POST') {
-      // Serialize all submissions by the same author so the duplicate and daily-limit checks
-      // cannot both pass for concurrent requests.
-      await client.query('select pg_advisory_xact_lock(hashtextextended($1,0))', [
-        `review:${user}`,
-      ]);
-      const exists = await client.query(
-        'select id from public.review where restaurant_id=$1 and user_id=$2 and enabled=true limit 1',
-        [restaurant, user],
+    // Ownership is intentionally based on the supplied localStorage ID, not authentication.
+    const condition =
+      "id=$1 and user_id=$2 and enabled=true and date_trunc('milliseconds',coalesce(updated_at,created_at))=$3::timestamptz";
+    let result;
+    // A review with written content is deleted logically: the row stays, hidden with enabled=false.
+    // A recommendation alone (no content) is removed for real, so undoing a 추천/비추천 click does
+    // not use up the daily limit, which counts every row created today.
+    if (method === 'DELETE')
+      result = await client.query(
+        `with target as (select id, coalesce(btrim(content),'')='' as empty from public.review where ${condition}),
+    removed as (delete from public.review where id in (select id from target where empty) returning id, restaurant_id),
+    hidden as (update public.review set enabled=false where id in (select id from target where not empty) returning id, restaurant_id)
+    select id, restaurant_id from removed union all select id, restaurant_id from hidden`,
+        [id, user, version],
       );
-      if (exists.rowCount)
-        throw new ReviewError('이미 작성한 리뷰가 있어요. 기존 리뷰를 수정해 주세요.', 409);
-      const available = await client.query(
-        'select id from public.restaurants where id=$1 and active=true for share',
-        [restaurant],
+    else {
+      result = await client.query(
+        `update public.review set content=$4,is_recommended=$5,tags=$6,updated_at=now() where ${condition} returning id, restaurant_id`,
+        [id, user, version, input!.content, input!.is_recommended, JSON.stringify(input!.tags)],
       );
-      if (!available.rowCount)
-        throw new ReviewError('지금은 리뷰를 작성할 수 없는 식당이에요.', 404);
-      // Deleted (enabled=false) reviews still count, so deleting never frees a daily slot.
-      const today = await client.query<{ count: number }>(
-        `select count(*)::int count from public.review
-      where user_id=$1
-        and created_at >= ((now() at time zone 'Asia/Seoul')::date::timestamp at time zone 'Asia/Seoul')`,
-        [user],
-      );
-      if ((today.rows[0]?.count ?? 0) >= DAILY_REVIEW_LIMIT)
-        throw new ReviewError(
-          `하루에 작성할 수 있는 리뷰 ${DAILY_REVIEW_LIMIT}개를 모두 사용했어요.`,
-          429,
-        );
-      await client.query(
-        `insert into public.review (restaurant_id,user_id,user_name,content,is_recommended,tags,updated_at)
-      values ($1,$2,$3,$4,$5,$6,null)`,
-        [
-          restaurant,
-          user,
-          name,
-          input!.content,
-          input!.is_recommended,
-          JSON.stringify(input!.tags),
-        ],
-      );
-    } else {
-      // Ownership is intentionally based on the supplied localStorage ID, not authentication.
-      const condition =
-        "id=$1 and user_id=$2 and enabled=true and date_trunc('milliseconds',coalesce(updated_at,created_at))=$3::timestamptz";
-      let result;
-      // A review with written content is deleted logically: the row stays, hidden with enabled=false.
-      // A recommendation alone (no content) is removed for real, so undoing a 추천/비추천 click does
-      // not use up the daily limit, which counts every row created today.
-      if (method === 'DELETE')
-        result = await client.query(
-          `with target as (select id, coalesce(btrim(content),'')='' as empty from public.review where ${condition}),
-      removed as (delete from public.review where id in (select id from target where empty) returning id, restaurant_id),
-      hidden as (update public.review set enabled=false where id in (select id from target where not empty) returning id, restaurant_id)
-      select id, restaurant_id from removed union all select id, restaurant_id from hidden`,
-          [id, user, version],
-        );
-      else {
-        result = await client.query(
-          `update public.review set content=$4,is_recommended=$5,tags=$6,updated_at=now() where ${condition} returning id, restaurant_id`,
-          [id, user, version, input!.content, input!.is_recommended, JSON.stringify(input!.tags)],
-        );
-      }
-      if (!result.rowCount)
-        throw new ReviewError('리뷰가 바뀌었거나 수정·삭제할 수 없어요. 새로고침해 주세요.', 409);
-      target = result.rows[0].restaurant_id;
     }
-    const vote = await getReviewVote(client, target!, user);
-    return { restaurant_id: target!, ...vote };
+    if (!result.rowCount)
+      throw new ReviewError('리뷰가 바뀌었거나 수정·삭제할 수 없어요. 새로고침해 주세요.', 409);
+    const target: string = result.rows[0].restaurant_id;
+    const vote = await getReviewVote(client, target, user);
+    return { restaurant_id: target, ...vote };
   });
 }
 

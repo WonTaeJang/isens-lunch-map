@@ -1,24 +1,16 @@
+import { onOtherTabChange, readStorage } from '@/lib/browser-storage';
 import { FAVORITES_CHANGED_EVENT, FAVORITES_STORAGE_KEY, toggleFavorite } from './favorites';
 
 export function subscribeFavorites(onChange: () => void) {
-  const onStorage = (event: StorageEvent) => {
-    if (event.key === FAVORITES_STORAGE_KEY || event.key === null) onChange();
-  };
-  window.addEventListener('storage', onStorage);
+  const stopOtherTabs = onOtherTabChange(FAVORITES_STORAGE_KEY, onChange);
   window.addEventListener(FAVORITES_CHANGED_EVENT, onChange);
   return () => {
-    window.removeEventListener('storage', onStorage);
+    stopOtherTabs();
     window.removeEventListener(FAVORITES_CHANGED_EVENT, onChange);
   };
 }
 
-export function getFavoritesSnapshot() {
-  try {
-    return window.localStorage.getItem(FAVORITES_STORAGE_KEY) ?? '';
-  } catch {
-    return '';
-  }
-}
+export const getFavoritesSnapshot = () => readStorage(FAVORITES_STORAGE_KEY);
 
 export function toggleStoredFavorite(id: string): string | null {
   try {

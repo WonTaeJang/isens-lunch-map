@@ -1,22 +1,11 @@
+import { parseIdList } from '@/lib/browser-storage';
+
 export const FAVORITES_STORAGE_KEY = 'favorite_restaurant_ids';
 export const FAVORITES_CHANGED_EVENT = 'lunch-favorites-changed';
 type FavoriteStorage = Pick<Storage, 'getItem' | 'setItem'>;
 
 export function readFavorites(storage: Pick<Storage, 'getItem'>): string[] {
-  const raw = storage.getItem(FAVORITES_STORAGE_KEY);
-  if (!raw) return [];
-  try {
-    const value: unknown = JSON.parse(raw);
-    return Array.isArray(value)
-      ? [
-          ...new Set(
-            value.filter((id): id is string => typeof id === 'string' && id.trim().length > 0),
-          ),
-        ]
-      : [];
-  } catch {
-    return [];
-  }
+  return parseIdList(storage.getItem(FAVORITES_STORAGE_KEY));
 }
 
 export function toggleFavorite(storage: FavoriteStorage, id: string): string[] {

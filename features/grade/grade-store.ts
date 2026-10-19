@@ -1,5 +1,6 @@
 'use client';
 
+import { onOtherTabChange, readStorage } from '@/lib/browser-storage';
 import { createListeners } from '@/lib/listeners';
 import { useSyncExternalStore } from 'react';
 import { isTierId, tierRank, type PromotedTierId, type TierId } from '@/lib/grades/model';
@@ -47,24 +48,15 @@ export function promoteStoredTier(
 }
 
 function subscribe(onChange: () => void) {
-  const onStorage = (event: StorageEvent) => {
-    if (event.key === GRADE_STORAGE_KEY || event.key === null) onChange();
-  };
-  window.addEventListener('storage', onStorage);
+  const stopOtherTabs = onOtherTabChange(GRADE_STORAGE_KEY, onChange);
   window.addEventListener(GRADE_CHANGED_EVENT, onChange);
   return () => {
-    window.removeEventListener('storage', onStorage);
+    stopOtherTabs();
     window.removeEventListener(GRADE_CHANGED_EVENT, onChange);
   };
 }
 
-function getSnapshot() {
-  try {
-    return window.localStorage.getItem(GRADE_STORAGE_KEY) ?? '';
-  } catch {
-    return '';
-  }
-}
+const getSnapshot = () => readStorage(GRADE_STORAGE_KEY);
 
 /** A rise to a higher tier, waiting to be celebrated (kept in memory until dismissed). */
 export type Promotion = { from: TierId; to: PromotedTierId };

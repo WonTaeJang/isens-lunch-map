@@ -1,6 +1,6 @@
 import { getDb } from '@/lib/server/db';
+import { adminErrorResponse } from '@/lib/server/admin-writes';
 import { applyDistances, previewDistances } from '@/lib/server/distances';
-import { ImportError } from '@/lib/server/import/parser';
 import { authorize } from '@/lib/server/import/sync';
 import { expireRestaurantCache, getRestaurants } from '@/lib/server/restaurants';
 
@@ -13,15 +13,9 @@ export async function GET(request: Request) {
     authorize(request);
     return Response.json(previewDistances(await getRestaurants(getDb())), { headers });
   } catch (error) {
-    return Response.json(
-      {
-        error:
-          error instanceof ImportError
-            ? error.message
-            : '거리를 재측정하지 못했습니다. 잠시 후 다시 시도해 주세요.',
-      },
-      { status: 400, headers },
-    );
+    return adminErrorResponse(error, '거리를 재측정하지 못했습니다. 잠시 후 다시 시도해 주세요.', {
+      headers,
+    });
   }
 }
 
@@ -34,14 +28,9 @@ export async function POST(request: Request) {
     expireRestaurantCache();
     return Response.json(result);
   } catch (error) {
-    return Response.json(
-      {
-        error:
-          error instanceof ImportError
-            ? error.message
-            : '거리를 반영하지 못했습니다. DB는 변경되지 않았습니다. 잠시 후 다시 시도해 주세요.',
-      },
-      { status: 400 },
+    return adminErrorResponse(
+      error,
+      '거리를 반영하지 못했습니다. DB는 변경되지 않았습니다. 잠시 후 다시 시도해 주세요.',
     );
   }
 }

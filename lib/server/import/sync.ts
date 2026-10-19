@@ -1,15 +1,10 @@
 import 'server-only';
 import { isUuid } from '@/lib/uuid';
-import {
-  geocode,
-  validCoordinates,
-  AddressNotFoundError,
-  GeocodingUnavailableError,
-} from './geocoder';
-import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
+import { geocode, geocodingDeadline, validCoordinates, AddressNotFoundError } from './geocoder';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { getDb } from '@/lib/server/db';
+import { adminSignature, writeLocked } from '@/lib/server/admin-writes';
 import { officeDistance, parseDistance } from '@/lib/distance';
-import { SELECT_ALL_RESTAURANTS_SQL } from '@/lib/server/restaurants';
 import { identity, ImportError, type ImportRow } from './parser';
 import type { Restaurant } from '@/lib/server/restaurants';
 import type { ImportPreview } from '@/lib/restaurant-types';
@@ -25,13 +20,8 @@ export function authorize(request: Request) {
   if (origin && origin !== new URL(request.url).origin)
     throw new ImportError('허용되지 않은 요청입니다.');
 }
-export function revision(rows: Restaurant[]) {
-  return createHash('sha256')
-    .update(JSON.stringify([...rows].sort((a, b) => a.id.localeCompare(b.id))))
-    .digest('hex');
-}
 export function previewToken(file: Buffer, rev: string) {
-  return createHmac('sha256', process.env.ADMIN_PASSWORD!).update(file).update(rev).digest('hex');
+  return adminSignature(file, rev);
 }
 function matchRows(incoming: ImportRow[], existing: Restaurant[]) {
   const lookup = new Map<string, Restaurant>();
@@ -126,8 +116,14 @@ export async function synchronize(incoming: ImportRow[], existing: Restaurant[],
   existing.filter(validCoordinates).forEach((r) => {
     if (r.address !== null) addresses.set(r.address, r);
   });
-  const prepared = [];
-  const deadline = Date.now() + 200000;
+  const prepared: (Omit<ImportRow, 'address'> & {
+    address: string | null;
+    id: string | undefined;
+    distance: number | null;
+    latitude: string | null;
+    longitude: string | null;
+  })[] = [];
+  const checkDeadline = geocodingDeadline();
   // Resolve every coordinate before any DB changes. Failed lookups become address-error rows; database writes remain atomic.
   for (const row of incoming) {
     const old = lookup.get(identity(row));
@@ -136,10 +132,7 @@ export async function synchronize(incoming: ImportRow[], existing: Restaurant[],
     let addressFailed = false;
     if (!validCoordinates(coordinates)) {
       try {
-        if (Date.now() > deadline)
-          throw new GeocodingUnavailableError(
-            '주소 검색 시간이 초과되었습니다. DB는 변경하지 않았습니다. 다시 시도해 주세요.',
-          );
+        checkDeadline();
         coordinates = await geocode(row.address);
       } catch (error) {
         if (!(error instanceof AddressNotFoundError)) throw error;
@@ -162,48 +155,40 @@ export async function synchronize(incoming: ImportRow[], existing: Restaurant[],
       longitude: coordinates!.longitude,
     });
   }
-  const client = await getDb().connect();
-  try {
-    await client.query('BEGIN');
-    await client.query('LOCK TABLE public.restaurants IN EXCLUSIVE MODE');
-    const current = await client.query<Restaurant>(SELECT_ALL_RESTAURANTS_SQL);
-    if (revision(current.rows) !== expected)
-      throw new ImportError('미리보기 이후 DB가 변경되었습니다. 다시 미리보기를 실행해 주세요.');
-    const ids: string[] = [];
-    for (const row of prepared) {
-      const values = [
-        row.name,
-        row.category,
-        row.main_menu,
-        row.address,
-        row.distance,
-        row.active,
-        row.latitude,
-        row.longitude,
-      ];
-      const result = row.id
-        ? await client.query(
-            'update public.restaurants set name=$1, category=$2, main_menu=$3, address=$4, distance=$5, active=$6, latitude=$7, longitude=$8, updated_at=now() where id=$9 returning id',
-            [...values, row.id],
-          )
-        : await client.query(
-            'insert into public.restaurants (id,name,category,main_menu,address,distance,active,latitude,longitude,created_at,updated_at) values (gen_random_uuid(),$1,$2,$3,$4,$5,$6,$7,$8,now(),now()) returning id',
-            values,
-          );
-      ids.push(result.rows[0].id);
-    }
-    await client.query(
-      'update public.restaurants set active=false, updated_at=now() where not (id=any($1::uuid[])) and active is distinct from false',
-      [ids],
-    );
-    await client.query('COMMIT');
-    return summary;
-  } catch (error) {
-    await client.query('ROLLBACK');
-    throw error;
-  } finally {
-    client.release();
-  }
+  return writeLocked(
+    expected,
+    '미리보기 이후 DB가 변경되었습니다. 다시 미리보기를 실행해 주세요.',
+    async (client) => {
+      const ids: string[] = [];
+      for (const row of prepared) {
+        const values = [
+          row.name,
+          row.category,
+          row.main_menu,
+          row.address,
+          row.distance,
+          row.active,
+          row.latitude,
+          row.longitude,
+        ];
+        const result = row.id
+          ? await client.query(
+              'update public.restaurants set name=$1, category=$2, main_menu=$3, address=$4, distance=$5, active=$6, latitude=$7, longitude=$8, updated_at=now() where id=$9 returning id',
+              [...values, row.id],
+            )
+          : await client.query(
+              'insert into public.restaurants (id,name,category,main_menu,address,distance,active,latitude,longitude,created_at,updated_at) values (gen_random_uuid(),$1,$2,$3,$4,$5,$6,$7,$8,now(),now()) returning id',
+              values,
+            );
+        ids.push(result.rows[0].id);
+      }
+      await client.query(
+        'update public.restaurants set active=false, updated_at=now() where not (id=any($1::uuid[])) and active is distinct from false',
+        [ids],
+      );
+      return summary;
+    },
+  );
 }
 
 export async function correctAddress(id: unknown, address: unknown, previousAddress: unknown) {

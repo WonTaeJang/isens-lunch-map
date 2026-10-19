@@ -7,10 +7,10 @@ import {
   plan,
   previewChanges,
   previewToken,
-  revision,
   synchronize,
   correctAddress,
 } from '@/lib/server/import/sync';
+import { adminErrorResponse, revision } from '@/lib/server/admin-writes';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -49,14 +49,9 @@ export async function POST(request: Request) {
     expireRestaurantCache();
     return Response.json({ summary });
   } catch (error) {
-    return Response.json(
-      {
-        error:
-          error instanceof ImportError
-            ? error.message
-            : '처리에 실패했습니다. DB는 반영되지 않았습니다. 잠시 후 다시 시도해 주세요.',
-      },
-      { status: 400 },
+    return adminErrorResponse(
+      error,
+      '처리에 실패했습니다. DB는 반영되지 않았습니다. 잠시 후 다시 시도해 주세요.',
     );
   }
 }
@@ -80,15 +75,7 @@ export async function PATCH(request: Request) {
     expireRestaurantCache();
     return Response.json({ ok: true });
   } catch (error) {
-    return Response.json(
-      {
-        error:
-          error instanceof ImportError
-            ? error.message
-            : '변경하지 못했습니다. 잠시 후 다시 시도해 주세요.',
-      },
-      { status: 400 },
-    );
+    return adminErrorResponse(error, '변경하지 못했습니다. 잠시 후 다시 시도해 주세요.');
   }
 }
 

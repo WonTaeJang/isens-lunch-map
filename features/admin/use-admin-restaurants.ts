@@ -4,6 +4,7 @@ import type {
   RestaurantRow as Row,
   ImportPreview as Preview,
   DistancePreview,
+  CoordinatePreview,
 } from '@/lib/restaurant-types';
 import {
   updateRestaurant,
@@ -11,6 +12,8 @@ import {
   commitImport,
   previewDistances,
   applyDistances,
+  previewCoordinates,
+  applyCoordinates,
 } from './admin-api';
 export default function useAdminRestaurants(
   restaurants: Row[],
@@ -37,9 +40,12 @@ export default function useAdminRestaurants(
   // Every save changes the restaurant revision, so it also invalidates the other preview.
   const [distancePreview, setDistancePreview] = useState<DistancePreview | null>(null);
   const [distanceMessage, setDistanceMessage] = useState('');
+  const [coordinatePreview, setCoordinatePreview] = useState<CoordinatePreview | null>(null);
+  const [coordinateMessage, setCoordinateMessage] = useState('');
   function clearPreviews() {
     setPreview(null);
     setDistancePreview(null);
+    setCoordinatePreview(null);
   }
   /** Runs one admin request at a time; a failure is shown with `show` (`fallback` if unknown). */
   async function exclusive(
@@ -125,27 +131,65 @@ export default function useAdminRestaurants(
       refresh();
     });
   }
-  async function measureDistances(mode: 'preview' | 'apply') {
+  /** Shared flow of the re-measure sections: load a preview, then save exactly that preview. */
+  async function remeasure<P>(
+    mode: 'preview' | 'apply',
+    flow: {
+      preview: P | null;
+      setPreview: (preview: P | null) => void;
+      show: (text: string) => void;
+      failure: string;
+      load: () => Promise<P>;
+      /** Saves the preview and returns the success message. */
+      save: (preview: P) => Promise<string>;
+    },
+  ) {
     if (!password) {
-      setDistanceMessage('관리자 비밀번호를 입력해 주세요.');
+      flow.show('관리자 비밀번호를 입력해 주세요.');
       return;
     }
     await exclusive(
-      setDistanceMessage,
-      '거리 재측정에 실패했습니다.',
+      flow.show,
+      flow.failure,
       async () => {
-        if (mode === 'preview') setDistancePreview(await previewDistances(password));
-        else if (distancePreview) {
-          const result = await applyDistances(password, distancePreview.revision);
+        if (mode === 'preview') flow.setPreview(await flow.load());
+        else if (flow.preview) {
+          const done = await flow.save(flow.preview);
           clearPreviews();
-          setDistanceMessage(`저장 완료: 거리 ${result.updated}건을 갱신했습니다.`);
+          flow.show(done);
           refresh();
         }
       },
       () => {
-        if (mode === 'preview') setDistancePreview(null);
+        if (mode === 'preview') flow.setPreview(null);
       },
     );
+  }
+  function measureDistances(mode: 'preview' | 'apply') {
+    return remeasure(mode, {
+      preview: distancePreview,
+      setPreview: setDistancePreview,
+      show: setDistanceMessage,
+      failure: '거리 재측정에 실패했습니다.',
+      load: () => previewDistances(password),
+      save: async (preview) => {
+        const result = await applyDistances(password, preview.revision);
+        return `저장 완료: 거리 ${result.updated}건을 갱신했습니다.`;
+      },
+    });
+  }
+  function measureCoordinates(mode: 'preview' | 'apply') {
+    return remeasure(mode, {
+      preview: coordinatePreview,
+      setPreview: setCoordinatePreview,
+      show: setCoordinateMessage,
+      failure: '좌표 재측정에 실패했습니다.',
+      load: () => previewCoordinates(password),
+      save: async (preview) => {
+        const result = await applyCoordinates(password, preview);
+        return `저장 완료: 좌표 ${result.updated}건을 갱신했습니다. 거리도 함께 다시 계산했습니다.`;
+      },
+    });
   }
   function onFileChange(next: File | null) {
     setFile(next);
@@ -175,5 +219,8 @@ export default function useAdminRestaurants(
     distancePreview,
     distanceMessage,
     measureDistances,
+    coordinatePreview,
+    coordinateMessage,
+    measureCoordinates,
   };
 }

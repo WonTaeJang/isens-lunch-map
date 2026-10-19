@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { formatDistance, officeDistance, parseDistance } from '../lib/distance';
 import { OFFICE_POSITION } from '../lib/office';
 import { applyDistances, distanceChanges, previewDistances } from '../lib/server/distances';
-import { revision } from '../lib/server/import/sync';
+import { revision } from '../lib/server/admin-writes';
+import { mockDb, restaurant as makeRestaurant } from './helpers/restaurants';
 import type { Restaurant } from '../lib/server/restaurants';
 
 const at = (dLat: number, dLng = 0) => ({
@@ -36,22 +37,8 @@ test('stored distances parse as meters and format as m or km', () => {
   for (const bad of [null, '', 'abc', '-10']) assert.equal(formatDistance(bad), '거리 정보 없음');
 });
 
-let seq = 0;
-function restaurant(overrides: Partial<Restaurant>): Restaurant {
-  return {
-    id: `00000000-0000-4000-8000-${String(++seq).padStart(12, '0')}`,
-    name: `식당 ${seq}`,
-    category: null,
-    main_menu: null,
-    address: '주소',
-    distance: null,
-    active: true,
-    ...at(0.001),
-    created_at: null,
-    updated_at: null,
-    ...overrides,
-  };
-}
+const restaurant = (overrides: Partial<Restaurant>) =>
+  makeRestaurant({ ...at(0.001), ...overrides });
 const rows = [
   restaurant({ name: '같음', distance: '110' }),
   restaurant({ name: '조금 다름', distance: '100' }),
@@ -78,19 +65,6 @@ test('distance preview lists only changes, largest first, and counts missing coo
   });
   assert.equal(previewDistances(rows).revision, revision(rows));
 });
-
-function mockDb(current: Restaurant[]) {
-  const calls: { text: string; values?: unknown[] }[] = [];
-  const client = {
-    query: async (text: string, values?: unknown[]) => {
-      calls.push({ text, values });
-      return { rows: text.startsWith('select id') ? current : [] };
-    },
-    release: () => {},
-  };
-  (globalThis as unknown as { lunchDb: unknown }).lunchDb = { connect: async () => client };
-  return calls;
-}
 
 test('applying distances updates only changed rows inside a locked transaction', async () => {
   const calls = mockDb(rows);

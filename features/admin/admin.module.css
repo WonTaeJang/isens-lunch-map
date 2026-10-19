@@ -149,3 +149,15 @@
 .spacedButton {
   margin-top: 20px;
 }
+/* Coordinate re-measure tables: name, address, then how far it moved. */
+.coordinates th:first-child {
+  width: 32%;
+}
+.coordinates th:nth-child(2) {
+  width: auto;
+}
+.coordinates th:nth-child(3),
+.coordinates td:nth-child(3) {
+  width: 96px;
+  white-space: nowrap;
+}

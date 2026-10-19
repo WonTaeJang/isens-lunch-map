@@ -28,6 +28,8 @@ lib/                         # features와 서버가 함께 쓰는 코드 (featu
     restaurants.ts           # 식당 조회·화면용 필드 선택
     import/                  # 엑셀 파싱·검증·DB 동기화
     distances.ts             # 거리 재측정 미리보기·반영
+    coordinates.ts           # 좌표 재측정(주소 재검색) 미리보기·반영
+    admin-writes.ts          # 관리자 쓰기 공통: 리비전·미리보기 서명·잠금 트랜잭션·오류 응답
   reviews/                   # 리뷰 타입·입력 검증·태그 등 정책 상수
   ranking/                   # 랭킹 순위 계산·정책 상수
   grades/                    # 등급 배점·구간·진행률 계산 (화면·서버 공용)
@@ -213,6 +215,23 @@ store NULL. The import preview reports `거리 변경` when a stored distance di
 The admin 업데이트 tab's 거리 재측정 section (`/api/admin/restaurants/distances`)
 previews every changed distance (GET) and saves them (POST) in one locked transaction,
 rejecting the save if any restaurant changed after the preview.
+
+Imports reuse stored coordinates, so coordinates only change on address correction.
+The 업데이트 tab's 좌표 재측정 section (`/api/admin/restaurants/coordinates`,
+`lib/server/coordinates.ts`) looks up every stored address on Kakao again (each address
+once, four at a time, within the import deadline) and previews restaurants whose
+coordinates moved 1 m or more, or had none (GET). Addresses that no longer resolve to
+exactly one place are listed separately and keep their coordinates; a service failure
+aborts the preview. The preview carries an HMAC token (keyed by `ADMIN_PASSWORD`) over
+the revision and the listed coordinates, and the save (POST) writes exactly those,
+with distances recomputed by `officeDistance`, in one locked transaction, rejecting a
+changed token or any restaurant changed after the preview. Running it undoes the 4 m
+spread from `docs/duplicate-coordinates.md`.
+
+Import, 거리 재측정 and 좌표 재측정 share `lib/server/admin-writes.ts`: `revision` hashes
+all rows for the preview, `adminSignature` signs previews with `ADMIN_PASSWORD`,
+`writeLocked` runs the save under the table lock and rolls back when the revision no
+longer matches, and `adminErrorResponse` turns `ImportError` messages into 400 responses.
 
 `npm test` checks parsing and synchronization with a mock database.
 `npm run db:check` checks the real DB read-only.

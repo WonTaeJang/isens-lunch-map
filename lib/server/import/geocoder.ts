@@ -5,6 +5,19 @@ import { ImportError } from './parser';
 export class AddressNotFoundError extends ImportError {}
 export class GeocodingUnavailableError extends ImportError {}
 
+const GEOCODING_DEADLINE_MS = 200_000;
+
+/** Starts the time limit for a batch of lookups; the returned check throws once it has passed. */
+export function geocodingDeadline() {
+  const end = Date.now() + GEOCODING_DEADLINE_MS;
+  return () => {
+    if (Date.now() > end)
+      throw new GeocodingUnavailableError(
+        '주소 검색 시간이 초과되었습니다. DB는 변경하지 않았습니다. 다시 시도해 주세요.',
+      );
+  };
+}
+
 export function validCoordinates(r?: { latitude: string | null; longitude: string | null }) {
   return !!r && hasCoordinates(r);
 }

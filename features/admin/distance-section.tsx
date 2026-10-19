@@ -1,7 +1,7 @@
 'use client';
 
-import Button from '@/components/ui/button';
 import styles from './admin.module.css';
+import RemeasureSection from './remeasure-section';
 import { formatDistance } from '@/lib/distance';
 import { OFFICE_ADDRESS } from '@/lib/office';
 import type { DistanceChange, DistancePreview } from '@/lib/restaurant-types';
@@ -26,25 +26,24 @@ function difference({ before, after }: DistanceChange) {
 /** Recomputes straight-line distances from the office, shows them, then saves on request. */
 export default function DistanceSection({ busy, preview, message, error, measure }: Props) {
   return (
-    <section className={styles.uploadSection}>
-      <h2>거리 재측정</h2>
-      <p className="description">
-        아이센스 빌딩({OFFICE_ADDRESS})에서 식당 좌표까지의 직선거리를 10m 단위로 다시 계산합니다.
-        엑셀 업데이트와 주소 수정 때도 같은 방식으로 자동 계산합니다.
-      </p>
-      <Button
-        className={styles.spacedButton}
-        loading={busy}
-        disabled={!!error}
-        onClick={() => measure('preview')}
-      >
-        재측정 결과 보기
-      </Button>
-      <p role="status" className="description">
-        {message}
-      </p>
+    <RemeasureSection
+      title="거리 재측정"
+      description={
+        <p className="description">
+          아이센스 빌딩({OFFICE_ADDRESS})에서 식당 좌표까지의 직선거리를 10m 단위로 다시 계산합니다.
+          엑셀 업데이트와 주소 수정 때도 같은 방식으로 자동 계산합니다.
+        </p>
+      }
+      busy={busy}
+      message={message}
+      error={error}
+      previewed={!!preview}
+      changeCount={preview?.rows.length ?? 0}
+      applyLabel="재측정 거리"
+      measure={measure}
+    >
       {preview && (
-        <div>
+        <>
           <p className="description">
             전체 {preview.summary.total}곳 · 변경 {preview.summary.changed}건 · 좌표 없음{' '}
             {preview.summary.missingCoordinates}곳
@@ -81,16 +80,8 @@ export default function DistanceSection({ busy, preview, message, error, measure
               </table>
             </div>
           )}
-          <Button
-            className={styles.spacedButton}
-            loading={busy}
-            disabled={!preview.rows.length}
-            onClick={() => measure('apply')}
-          >
-            재측정 거리 {preview.rows.length}건 반영
-          </Button>
-        </div>
+        </>
       )}
-    </section>
+    </RemeasureSection>
   );
 }

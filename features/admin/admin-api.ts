@@ -1,5 +1,6 @@
 import type { AdminStatistics } from '@/lib/admin/statistics-types';
 import type {
+  CoordinatePreview,
   DistancePreview,
   ImportPreview,
   ImportSummary,
@@ -14,11 +15,12 @@ type CommitResult = { summary: ImportSummary & { addressErrors: number } };
 
 const RESTAURANTS_URL = '/api/admin/restaurants';
 const DISTANCES_URL = '/api/admin/restaurants/distances';
+const COORDINATES_URL = '/api/admin/restaurants/coordinates';
 
 async function request<T>(
   password: string,
   method: 'POST' | 'PATCH',
-  body: FormData | RestaurantUpdate | { revision: string },
+  body: FormData | object,
   url = RESTAURANTS_URL,
 ): Promise<T> {
   const headers: Record<string, string> = { 'x-admin-password': password };
@@ -64,6 +66,24 @@ export function previewDistances(password: string) {
 }
 export function applyDistances(password: string, revision: string) {
   return request<{ updated: number }>(password, 'POST', { revision }, DISTANCES_URL);
+}
+
+/** Looks up every stored address again for review; nothing is saved. */
+export function previewCoordinates(password: string) {
+  return load<CoordinatePreview>(password, COORDINATES_URL, '좌표를 재측정하지 못했습니다.');
+}
+/** Saves exactly the previewed coordinates (and their distances). */
+export function applyCoordinates(password: string, preview: CoordinatePreview) {
+  return request<{ updated: number }>(
+    password,
+    'POST',
+    {
+      revision: preview.revision,
+      token: preview.token,
+      changes: preview.rows.map((row) => ({ id: row.id, ...row.after })),
+    },
+    COORDINATES_URL,
+  );
 }
 
 export async function loadAdminRestaurants(password: string) {

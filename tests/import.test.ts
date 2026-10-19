@@ -2,7 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import ExcelJS from 'exceljs';
 import { parseWorkbook, identity } from '../lib/server/import/parser';
-import { plan, previewChanges, revision, synchronize } from '../lib/server/import/sync';
+import { plan, previewChanges, synchronize } from '../lib/server/import/sync';
+import { revision } from '../lib/server/admin-writes';
+import { mockDb as fakeDb } from './helpers/restaurants';
 import type { Restaurant } from '../lib/server/restaurants';
 
 async function fixture(
@@ -83,20 +85,8 @@ const existing: Restaurant[] = [
     updated_at: null,
   },
 ];
-function mockDb(current = existing, fail = false) {
-  const calls: { text: string; values?: unknown[] }[] = [];
-  const client = {
-    query: async (text: string, values?: unknown[]) => {
-      calls.push({ text, values });
-      if (text.startsWith('select id')) return { rows: current };
-      if (fail && text.startsWith('update public')) throw new Error('injected');
-      return { rows: [{ id: existing[0].id }] };
-    },
-    release: () => {},
-  };
-  (globalThis as unknown as { lunchDb: unknown }).lunchDb = { connect: async () => client };
-  return calls;
-}
+const mockDb = (current = existing, fail = false) =>
+  fakeDb(current, { fail, result: [{ id: existing[0].id }] });
 test('existing coordinates reused; strike and absent rows deactivate in transaction', async () => {
   const incoming = await parseWorkbook(await fixture({ strike: true }));
   assert.deepEqual(plan(incoming, existing), { added: 0, updated: 1, inactive: 1, missing: 1 });

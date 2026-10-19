@@ -75,6 +75,7 @@ lib/                         # features와 서버가 함께 쓰는 코드 (featu
 만듭니다. 제목·버튼이 정해진 단순 모달은 `Modal`을 쓰고, 리뷰 패널·확인 창·두 게임처럼 모양이 다른 창은
 `ModalDialog`에 자기 스타일만 얹습니다. 두 게임(슬롯·점심 상자)은 후보 계산(`gameCandidates`, 목록의
 거리·즐겨찾기 필터만 따르고 검색어는 무시)과 뽑기(`drawRestaurants`, 직전 결과 제외)도 함께 씁니다.
+두 게임은 `useGamePlayCounter`로 팝업에서 한 판 수를 세어 닫힐 때 날짜별 횟수에 더합니다(`docs/game-plays.md`).
 
 ### 지도와 리스트의 역할 분리
 

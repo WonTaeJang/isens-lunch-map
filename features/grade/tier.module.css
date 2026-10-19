@@ -89,30 +89,30 @@
 .ring > svg[data-top] {
   filter: drop-shadow(0 0 3px rgb(63 186 255 / 70%));
 }
-.ring-track,
-.ring-fill {
+.ringTrack,
+.ringFill {
   fill: none;
   stroke-width: 4;
 }
-.ring-track {
+.ringTrack {
   stroke: var(--color-border);
 }
-.ring-fill {
+.ringFill {
   stroke: var(--tier-mid);
   stroke-linecap: round;
   transition: stroke-dasharray 0.8s ease-out;
 }
 /* 6 of 72 units: the 4-unit ring plus a 2-unit gap. */
-.ring-crest {
+.ringCrest {
   position: absolute;
   inset: 8.333%;
 }
-.ring-crest svg {
+.ringCrest svg {
   width: 100%;
   height: 100%;
 }
 @media (prefers-reduced-motion: reduce) {
-  .ring-fill {
+  .ringFill {
     transition: none;
   }
 }

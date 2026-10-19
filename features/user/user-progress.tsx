@@ -14,7 +14,7 @@ export default function UserProgress({
 }) {
   if (!stats)
     return (
-      <section className={styles['user-progress']} aria-label="점심 통계">
+      <section className={styles.userProgress} aria-label="점심 통계">
         {loading ? (
           <LoadingStatus label="점심 통계를 불러오는 중…" />
         ) : (
@@ -29,9 +29,9 @@ export default function UserProgress({
   const breakdown = `리뷰 ${stats.reviewed_active} · 오늘의 점심 ${stats.lunched_active}`;
   const rated = stats.recommended_active + stats.not_recommended_active;
   return (
-    <section className={styles['user-progress']} aria-label="점심 통계">
+    <section className={styles.userProgress} aria-label="점심 통계">
       <div>
-        <div className={styles['user-progress-heading']}>
+        <div className={styles.userProgressHeading}>
           <h2>점심 탐방 진행률</h2>
           <strong>{formatPercent(progress)}</strong>
         </div>
@@ -43,7 +43,7 @@ export default function UserProgress({
         <p className="subtle">{stats.active_total ? breakdown : '집계할 식당이 없어요'}</p>
       </div>
       <div>
-        <div className={styles['user-progress-heading']}>
+        <div className={styles.userProgressHeading}>
           <h2>내 리뷰 성향</h2>
         </div>
         <RecommendationBar

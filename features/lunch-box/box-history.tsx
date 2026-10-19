@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, useMemo, useState } from 'react';
-import useModalDialog from '@/components/ui/use-modal-dialog';
+import ModalDialog from '@/components/ui/modal-dialog';
 import Button from '@/components/ui/button';
 import CountBadge from '@/components/ui/count-badge';
 import { GiftBoxIcon, MapIcon, CloseIcon } from '@/components/ui/icons';
@@ -77,19 +77,9 @@ function HistoryDialog({
   onSelect,
   onClose,
 }: Props & { counts: Record<BoxColor, number>; onClose: () => void }) {
-  const dialog = useModalDialog();
   const titleId = useId();
   return (
-    <dialog
-      ref={dialog}
-      className={styles.dialog}
-      aria-labelledby={titleId}
-      onCancel={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        onClose();
-      }}
-    >
+    <ModalDialog className={styles.dialog} aria-labelledby={titleId} onClose={onClose}>
       <div className={styles.heading}>
         <h2 id={titleId}>
           상자 뽑기 기록 <CountBadge>{entries.length}</CountBadge>
@@ -150,6 +140,6 @@ function HistoryDialog({
       ) : (
         <p className={styles.empty}>상자를 열면 식당과 상자 기록이 여기에 쌓여요.</p>
       )}
-    </dialog>
+    </ModalDialog>
   );
 }

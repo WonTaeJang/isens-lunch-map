@@ -20,7 +20,7 @@ export default function IdentityEditor({
   return (
     <Modal
       title="사용자 정보 수정"
-      className={styles['identity-editor']}
+      className={styles.identityEditor}
       onClose={onClose}
       actions={
         <>

@@ -1,51 +1,32 @@
 'use client';
 import styles from './user.module.css';
 
-import IdentityEditor from './identity-editor';
-import UserProgress from './user-progress';
-import Link from 'next/link';
-import { useRef, useState, type ReactNode } from 'react';
-import Button from '@/components/ui/button';
-import { SettingsIcon, UserIcon } from '@/components/ui/icons';
-import TierBadge from '@/features/grade/tier-badge';
+import { useState, type ReactNode } from 'react';
+import LoadingStatus from '@/components/ui/loading-status';
 import PromotionDialog from '@/features/grade/promotion-dialog';
 import TierDialog from '@/features/grade/tier-dialog';
-import TierRing from '@/features/grade/tier-ring';
 import useUserGrade from '@/features/grade/use-user-grade';
-import LoadingStatus from '@/components/ui/loading-status';
-import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import useFavorites from '@/features/favorites/use-favorites';
-import { toggleStoredFavorite } from '@/features/favorites/favorites-store';
-import ReviewActionIcons from '@/features/reviews/review-action-icons';
-import RecommendationBadge from '@/features/reviews/recommendation-badge';
-import list from '@/features/reviews/review-list.module.css';
-import ReviewForm from '@/features/reviews/review-form';
-import ReviewFooter from '@/features/reviews/review-footer';
 import ReviewDeleteDialog from '@/features/reviews/review-delete-dialog';
 import useReviewActions from '@/features/reviews/use-review-actions';
-import { reviewTimestamp, type UserReview, type UserReviewPage } from '@/lib/reviews/model';
-import type { RestaurantRow } from '@/lib/restaurant-types';
-import { hasCoordinates } from '@/lib/coordinates';
-import { restaurantMapHref } from '@/lib/map-link';
-import DistanceBadge from '@/features/lunch-map/distance-badge';
-import { withEul } from '@/lib/korean';
-
-import useLocalUser from '@/features/local-user/use-local-user';
-import useBlacklist from '@/features/blacklist/use-blacklist';
-import HiddenBadge from '@/features/blacklist/hidden-badge';
-import BlacklistList from '@/features/blacklist/blacklist-list';
-import UserName from '@/features/local-user/user-name';
-import type { LocalIdentity } from '@/features/local-user/local-user-store';
 import useReviewFeed from '@/features/reviews/use-review-feed';
+import type { UserReview, UserReviewPage } from '@/lib/reviews/model';
+import type { RestaurantRow } from '@/lib/restaurant-types';
+import { withEul } from '@/lib/korean';
+import useLocalUser from '@/features/local-user/use-local-user';
+import type { LocalIdentity } from '@/features/local-user/local-user-store';
+import useBlacklist from '@/features/blacklist/use-blacklist';
+import BlacklistList from '@/features/blacklist/blacklist-list';
 import LunchCalendar from '@/features/lunch-visits/lunch-calendar';
 import DeviceLinkDialog from './device-link-dialog';
+import IdentityEditor from './identity-editor';
 import IdentityImport from './identity-import';
+import UserFavoritesTab from './user-favorites-tab';
+import UserProfileCard from './user-profile-card';
+import UserProgress from './user-progress';
+import UserReviewsTab from './user-reviews-tab';
+
 type Props = { restaurants: RestaurantRow[] };
-const DATE_FORMAT = new Intl.DateTimeFormat('ko-KR', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
 const TABS = [
   { value: 'lunch', label: '점심 기록' },
   { value: 'reviews', label: '내 리뷰' },
@@ -68,6 +49,12 @@ export default function UserDashboard(props: Props) {
     </>
   );
 }
+
+/**
+ * The user page: profile, progress and the storage note on the side, record tabs in the main
+ * column. The review feed lives here because the profile counts, the grade and the 내 리뷰 tab
+ * all read it, and the tabs stay locked while a review is being saved or edited.
+ */
 function UserDashboardContent({
   restaurants,
   identity,
@@ -77,21 +64,7 @@ function UserDashboardContent({
   const [identityEditorOpen, setIdentityEditorOpen] = useState(false);
   const [deviceDialogOpen, setDeviceDialogOpen] = useState(false);
   const [tierDialogOpen, setTierDialogOpen] = useState(false);
-  const profileClicks = useRef({ start: 0, count: 0 });
-  function clickProfile() {
-    if (!identity || busy || editing) return;
-    const now = performance.now();
-    const clicks = profileClicks.current;
-    if (!clicks.count || now - clicks.start > 2000) {
-      clicks.start = now;
-      clicks.count = 0;
-    }
-    clicks.count++;
-    if (clicks.count === 5) {
-      clicks.count = 0;
-      setIdentityEditorOpen(true);
-    }
-  }
+  const [tab, setTab] = useState<(typeof TABS)[number]['value']>('lunch');
   const favorites = useFavorites();
   const hidden = useBlacklist().ids;
   /** A tab that needs the browser's identity: its content, an identity error or a loading line. */
@@ -117,85 +90,31 @@ function UserDashboardContent({
     feed,
     savedNotice: '리뷰를 수정했어요.',
   });
-  const { notice, editing, deleting, setError } = actions;
+  const { editing, deleting } = actions;
   const error = identityError || actions.error;
-  const [tab, setTab] = useState<(typeof TABS)[number]['value']>('lunch');
-  const [favoriteError, setFavoriteError] = useState('');
-  const savedRestaurants = restaurants
-    .filter((row) => favorites.has(row.id))
-    .sort((a, b) => Number(Boolean(b.active)) - Number(Boolean(a.active)));
   return (
-    <div className={styles['user-dashboard']}>
+    <div className={styles.userDashboard}>
       {/* Wide screens: profile, progress and the storage note on the left, the record tabs on the right. */}
-      <div className={styles['user-side']}>
-        <div className={styles['user-profile-wrap']}>
-          <section
-            className={styles['user-profile']}
-            aria-label="내 프로필"
-            tabIndex={0}
-            onClick={clickProfile}
-            onKeyDown={(event) => {
-              if (!event.repeat && (event.key === 'Enter' || event.key === ' ')) {
-                event.preventDefault();
-                clickProfile();
-              }
-            }}
-          >
-            {grade.tier ? (
-              // The grade crest opens the tier table; it never counts toward the card's 5-click shortcut.
-              <button
-                type="button"
-                className={styles['user-avatar']}
-                aria-label="등급표 보기"
-                title="등급표 보기"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setTierDialogOpen(true);
-                }}
-                onKeyDown={(event) => event.stopPropagation()}
-              >
-                <TierRing tier={grade.tier} progress={grade.progress} />
-              </button>
-            ) : (
-              <span className={styles['user-avatar']} aria-hidden="true">
-                <UserIcon size={30} strokeWidth="1.7" />
-              </span>
-            )}
-            <div>
-              {grade.tier && <TierBadge tier={grade.tier} />}
-              <h1>
-                {identity ? (
-                  <UserName name={identity.user_name} />
-                ) : identityReady ? (
-                  '사용자 정보를 확인해 주세요'
-                ) : (
-                  '불러오는 중…'
-                )}
-              </h1>
-              <p className="subtle">
-                작성한 리뷰 {page?.total ?? '—'} · 즐겨찾기 {identityReady ? favorites.size : '—'}
-              </p>
-            </div>
-          </section>
-          {/* A sibling, not a child, so the card's 5-click editor shortcut ignores it. */}
-          <Link
-            href="/admin"
-            className={styles['user-admin-link']}
-            aria-label="리스트 관리"
-            title="리스트 관리"
-          >
-            <SettingsIcon size={16} />
-          </Link>
-        </div>
+      <div className={styles.userSide}>
+        <UserProfileCard
+          identity={identity}
+          identityReady={identityReady}
+          grade={grade}
+          reviewTotal={page?.total}
+          favoriteCount={favorites.size}
+          onShowTiers={() => setTierDialogOpen(true)}
+          onSecretEdit={() => setIdentityEditorOpen(true)}
+          secretEditLocked={!identity || busy || Boolean(editing)}
+        />
         {identity && (
-          <div className={styles['user-device-link']}>
+          <div className={styles.userDeviceLink}>
             <button type="button" onClick={() => setDeviceDialogOpen(true)}>
               다른 기기에서 이어 쓰기
             </button>
           </div>
         )}
         <UserProgress stats={page} loading={loading} />
-        <p className={styles['user-storage-note']}>
+        <p className={styles.userStorageNote}>
           이 브라우저에 저장된 사용자 정보예요. 브라우저 데이터를 삭제하면 기존 리뷰를 관리할 수
           없어요.
         </p>
@@ -232,8 +151,8 @@ function UserDashboardContent({
           onConfirm={actions.confirmDelete}
         />
       )}
-      <div className={styles['user-main']}>
-        <div className={styles['user-tabs']} aria-label="내 기록 분류">
+      <div className={styles.userMain}>
+        <div className={styles.userTabs} aria-label="내 기록 분류">
           {TABS.map((item) => (
             <button
               type="button"
@@ -247,175 +166,35 @@ function UserDashboardContent({
           ))}
         </div>
         {tab === 'lunch' ? (
-          <div className={styles['user-records']}>
+          <div className={styles.userRecords}>
             {withIdentity('점심 기록', (userId) => (
               <LunchCalendar userId={userId} />
             ))}
           </div>
         ) : tab === 'reviews' ? (
-          <section className={styles['user-records']} aria-label="내 리뷰">
-            {error && (
-              <div className="error-text" role="alert">
-                {error}{' '}
-                <Button
-                  className={styles['spaced-button']}
-                  disabled={loading || busy || Boolean(editing)}
-                  onClick={() => {
-                    setError('');
-                    if (identity) void load();
-                    else window.location.reload();
-                  }}
-                >
-                  다시 불러오기
-                </Button>
-              </div>
-            )}
-            {notice && <p role="status">{notice}</p>}
-            {loading && !page?.hasMore && <LoadingStatus label="내 리뷰를 불러오는 중…" />}
-            {page?.total === 0 && !loading && (
-              <div className={list.empty}>
-                아직 작성한 리뷰가 없어요.{' '}
-                <Link href="/" className="text-link">
-                  점심 지도에서 식당 찾아보기
-                </Link>
-              </div>
-            )}
-            <ul className={`${list.list} ${styles['user-list']}`}>
-              {page?.reviews.map((review) => {
-                // A review of a hidden restaurant is only shown, marked 숨김: no link, edit or delete.
-                const isHidden = hidden?.has(review.restaurant_id) ?? false;
-                const usable = review.restaurant_active && !isHidden;
-                return (
-                  <li
-                    className={`${list.item} ${styles['user-item']}${usable ? '' : ` ${styles['user-restaurant-inactive']}`}`}
-                    key={review.id}
-                  >
-                    <div className={`${list.itemHeading} ${styles['user-item-heading']}`}>
-                      <h2>
-                        {usable && hasCoordinates(review) ? (
-                          <Link href={restaurantMapHref(review.restaurant_id)}>
-                            {review.restaurant_name}
-                          </Link>
-                        ) : (
-                          review.restaurant_name
-                        )}
-                        {isHidden && <HiddenBadge />}
-                      </h2>
-                      <div className={list.headingActions}>
-                        <RecommendationBadge
-                          recommended={review.is_recommended}
-                          className={list.headingBadge}
-                        />
-                        <ReviewActionIcons
-                          disabled={busy || loading || Boolean(editing) || isHidden}
-                          onEdit={() => actions.startEdit(review)}
-                          onDelete={() => actions.startDelete(review)}
-                        />
-                      </div>
-                    </div>
-                    {!review.restaurant_active && <p className="subtle">현재 비활성 식당이에요.</p>}
-                    {review.restaurant_active && !hasCoordinates(review) && (
-                      <p className="subtle">위치 정보 없음 · 지도에 표시되지 않아요</p>
-                    )}
-                    <p className="subtle">
-                      {DATE_FORMAT.format(new Date(reviewTimestamp(review)))}
-                      {review.updated_at && ' · 수정됨'}
-                    </p>
-                    {editing?.id === review.id ? (
-                      <ReviewForm
-                        key={editing.id}
-                        review={editing}
-                        busy={busy || loading}
-                        onReload={() => actions.loadOwnReview(editing.id)}
-                        onCancel={() => actions.setEditing(null)}
-                        onSave={(input, base) => actions.mutate('PATCH', base ?? editing, input)}
-                      />
-                    ) : (
-                      <>
-                        {review.content && (
-                          <p className={`${list.content} ${styles['user-content']}`}>
-                            {review.content}
-                          </p>
-                        )}
-                        <ReviewFooter review={review} tagsClassName={styles['user-tags']} />
-                      </>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-            {page?.hasMore && (
-              <Button
-                className={styles['spaced-button']}
-                loading={loading}
-                loadingLabel="불러오는 중…"
-                disabled={busy || Boolean(editing)}
-                onClick={() => void load(true)}
-              >
-                더 보기
-              </Button>
-            )}
-          </section>
+          <UserReviewsTab
+            identity={identity}
+            page={page}
+            loading={loading}
+            busy={busy}
+            error={error}
+            load={load}
+            actions={actions}
+            hidden={hidden}
+          />
         ) : tab === 'hidden' ? (
-          <section className={styles['user-records']} aria-label="숨긴 식당">
+          <section className={styles.userRecords} aria-label="숨긴 식당">
             {withIdentity('숨긴 식당', (userId) => (
               <BlacklistList
                 userId={userId}
-                listClassName={styles['user-list']}
-                itemClassName={styles['user-item']}
-                inactiveClassName={styles['user-restaurant-inactive']}
+                listClassName={styles.userList}
+                itemClassName={styles.userItem}
+                inactiveClassName={styles.userRestaurantInactive}
               />
             ))}
           </section>
         ) : (
-          <section className={styles['user-records']} aria-label="즐겨찾기 식당">
-            {favoriteError && (
-              <p className="error-text" role="alert">
-                {favoriteError}
-              </p>
-            )}
-            {!savedRestaurants.length && (
-              <p className={list.empty}>
-                즐겨찾기한 식당이 없어요.{' '}
-                <Link href="/" className="text-link">
-                  식당 찾아보기
-                </Link>
-              </p>
-            )}
-            <ul className={`${list.list} ${styles['user-list']}`}>
-              {savedRestaurants.map((row) => (
-                <li
-                  className={`${list.item} ${styles['user-item']}${row.active ? '' : ` ${styles['user-restaurant-inactive']}`}`}
-                  key={row.id}
-                >
-                  <div className={`${list.itemHeading} ${styles['user-item-heading']}`}>
-                    <div className={styles['favorite-title']}>
-                      <FavoriteToggle
-                        restaurantName={row.name}
-                        selected={favorites.has(row.id)}
-                        onClick={() => setFavoriteError(toggleStoredFavorite(row.id) ?? '')}
-                      />
-                      <h2>
-                        {row.active && hasCoordinates(row) ? (
-                          <Link href={restaurantMapHref(row.id)}>{row.name}</Link>
-                        ) : (
-                          row.name
-                        )}
-                      </h2>
-                    </div>
-                    <DistanceBadge distance={row.distance} className={styles['user-distance']} />
-                  </div>
-                  <p className={`description ${styles['user-description']}`}>
-                    {row.category} · {row.main_menu}
-                  </p>
-                  <p className={`description ${styles['user-description']}`}>
-                    {row.address || '주소 확인 필요'}
-                  </p>
-                  {!row.active && <p className="subtle">현재 비활성 식당이에요.</p>}
-                </li>
-              ))}
-            </ul>
-          </section>
+          <UserFavoritesTab restaurants={restaurants} favorites={favorites} />
         )}
       </div>
     </div>

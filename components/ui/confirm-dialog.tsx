@@ -1,7 +1,7 @@
 'use client';
 
 import { useId } from 'react';
-import useModalDialog from './use-modal-dialog';
+import ModalDialog from './modal-dialog';
 import Button from './button';
 import { CalendarCheckIcon } from '@/components/ui/icons';
 import styles from './confirm-dialog.module.css';
@@ -27,19 +27,15 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
 }: Props) {
-  const dialog = useModalDialog();
   const titleId = useId();
   const descriptionId = useId();
   return (
-    <dialog
-      ref={dialog}
+    <ModalDialog
       className={styles.dialog}
       data-notice={!showCancel || undefined}
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
-      onCancel={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
+      onClose={() => {
         if (!busy) onCancel();
       }}
     >
@@ -66,6 +62,6 @@ export default function ConfirmDialog({
           {confirmLabel}
         </Button>
       </div>
-    </dialog>
+    </ModalDialog>
   );
 }

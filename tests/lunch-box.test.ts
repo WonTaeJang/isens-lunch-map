@@ -4,11 +4,10 @@ import {
   boxPosition,
   countBoxColors,
   createBoxes,
-  getBoxCandidates,
   pickBoxColor,
   type BoxHistoryEntry,
 } from '../features/lunch-box/model';
-import { DEFAULT_FILTERS } from '../features/lunch-map/filter-restaurants';
+import { DEFAULT_FILTERS, gameCandidates } from '../features/lunch-map/filter-restaurants';
 import type { MapRestaurant } from '../lib/restaurant-types';
 
 const rows: MapRestaurant[] = [
@@ -34,19 +33,19 @@ test('box candidates intersect inherited distance/favorites and game categories'
   };
   const favorites = new Set(['a', 'b', 'c', 'd']);
   assert.deepEqual(
-    getBoxCandidates(rows, filters, favorites).map((row) => row.id),
+    gameCandidates(rows, filters, favorites).map((row) => row.id),
     ['a', 'c'],
   );
   assert.deepEqual(
-    getBoxCandidates(rows, filters, favorites, ['미분류']).map((row) => row.id),
+    gameCandidates(rows, filters, favorites, ['미분류']).map((row) => row.id),
     ['c'],
   );
-  assert.deepEqual(getBoxCandidates(rows, filters, favorites, ['일식']), []);
-  assert.equal(getBoxCandidates(rows, DEFAULT_FILTERS, favorites).length, 4);
+  assert.deepEqual(gameCandidates(rows, filters, favorites, ['일식']), []);
+  assert.equal(gameCandidates(rows, DEFAULT_FILTERS, favorites).length, 4);
 });
 
 test('boxes respect candidate boundaries, avoid duplicates and exclude the previous winner', () => {
-  const candidates = getBoxCandidates(rows, { ...DEFAULT_FILTERS, maxDistance: 100 }, new Set());
+  const candidates = gameCandidates(rows, { ...DEFAULT_FILTERS, maxDistance: 100 }, new Set());
   assert.deepEqual(
     createBoxes(candidates, 'a', () => 0).map((box) => box.restaurant.id),
     ['c'],

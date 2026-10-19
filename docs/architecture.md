@@ -29,12 +29,14 @@ lib/                         # features와 서버가 함께 쓰는 코드 (featu
     import/                  # 엑셀 파싱·검증·DB 동기화
     distances.ts             # 거리 재측정 미리보기·반영
     coordinates.ts           # 좌표 재측정(주소 재검색) 미리보기·반영
-    admin-writes.ts          # 관리자 쓰기 공통: 리비전·미리보기 서명·잠금 트랜잭션·오류 응답
+    admin.ts                 # 관리자 공통: 비밀번호 확인·AdminError·리비전·미리보기 서명·잠금 트랜잭션
+    api-route.ts             # API 공통: JSON 본문 읽기·오류 응답·캐시 헤더
   reviews/                   # 리뷰 타입·입력 검증·태그 등 정책 상수
   ranking/                   # 랭킹 순위 계산·정책 상수
   grades/                    # 등급 배점·구간·진행률 계산 (화면·서버 공용)
   admin/                     # 관리자 통계 타입
   restaurant-types.ts        # 공통 데이터 타입
+  request-error.ts           # API 요청 오류의 공통 부모(RequestError)·UUID 검사
   coordinates.ts             # 좌표 유효성 검사
   office.ts                  # 아이센스 빌딩 주소·좌표 (지도 중심, 거리 기준점)
   distance.ts                # 회사 기준 직선거리 계산·거리 표시
@@ -48,6 +50,11 @@ lib/                         # features와 서버가 함께 쓰는 코드 (featu
   브라우저로 보내는 필드는 `lib/server/restaurants.ts`의 `toMapRestaurant`·`toRestaurantRow`에서 명시적으로 고릅니다.
 - 페이지의 필수 데이터 조회가 실패하면 `app/error.tsx`가 표시되고 "다시 시도"로 다시 조회합니다.
   리뷰 집계처럼 선택 데이터는 페이지에서 `.catch(() => null)`로 처리합니다. 없는 경로는 `app/not-found.tsx`가 표시됩니다.
+- API 입력 오류는 기능별 클래스(`BlacklistError`, `LunchVisitError`, `ReviewError`, `AdminError`)로 던지며,
+  모두 `lib/request-error.ts`의 `RequestError`(메시지·상태 코드)를 상속합니다. 라우트는
+  `lib/server/api-route.ts`의 `errorResponse`로 응답해, `RequestError`는 메시지와 상태 코드를 그대로 보내고
+  그 밖의 오류는 메타데이터만 로그에 남긴 뒤 500과 일반 안내 문구로 답합니다.
+  JSON 본문은 `readJsonObject`(같은 출처·길이·형식 확인)로 읽고, 사용자별 응답에는 `PRIVATE_NO_STORE` 헤더를 붙입니다.
 
 ### 페이지와 공통 UI
 
@@ -60,6 +67,10 @@ lib/                         # features와 서버가 함께 쓰는 코드 (featu
 예를 들어 `Toggle`은 전달받은 상태를 표시하고 변경 이벤트를 알립니다.
 따라서 지도 필터 디자인을 바꿔도 관리자 활성·비활성 토글은 독립적으로 유지할 수 있습니다.
 특정 기능에서만 사용하는 UI를 무조건 공통 폴더로 옮기지는 않습니다.
+모든 모달은 `ModalDialog`(`<dialog>`를 띄우고 Esc를 `onClose`로 넘기며 바깥 모달로 전달하지 않음) 위에
+만듭니다. 제목·버튼이 정해진 단순 모달은 `Modal`을 쓰고, 리뷰 패널·확인 창·두 게임처럼 모양이 다른 창은
+`ModalDialog`에 자기 스타일만 얹습니다. 두 게임(슬롯·점심 상자)은 후보 계산(`gameCandidates`, 목록의
+거리·즐겨찾기 필터만 따르고 검색어는 무시)과 뽑기(`drawRestaurants`, 직전 결과 제외)도 함께 씁니다.
 
 ### 지도와 리스트의 역할 분리
 
@@ -242,12 +253,13 @@ changed token or any restaurant changed after the preview. It also undoes coordi
 moved by hand, such as the old 4 m spread; `docs/duplicate-coordinates.md` lists
 restaurants that share coordinates.
 
-Import, 거리 재측정 and 좌표 재측정 share `lib/server/admin-writes.ts`: `revision` hashes
-all rows for the preview, `adminSignature` signs previews with `ADMIN_PASSWORD`,
-`writeLocked` runs the save under the table lock and rolls back when the revision no
-longer matches, and `adminErrorResponse` sends an `ImportError` message with its status
-(400 by default, 401 for a wrong password, 403 for another origin) and logs anything else
-as a 500 with a generic message. The admin client reads every response through `requestJson`,
+Every admin route uses `lib/server/admin.ts`: `authorize` checks the password header and
+the origin, and `adminErrorResponse` sends an `AdminError` message with its status (400 by
+default, 401 for a wrong password, 403 for another origin, 500 without `ADMIN_PASSWORD`) and
+logs anything else as a 500 with a generic message. Import, 거리 재측정 and 좌표 재측정 also
+share its `revision` (hashes all rows for the preview), `adminSignature` (signs previews with
+`ADMIN_PASSWORD`) and `writeLocked` (runs the save under the table lock and rolls back when
+the revision no longer matches). The admin client reads every response through `requestJson`,
 so a non-JSON reply such as a gateway timeout shows a readable error.
 
 `npm test` checks parsing and synchronization with a mock database.
@@ -264,6 +276,7 @@ from its dashboard. It is included in Next.js server deployment traces.
 PC에서는 오른쪽 패널, 모바일에서는 하단 패널을 사용합니다.
 
 - `features/reviews/review-panel.tsx`: 조회·저장 상태와 리뷰 패널
+- `features/reviews/review-item.tsx`: 리뷰 패널과 내 리뷰 탭이 함께 쓰는 리뷰 한 건(추천 배지·수정·삭제·날짜·내용·태그·좋아요)
 - `features/reviews/review-form.tsx`: 추천/비추천, 내용(선택), 태그 입력
 - `lib/reviews/model.ts`, `lib/reviews/constants.ts`: 공통 타입과 입력 검증, 고정 태그 목록
 - `features/reviews/use-review-actions.ts`: 리뷰 패널과 사용자 페이지가 공유하는 수정·삭제 흐름
@@ -326,7 +339,9 @@ create index if not exists review_user_created_idx on public.review (user_id, cr
 ## 사용자 페이지 (`/user`)
 
 상단 사용자 SVG 아이콘으로 이동합니다. `features/user/user-dashboard.tsx`에서
-localStorage의 기존 닉네임·ID를 읽고 내 리뷰와 즐겨찾기 탭을 표시합니다.
+localStorage의 기존 닉네임·ID를 읽고 프로필(`user-profile-card.tsx`)과 점심 기록·내 리뷰
+(`user-reviews-tab.tsx`)·즐겨찾기(`user-favorites-tab.tsx`)·숨긴 식당 탭을 표시합니다.
+내 리뷰 목록은 프로필 숫자·등급과 함께 쓰므로 대시보드가 들고 탭에 넘깁니다.
 `GET /api/reviews?scope=mine&user_id=...`는 해당 ID의 리뷰를 최신순 20개씩 반환합니다.
 비활성 식당에 남긴 리뷰도 조회·수정·삭제할 수 있고 기존 리뷰 API와 작성 폼을 재사용합니다.
 리뷰 수정 중에는 탭 전환을 잠가 입력 내용이 사라지는 것을 막습니다.

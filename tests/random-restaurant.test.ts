@@ -83,3 +83,21 @@ test('with few candidates the reel cycles them, showing the winner only where it
   );
   for (let i = 1; i < names.length; i++) assert.notEqual(names[i], names[i - 1]);
 });
+
+test('both games draw different restaurants, leaving out the last result unless it is the only one', async () => {
+  const { drawRestaurants } = await import('../features/lunch-map/random-model');
+  assert.deepEqual(
+    drawRestaurants(rows, 2, 'a', () => 0).map((row) => row.id),
+    rows
+      .filter((row) => row.id !== 'a')
+      .slice(0, 2)
+      .map((row) => row.id),
+  );
+  assert.deepEqual(
+    drawRestaurants([rows[0]], 3, 'a').map((row) => row.id),
+    ['a'],
+  );
+  assert.deepEqual(drawRestaurants([], 3), []);
+  const all = drawRestaurants(rows, rows.length + 5);
+  assert.equal(new Set(all.map((row) => row.id)).size, all.length);
+});

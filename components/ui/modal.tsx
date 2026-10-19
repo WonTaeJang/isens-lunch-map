@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, type CSSProperties, type ReactNode } from 'react';
-import useModalDialog from './use-modal-dialog';
+import ModalDialog from './modal-dialog';
 import styles from './modal.module.css';
 
 type Props = {
@@ -35,18 +35,13 @@ export default function Modal({
   actions,
   children,
 }: Props) {
-  const dialog = useModalDialog();
   const titleId = useId();
   return (
-    <dialog
-      ref={dialog}
+    <ModalDialog
       className={[styles.modal, className].filter(Boolean).join(' ')}
       style={width ? ({ '--modal-width': `${width}px` } as CSSProperties) : undefined}
       aria-labelledby={title ? titleId : labelledBy}
-      onCancel={(event) => {
-        event.preventDefault();
-        onClose();
-      }}
+      onClose={onClose}
     >
       {(title || header) && (
         <div className={styles.header}>
@@ -60,6 +55,6 @@ export default function Modal({
       )}
       <div className={styles.body}>{children}</div>
       {actions && <div className={styles.actions}>{actions}</div>}
-    </dialog>
+    </ModalDialog>
   );
 }

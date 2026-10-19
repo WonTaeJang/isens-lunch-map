@@ -112,7 +112,7 @@
     animation: none;
   }
 }
-.dialog-body {
+.dialogBody {
   min-height: 190px;
   align-content: center; /* Shorter steps sit in the middle of the fixed area. */
 }

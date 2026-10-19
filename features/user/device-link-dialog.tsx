@@ -29,7 +29,7 @@ export default function DeviceLinkDialog({
     <Modal
       title="다른 기기에서 이어 쓰기"
       width={360}
-      className={styles['device-dialog']}
+      className={styles.deviceDialog}
       onClose={onClose}
       actions={
         <>
@@ -43,10 +43,10 @@ export default function DeviceLinkDialog({
       <p className="description">
         휴대폰 카메라로 QR을 찍거나, 링크를 다른 브라우저에서 열어 주세요.
       </p>
-      <div className={styles['device-qr']}>
+      <div className={styles.deviceQr}>
         <QrCode value={link} label="다른 기기에서 이어 쓰기 QR 코드" />
       </div>
-      <p className={styles['device-warning']}>
+      <p className={styles.deviceWarning}>
         이 링크로 내 리뷰를 수정·삭제할 수 있어요. 다른 사람에게 보내지 마세요.
       </p>
     </Modal>

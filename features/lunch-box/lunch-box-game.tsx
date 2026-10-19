@@ -2,23 +2,22 @@
 
 import Button from '@/components/ui/button';
 import FilterChip from '@/components/ui/filter-chip';
-import { DEFAULT_FILTERS, type RestaurantFilters } from '@/features/lunch-map/filter-restaurants';
+import {
+  categoryOf,
+  DEFAULT_FILTERS,
+  gameCandidates,
+  type RestaurantFilters,
+} from '@/features/lunch-map/filter-restaurants';
 import { RestaurantFilterChips } from '@/features/lunch-map/restaurant-filter-controls';
 import DistanceBadge from '@/features/lunch-map/distance-badge';
 import ReviewCountBadges from '@/features/reviews/review-counts';
 import { getReviewCounts, type ReviewCounts } from '@/lib/reviews/model';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { CloseIcon } from '@/components/ui/icons';
-import useModalDialog from '@/components/ui/use-modal-dialog';
+import ModalDialog from '@/components/ui/modal-dialog';
 import { hasCoordinates } from '@/lib/coordinates';
 import type { MapRestaurant } from '@/lib/restaurant-types';
-import {
-  boxPosition,
-  createBoxes,
-  getBoxCandidates,
-  type BoxHistoryEntry,
-  type LunchBox,
-} from './model';
+import { boxPosition, createBoxes, type BoxHistoryEntry, type LunchBox } from './model';
 import styles from './lunch-box.module.css';
 import BoxHistory from './box-history';
 
@@ -41,12 +40,11 @@ export default function LunchBoxGame({
   favorites: ReadonlySet<string>;
   onSelect: (id: string) => void;
 }) {
-  const dialog = useModalDialog();
   const [filters, setFilters] = useState<RestaurantFilters>({ ...initialFilters, query: '' });
   const [categories, setCategories] = useState<string[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [boxes, setBoxes] = useState<LunchBox[]>(() =>
-    createBoxes(getBoxCandidates(restaurants, initialFilters, favorites)),
+    createBoxes(gameCandidates(restaurants, initialFilters, favorites)),
   );
   const [selected, setSelected] = useState<number | null>(null);
   const [phase, setPhase] = useState<'shuffle' | 'choose' | 'opening' | 'result'>('shuffle');
@@ -64,9 +62,9 @@ export default function LunchBoxGame({
   const recorded = useRef<LunchBox | null>(null);
   const winner = selected === null ? null : boxes[selected];
 
-  const candidates = getBoxCandidates(restaurants, filters, favorites, categories);
-  const categoryOptions = [...new Set(restaurants.map((row) => row.category || '미분류'))].sort(
-    (a, b) => a.localeCompare(b, 'ko'),
+  const candidates = gameCandidates(restaurants, filters, favorites, categories);
+  const categoryOptions = [...new Set(restaurants.map(categoryOf))].sort((a, b) =>
+    a.localeCompare(b, 'ko'),
   );
   const filterBusy = phase === 'opening' || phase === 'shuffle';
   const filterSummary = [
@@ -80,7 +78,7 @@ export default function LunchBoxGame({
     if (filterBusy) return;
     setFilters(next);
     setCategories(nextCategories);
-    const rows = getBoxCandidates(restaurants, next, favorites, nextCategories);
+    const rows = gameCandidates(restaurants, next, favorites, nextCategories);
     setBoxes(createBoxes(rows));
     cancelPress();
     setSelected(null);
@@ -179,17 +177,14 @@ export default function LunchBoxGame({
   }
 
   return (
-    <dialog
-      ref={dialog}
+    <ModalDialog
       className={styles.dialog}
       data-closing={closing || undefined}
       data-phase={phase}
       data-color={winner?.color}
       aria-labelledby="lunch-box-title"
-      onCancel={(event) => {
-        event.preventDefault();
-        setClosing(true);
-      }}
+      // Closes after its exit animation.
+      onClose={() => setClosing(true)}
     >
       <div className={styles.world}>
         <div className={styles.stars} aria-hidden="true" />
@@ -472,6 +467,6 @@ export default function LunchBoxGame({
           <small>빛의 색은 무작위이며, 식당의 평가와는 관계없어요.</small>
         </footer>
       </div>
-    </dialog>
+    </ModalDialog>
   );
 }

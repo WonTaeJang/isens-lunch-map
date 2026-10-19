@@ -1,33 +1,33 @@
-.user-dashboard {
+.userDashboard {
   display: flex;
   flex-direction: column;
   max-width: 780px;
   margin: 32px auto;
 }
-/* One column in reading order, with the storage note (inside .user-side) last. */
-.user-side {
+/* One column in reading order, with the storage note (inside .userSide) last. */
+.userSide {
   display: contents;
 }
 /* Wide screens: profile, progress and the storage note on the left, kept in view while the
    records on the right scroll. */
 @media (min-width: 1100px) {
-  .user-dashboard {
+  .userDashboard {
     display: grid;
     grid-template-columns: 340px minmax(0, 1fr);
     column-gap: 24px;
     align-items: start;
     max-width: 1180px;
   }
-  .user-side {
+  .userSide {
     display: block;
     position: sticky;
     top: 24px;
   }
-  .user-main .user-tabs {
+  .userMain .userTabs {
     margin-top: 0;
   }
 }
-.user-profile {
+.userProfile {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -36,16 +36,16 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-2xl);
 }
-.user-profile h1 {
+.userProfile h1 {
   font-size: 24px;
   margin: 6px 0 10px;
   overflow-wrap: anywhere;
 }
-.user-profile-wrap {
+.userProfileWrap {
   position: relative;
 }
 /* Small, quiet link to the admin page in the profile card's top-right corner. */
-.user-admin-link {
+.userAdminLink {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -56,11 +56,11 @@
   border-radius: var(--radius-sm);
   color: var(--color-text-faint);
 }
-.user-admin-link:hover {
+.userAdminLink:hover {
   background: var(--color-surface-muted);
   color: var(--color-text-muted);
 }
-.user-avatar {
+.userAvatar {
   flex: 0 0 72px;
   height: 72px;
   display: grid;
@@ -70,19 +70,19 @@
   color: var(--color-primary);
 }
 /* The grade crest and its progress ring fill the avatar slot (72px, 56px on phones). */
-button.user-avatar {
+button.userAvatar {
   padding: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
 }
-.user-tabs {
+.userTabs {
   display: flex;
   gap: 24px;
   margin-top: 24px;
   border-bottom: 1px solid var(--color-border);
 }
-.user-tabs button {
+.userTabs button {
   padding: 16px 8px;
   border: 0;
   border-bottom: 3px solid transparent;
@@ -93,13 +93,13 @@ button.user-avatar {
   white-space: nowrap;
   cursor: pointer;
 }
-.user-tabs button[aria-pressed='true'] {
+.userTabs button[aria-pressed='true'] {
   border-bottom-color: var(--color-primary);
   color: var(--color-primary);
   font-weight: 700;
 }
 /* Narrow screens: four equal tabs across the row (like the ranking tabs) instead of wrapping labels. */
-.user-records {
+.userRecords {
   background: var(--color-surface);
   padding: 24px;
   border: 1px solid var(--color-border);
@@ -108,27 +108,27 @@ button.user-avatar {
 }
 /* Hook classes (user-list, user-item, ...) sit next to the shared review list classes, so these
    overrides win by specificity rather than by stylesheet order. */
-.user-records .user-list {
+.userRecords .userList {
   margin: 0;
 }
-.user-records .user-item {
+.userRecords .userItem {
   padding: 20px 12px;
 }
-.user-records .user-item:first-child {
+.userRecords .userItem:first-child {
   border-top: 0;
 }
-.user-records .user-item-heading h2 {
+.userRecords .userItemHeading h2 {
   font-size: var(--text-lg);
   overflow-wrap: anywhere;
 }
-.user-records .user-item-heading a:hover {
+.userRecords .userItemHeading a:hover {
   color: var(--color-primary);
   text-decoration: underline;
 }
-.user-records .user-description {
+.userRecords .userDescription {
   margin-top: 8px;
 }
-.user-storage-note {
+.userStorageNote {
   order: 1;
   margin-top: 20px;
   color: var(--color-text-subtle);
@@ -136,22 +136,22 @@ button.user-avatar {
   line-height: 1.8;
 }
 
-.user-records .user-restaurant-inactive {
+.userRecords .userRestaurantInactive {
   background: var(--color-surface-muted);
   border-radius: var(--radius-md);
 }
-.user-restaurant-inactive .user-item-heading h2,
-.user-restaurant-inactive .user-content,
-.user-restaurant-inactive .user-description {
+.userRestaurantInactive .userItemHeading h2,
+.userRestaurantInactive .userContent,
+.userRestaurantInactive .userDescription {
   color: var(--color-text-subtle);
 }
-.user-restaurant-inactive .user-tags span,
-.user-restaurant-inactive .user-distance {
+.userRestaurantInactive .userTags span,
+.userRestaurantInactive .userDistance {
   background: var(--color-border-subtle);
   color: var(--color-text-muted);
 }
 
-.user-progress {
+.userProgress {
   margin-top: 16px;
   padding: 24px 28px;
   display: grid;
@@ -160,50 +160,50 @@ button.user-avatar {
   border-radius: var(--radius-2xl);
   background: var(--color-surface);
 }
-.user-progress-heading {
+.userProgressHeading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 10px;
 }
-.user-progress-heading h2 {
+.userProgressHeading h2 {
   font-size: var(--text-base);
 }
-.user-progress-heading strong {
+.userProgressHeading strong {
   color: var(--color-primary);
   font-size: var(--text-base);
 }
 
-.favorite-title {
+.favoriteTitle {
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
 }
-.favorite-title h2 {
+.favoriteTitle h2 {
   min-width: 0;
 }
 
-.identity-editor form {
+.identityEditor form {
   margin-top: 20px;
 }
-.identity-editor label {
+.identityEditor label {
   display: block;
   margin-top: 12px;
   font-size: var(--text-md);
 }
-.identity-editor input {
+.identityEditor input {
   width: 100%;
 }
 
 /* 다른 기기에서 이어 쓰기 */
-.user-device-link {
+.userDeviceLink {
   display: flex;
   justify-content: flex-end;
   margin-top: 8px;
 }
-.user-device-link button {
+.userDeviceLink button {
   padding: 4px 2px;
   border: 0;
   background: none;
@@ -214,54 +214,54 @@ button.user-avatar {
   text-underline-offset: 3px;
   cursor: pointer;
 }
-.user-device-link button:hover {
+.userDeviceLink button:hover {
   color: var(--color-primary-strong);
 }
-.device-dialog {
+.deviceDialog {
   text-align: center;
 }
-.device-qr {
+.deviceQr {
   display: flex;
   justify-content: center;
   margin: 16px 0 8px;
 }
-.device-warning {
+.deviceWarning {
   color: var(--color-warning);
   font-size: var(--text-sm);
   line-height: 1.5;
 }
 /* Button has no outer margin; this is the space it used to get from the global .button. */
-.spaced-button {
+.spacedButton {
   margin-top: 20px;
 }
 /* Phones and narrow windows. */
 @media (max-width: 760px) {
-  .user-tabs {
+  .userTabs {
     gap: 0;
   }
-  .user-tabs button {
+  .userTabs button {
     flex: 1;
     min-width: 0;
     padding-inline: 4px;
   }
-  .user-dashboard {
+  .userDashboard {
     margin-top: 20px;
   }
-  .user-profile {
+  .userProfile {
     padding: 20px;
     gap: 14px;
   }
-  .user-profile h1 {
+  .userProfile h1 {
     font-size: var(--text-2xl);
   }
-  .user-avatar {
+  .userAvatar {
     flex-basis: 56px;
     height: 56px;
   }
-  .user-records {
+  .userRecords {
     padding: 18px;
   }
-  .user-progress {
+  .userProgress {
     padding: 20px;
   }
 }

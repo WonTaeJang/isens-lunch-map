@@ -3,7 +3,7 @@
 import { CloseIcon } from '@/components/ui/icons';
 
 import { useId, useRef, useState } from 'react';
-import useModalDialog from '@/components/ui/use-modal-dialog';
+import ModalDialog from '@/components/ui/modal-dialog';
 import Button from '@/components/ui/button';
 import ReviewCountBadges from '@/features/reviews/review-counts';
 import ReviewedBadge from '@/features/reviews/reviewed-badge';
@@ -13,7 +13,7 @@ import useTodayLunchAction from '@/features/lunch-visits/use-today-lunch-action'
 import type { ReviewCounts } from '@/lib/reviews/model';
 import { hasCoordinates } from '@/lib/coordinates';
 import type { MapRestaurant } from '@/lib/restaurant-types';
-import { filterRestaurants, type RestaurantFilters } from './filter-restaurants';
+import { gameCandidates, type RestaurantFilters } from './filter-restaurants';
 import { RestaurantFilterChips } from './restaurant-filter-controls';
 import RestaurantSlot from './restaurant-slot';
 import { getReviewCounts } from '@/lib/reviews/model';
@@ -38,7 +38,6 @@ export default function RandomRestaurant({
   onClose: () => void;
   onSelect: (id: string) => void;
 }) {
-  const dialog = useModalDialog();
   const titleId = useId();
   const drawing = useRef(false);
   const [filters, setFilters] = useState({ ...initialFilters, query: '' });
@@ -47,7 +46,7 @@ export default function RandomRestaurant({
   const [reel, setReel] = useState<{ names: string[]; key: number; chosen: MapRestaurant } | null>(
     null,
   );
-  const candidates = filterRestaurants(restaurants, filters, favorites);
+  const candidates = gameCandidates(restaurants, filters, favorites);
   const resultCounts = result ? getReviewCounts(reviewCounts, result.id) : null;
   const todayLunch = useTodayLunchAction();
 
@@ -73,15 +72,7 @@ export default function RandomRestaurant({
   }
 
   return (
-    <dialog
-      ref={dialog}
-      className={styles.dialog}
-      aria-labelledby={titleId}
-      onCancel={(event) => {
-        event.preventDefault();
-        onClose();
-      }}
-    >
+    <ModalDialog className={styles.dialog} aria-labelledby={titleId} onClose={onClose}>
       <div className={styles.heading}>
         <h2 id={titleId}>오늘 뭐 먹지?</h2>
         <button
@@ -193,6 +184,6 @@ export default function RandomRestaurant({
         </div>
       )}
       {todayLunch.dialog}
-    </dialog>
+    </ModalDialog>
   );
 }

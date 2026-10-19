@@ -25,9 +25,9 @@ export default function TierRing({
   return (
     <span className={styles.ring} style={tierColorVars(tier)}>
       <svg viewBox={`0 0 ${BOX} ${BOX}`} aria-hidden="true" data-top={top || undefined}>
-        <circle className={styles['ring-track']} cx={BOX / 2} cy={BOX / 2} r={RADIUS} />
+        <circle className={styles.ringTrack} cx={BOX / 2} cy={BOX / 2} r={RADIUS} />
         <circle
-          className={styles['ring-fill']}
+          className={styles.ringFill}
           cx={BOX / 2}
           cy={BOX / 2}
           r={RADIUS}
@@ -37,7 +37,7 @@ export default function TierRing({
           opacity={fill > 0 ? 1 : 0}
         />
       </svg>
-      <span className={styles['ring-crest']}>
+      <span className={styles.ringCrest}>
         <TierIcon tier={tier} />
       </span>
     </span>

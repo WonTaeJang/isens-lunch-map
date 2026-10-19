@@ -58,7 +58,7 @@ function GuideDialog({ onClose }: { onClose: () => void }) {
         {/* A new key per step remounts the slide so its entry animation plays again. */}
         <div key={step} className={styles.slide} data-direction={direction}>
           <h2 id="guide-title">{current.title}</h2>
-          <div className={`${styles.body} ${styles['dialog-body']}`}>
+          <div className={`${styles.body} ${styles.dialogBody}`}>
             {current.body(identity?.user_name ?? null)}
           </div>
         </div>

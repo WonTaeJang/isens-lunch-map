@@ -14,6 +14,24 @@ export const DEFAULT_FILTERS: RestaurantFilters = {
 const normalize = (value: string) =>
   value.normalize('NFKC').toLocaleLowerCase('ko-KR').replace(/\s+/g, '');
 
+/** A restaurant's category in the game filters; restaurants without one are grouped as 미분류. */
+export const categoryOf = (row: Pick<MapRestaurant, 'category'>) => row.category || '미분류';
+
+/**
+ * Candidates for the games (slot and lunch box): the list's distance and favorite filters, never
+ * its text search, optionally narrowed to `categories`.
+ */
+export function gameCandidates(
+  rows: MapRestaurant[],
+  filters: RestaurantFilters,
+  favorites: ReadonlySet<string>,
+  categories: readonly string[] = [],
+) {
+  return filterRestaurants(rows, { ...filters, query: '' }, favorites).filter(
+    (row) => !categories.length || categories.includes(categoryOf(row)),
+  );
+}
+
 export function filterRestaurants(
   rows: MapRestaurant[],
   filters: RestaurantFilters,

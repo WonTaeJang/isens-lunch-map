@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import useModalDialog from '@/components/ui/use-modal-dialog';
+import ModalDialog from '@/components/ui/modal-dialog';
 import useBackdropClose from '@/components/ui/use-backdrop-close';
 import Button from '@/components/ui/button';
 import LoadingStatus from '@/components/ui/loading-status';
@@ -9,18 +9,11 @@ import ConfirmDialog from '@/components/ui/confirm-dialog';
 import ReviewDeleteDialog from './review-delete-dialog';
 import { ApiError, reviewRequest as request } from './review-api';
 import RecommendationBar from './recommendation-bar';
-import ReviewActionIcons from './review-action-icons';
-import RecommendationBadge from '@/features/reviews/recommendation-badge';
 import ReviewForm from './review-form';
-import ReviewFooter from './review-footer';
+import ReviewItem from './review-item';
 import styles from './review-panel.module.css';
 import list from './review-list.module.css';
-import {
-  reviewTimestamp,
-  type Review,
-  type ReviewPage,
-  type reviewInput,
-} from '@/lib/reviews/model';
+import { type Review, type ReviewPage, type reviewInput } from '@/lib/reviews/model';
 import { DAILY_REVIEW_LIMIT } from '@/lib/reviews/constants';
 
 import useLocalUser from '@/features/local-user/use-local-user';
@@ -29,11 +22,6 @@ import type { LocalIdentity } from '@/features/local-user/local-user-store';
 import useReviewFeed from './use-review-feed';
 import useReviewActions from './use-review-actions';
 type Props = { restaurant: { id: string; name: string }; onClose: () => void };
-const DATE_FORMAT = new Intl.DateTimeFormat('ko-KR', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
 
 export default function ReviewPanel(props: Props) {
   const user = useLocalUser();
@@ -54,7 +42,6 @@ function ReviewPanelContent({
   identityReady,
   storageError,
 }: Props & { identity: LocalIdentity | null; identityReady: boolean; storageError: string }) {
-  const dialog = useModalDialog();
   const params = new URLSearchParams({ restaurant_id: restaurant.id });
   if (identity) params.set('user_id', identity.user_id);
   const feed = useReviewFeed<ReviewPage>(identityReady ? `/api/reviews?${params}` : null);
@@ -98,15 +85,11 @@ function ReviewPanelContent({
   const backdropClose = useBackdropClose(close);
 
   return (
-    <dialog
-      ref={dialog}
+    <ModalDialog
       className={styles.panel}
       aria-labelledby="review-panel-title"
       {...backdropClose}
-      onCancel={(event) => {
-        event.preventDefault();
-        close();
-      }}
+      onClose={close}
     >
       {limitReached && (
         <ConfirmDialog
@@ -193,34 +176,27 @@ function ReviewPanelContent({
         )}
         <ul className={list.list}>
           {page?.reviews.map((review) => (
-            <li key={review.id} className={list.item}>
-              <div className={list.itemHeading}>
+            <ReviewItem
+              key={review.id}
+              review={review}
+              title={
                 <strong>
                   {review.user_name ? <UserName name={review.user_name} /> : '익명'}{' '}
                   {review.is_mine && <small>내 리뷰</small>}
                 </strong>
-                <div className={list.headingActions}>
-                  <RecommendationBadge
-                    recommended={review.is_recommended}
-                    className={list.headingBadge}
-                  />
-                  {review.is_mine && (
-                    <ReviewActionIcons
-                      disabled={busy || loading || Boolean(editing)}
-                      onEdit={() => actions.startEdit(review)}
-                      onDelete={() => actions.startDelete(review)}
-                    />
-                  )}
-                </div>
-              </div>
-              <p className="subtle">
-                {DATE_FORMAT.format(new Date(reviewTimestamp(review)))}
-                {review.updated_at && ' · 수정됨'}
-              </p>
-              {review.content && <p className={list.content}>{review.content}</p>}
-              {/* No 좋아요 while a review is being written or edited. */}
-              <ReviewFooter review={review} likeDisabled={Boolean(editing)} />
-            </li>
+              }
+              actions={
+                review.is_mine
+                  ? {
+                      disabled: busy || loading || Boolean(editing),
+                      onEdit: () => actions.startEdit(review),
+                      onDelete: () => actions.startDelete(review),
+                    }
+                  : undefined
+              }
+              // No 좋아요 while a review is being written or edited.
+              likeDisabled={Boolean(editing)}
+            />
           ))}
         </ul>
         {page?.hasMore && (
@@ -235,6 +211,6 @@ function ReviewPanelContent({
           </Button>
         )}
       </div>
-    </dialog>
+    </ModalDialog>
   );
 }

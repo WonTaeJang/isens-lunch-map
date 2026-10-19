@@ -1,5 +1,6 @@
 'use client';
 
+import useGamePlayCounter from '@/features/game-plays/use-game-play-counter';
 import { menuLine } from '@/lib/restaurant-labels';
 import { prefersReducedMotion } from '@/lib/motion';
 import { CloseIcon } from '@/components/ui/icons';
@@ -51,6 +52,7 @@ export default function RandomRestaurant({
   const candidates = gameCandidates(restaurants, filters, favorites);
   const resultCounts = result ? getReviewCounts(reviewCounts, result.id) : null;
   const todayLunch = useTodayLunchAction();
+  const countPlay = useGamePlayCounter('slot');
 
   function changeFilters(next: Partial<RestaurantFilters>) {
     setFilters((current) => ({ ...current, ...next, query: '' }));
@@ -61,6 +63,7 @@ export default function RandomRestaurant({
     if (drawing.current) return;
     const chosen = pickRestaurant(candidates, result?.id);
     if (!chosen) return;
+    countPlay();
     if (candidates.length === 1 || prefersReducedMotion()) {
       setReel(null);
       setResult(chosen);

@@ -1,5 +1,6 @@
 'use client';
 
+import useGamePlayCounter from '@/features/game-plays/use-game-play-counter';
 import { menuLine } from '@/lib/restaurant-labels';
 import { prefersReducedMotion } from '@/lib/motion';
 import Button from '@/components/ui/button';
@@ -63,6 +64,7 @@ export default function LunchBoxGame({
   const resultRef = useRef<HTMLHeadingElement>(null);
   const recorded = useRef<LunchBox | null>(null);
   const winner = selected === null ? null : boxes[selected];
+  const countPlay = useGamePlayCounter('lunch_box');
 
   const candidates = gameCandidates(restaurants, filters, favorites, categories);
   const categoryOptions = [...new Set(restaurants.map(categoryOf))].sort((a, b) =>
@@ -140,6 +142,7 @@ export default function LunchBoxGame({
   useEffect(() => {
     if (phase !== 'result' || !winner || selected === null || recorded.current === winner) return;
     recorded.current = winner;
+    countPlay();
     resultRef.current?.focus();
     onRecord({
       ...winner,
@@ -147,7 +150,7 @@ export default function LunchBoxGame({
       position: boxPosition(selected, boxes.length),
       counts: getReviewCounts(reviewCounts, winner.restaurant.id),
     });
-  }, [phase, winner, selected, boxes.length, reviewCounts, onRecord]);
+  }, [phase, winner, selected, boxes.length, reviewCounts, onRecord, countPlay]);
   useEffect(() => {
     if (!closing) return;
     const timer = window.setTimeout(onClose, 420);

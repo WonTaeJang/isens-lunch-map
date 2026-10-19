@@ -76,6 +76,8 @@ lib/                         # features와 서버가 함께 쓰는 코드 (featu
 `ModalDialog`에 자기 스타일만 얹습니다. 두 게임(슬롯·점심 상자)은 후보 계산(`gameCandidates`, 목록의
 거리·즐겨찾기 필터만 따르고 검색어는 무시)과 뽑기(`drawRestaurants`, 직전 결과 제외)도 함께 씁니다.
 두 게임은 `useGamePlayCounter`로 팝업에서 한 판 수를 세어 닫힐 때 날짜별 횟수에 더합니다(`docs/game-plays.md`).
+지도 밑 "최근 본" 줄(`features/recent-restaurants`)은 상세 카드가 열린 식당 ID를 이 브라우저의 localStorage에
+최근 순으로 5개까지 남깁니다. 칩마다 지우기와 전체 지우기가 있고, 지금 필터에 가려진 식당 칩은 흐리게 표시됩니다.
 
 ### 지도와 리스트의 역할 분리
 

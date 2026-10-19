@@ -189,7 +189,6 @@ export default function LunchBoxGame({
       onClose={() => setClosing(true)}
     >
       <div className={styles.world}>
-        <div className={styles.stars} aria-hidden="true" />
         <header className={styles.header}>
           <span className={styles.brand}>
             LUNCH MAP <span>/</span> 설레는 점심시간

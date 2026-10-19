@@ -52,21 +52,6 @@
     radial-gradient(ellipse at 12% 74%, #dbe9cd99, transparent 55%),
     linear-gradient(150deg, #fffcf3, #fff8e9 55%, #eff4e5);
 }
-.stars {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  opacity: 0.5;
-  background-image:
-    radial-gradient(1px 1px at 20px 30px, #ceaa68 90%, transparent),
-    radial-gradient(1px 1px at 110px 140px, #8da47a 90%, transparent),
-    radial-gradient(2px 2px at 190px 80px, #dcad5c 70%, transparent);
-  background-size:
-    233px 211px,
-    307px 263px,
-    491px 379px;
-  mask-image: linear-gradient(transparent, #000 25%, #000 80%, transparent);
-}
 .header {
   display: flex;
   justify-content: space-between;

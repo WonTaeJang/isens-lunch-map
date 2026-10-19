@@ -48,9 +48,19 @@
   padding: 24px 22px;
   border-bottom: 1px solid var(--color-border-subtle);
 }
+/* The map with 최근 본 under it, as one grid cell. */
+.mapColumn {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
 @media (max-width: 760px) {
   .layout {
     grid-template-columns: 1fr;
+  }
+  /* The map comes first on phones, above the list. */
+  .mapColumn {
+    grid-row: 1;
   }
 }
 .favoriteError {

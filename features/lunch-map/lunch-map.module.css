@@ -38,7 +38,6 @@
   /* Fixed heights by width: in-app browsers (e.g. KakaoTalk) resize the page while their bars
      hide on scroll, so a viewport-height map would keep resizing. */
   .panel {
-    grid-row: 1;
     height: 440px;
   }
 }

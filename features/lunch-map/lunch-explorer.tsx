@@ -15,6 +15,8 @@ import RestaurantFilters from './restaurant-filters';
 import RestaurantResults from './restaurant-results';
 import styles from './lunch-explorer.module.css';
 import LunchMap from './lunch-map';
+import RecentRestaurants from '@/features/recent-restaurants/recent-restaurants';
+import { recentRestaurants } from '@/features/recent-restaurants/recent-restaurants-store';
 import useFavorites from '@/features/favorites/use-favorites';
 import useBlacklist from '@/features/blacklist/use-blacklist';
 import { toggleStoredFavorite } from '@/features/favorites/favorites-store';
@@ -82,8 +84,23 @@ export default function LunchExplorer({
     [restaurants, filters, favorites],
   );
   // Hidden selections must not reopen when a filter is removed.
-  const visibleSelectedId = rows.some((row) => row.id === selectedId) ? selectedId : null;
+  const visibleIds = useMemo(() => new Set(rows.map((row) => row.id)), [rows]);
+  const visibleSelectedId = selectedId && visibleIds.has(selectedId) ? selectedId : null;
   if (selectedId !== visibleSelectedId) setSelectedId(visibleSelectedId);
+  // An opened restaurant card goes to the front of 최근 본, unless it was opened from 최근 본
+  // itself: picking a chip leaves the row's order as it is.
+  const openedFromRecent = useRef<string | null>(null);
+  useEffect(() => {
+    if (!visibleSelectedId) return;
+    const fromRecent = openedFromRecent.current === visibleSelectedId;
+    openedFromRecent.current = null;
+    if (!fromRecent) recentRestaurants.add(visibleSelectedId);
+  }, [visibleSelectedId]);
+  function selectFromRecent(id: string) {
+    // Re-picking the open restaurant changes no selection, so there is nothing to skip.
+    if (id !== visibleSelectedId) openedFromRecent.current = id;
+    selectRestaurant(id);
+  }
 
   function changeFilters(next: Partial<typeof filters>) {
     setFilters((current) => ({ ...current, ...next }));
@@ -179,20 +196,27 @@ export default function LunchExplorer({
           onReviews={openReviews}
         />
       </aside>
-      <LunchMap
-        reviewedIds={reviewedIds}
-        reviewCounts={reviewCounts}
-        restaurants={rows}
-        favorites={favorites}
-        selectedId={visibleSelectedId}
-        focusRequest={focusRequest}
-        onSelect={setSelectedId}
-        onFavorite={toggleStoredFavorite}
-        onReviews={openReviews}
-        randomDisabled={!restaurants.length}
-        onRandom={() => setActiveGame(Math.random() < 0.5 ? 'slot' : 'box')}
-        onShowTodayLunch={showTodayLunch}
-      />
+      <div className={styles.mapColumn}>
+        <LunchMap
+          reviewedIds={reviewedIds}
+          reviewCounts={reviewCounts}
+          restaurants={rows}
+          favorites={favorites}
+          selectedId={visibleSelectedId}
+          focusRequest={focusRequest}
+          onSelect={setSelectedId}
+          onFavorite={toggleStoredFavorite}
+          onReviews={openReviews}
+          randomDisabled={!restaurants.length}
+          onRandom={() => setActiveGame(Math.random() < 0.5 ? 'slot' : 'box')}
+          onShowTodayLunch={showTodayLunch}
+        />
+        <RecentRestaurants
+          restaurants={restaurants}
+          visibleIds={visibleIds}
+          onSelect={selectFromRecent}
+        />
+      </div>
       {reviewRestaurant && !hidden?.has(reviewRestaurant.id) && (
         <ReviewPanel
           key={reviewRestaurant.id}

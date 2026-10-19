@@ -34,7 +34,7 @@ lib/                         # features와 서버가 함께 쓰는 코드 (featu
   reviews/                   # 리뷰 타입·입력 검증·태그 등 정책 상수
   ranking/                   # 랭킹 순위 계산·정책 상수
   grades/                    # 등급 배점·구간·진행률 계산 (화면·서버 공용)
-  admin/                     # 관리자 통계 타입
+  admin/                     # 관리자 통계·미리보기(거리·좌표·엑셀) 타입
   restaurant-types.ts        # 공통 데이터 타입
   request-error.ts           # API 요청 오류의 공통 부모(RequestError)·UUID 검사
   coordinates.ts             # 좌표 유효성 검사
@@ -55,6 +55,10 @@ lib/                         # features와 서버가 함께 쓰는 코드 (featu
   `lib/server/api-route.ts`의 `errorResponse`로 응답해, `RequestError`는 메시지와 상태 코드를 그대로 보내고
   그 밖의 오류는 메타데이터만 로그에 남긴 뒤 500과 일반 안내 문구로 답합니다.
   JSON 본문은 `readJsonObject`(같은 출처·길이·형식 확인)로 읽고, 사용자별 응답에는 `PRIVATE_NO_STORE` 헤더를 붙입니다.
+- 작은 공통 도구: DB 트랜잭션은 `withTransaction`(`lib/server/db.ts`), 브라우저 저장소(store)의 구독은
+  `createListeners`(`lib/listeners.ts`), JSON 요청 옵션은 `jsonBody`(`lib/request-json.ts`),
+  움직임 줄이기 설정은 `prefersReducedMotion`(`lib/motion.ts`), 식당 정보가 비었을 때의 문구('분류 정보 없음'·
+  '주소 확인 필요', "카테고리 · 대표메뉴")는 `lib/restaurant-labels.ts`를 씁니다.
 
 ### 페이지와 공통 UI
 

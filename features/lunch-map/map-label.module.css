@@ -29,3 +29,39 @@
   /* Never block marker clicks or map dragging. */
   pointer-events: none;
 }
+
+/* Restaurants at the same coordinates: their count in the restaurant marker color. Its bottom
+ * sits on the place, where the marker tip points. */
+.group {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 5px;
+  border: 2px solid #fff;
+  border-radius: var(--radius-full);
+  background: #2785d5; /* restaurant-marker-default.svg */
+  box-shadow: var(--shadow-xs);
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+.group[aria-expanded='true'] {
+  box-shadow: 0 0 0 3px rgb(39 133 213 / 30%);
+}
+.groupLabel {
+  display: flex;
+  gap: 3px;
+  bottom: 27px; /* Just above the 24px circle. */
+}
+/* Only the name is cut short, so "외 N" always shows. */
+.groupLabel span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.groupLabel span:last-child {
+  flex: none;
+}

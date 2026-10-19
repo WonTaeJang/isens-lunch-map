@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckIcon, DirectionsIcon } from '@/components/ui/icons';
+import { CheckIcon, ChevronLeftIcon, DirectionsIcon } from '@/components/ui/icons';
 import FavoriteToggle from '@/features/favorites/favorite-toggle';
 import HideButton from '@/features/blacklist/hide-button';
 import TodayLunchButton from '@/features/lunch-visits/today-lunch-button';
@@ -26,6 +26,9 @@ type Props = {
   /** Records, changes (after confirmation) or cancels today's lunch and shows the result in a
    * snackbar. `chosen` is true only when this restaurant just became today's lunch. */
   onTodayLunch: () => Promise<{ chosen: boolean }>;
+  /** Shown when other restaurants share this place: returns to their list. `label` names the
+   * list for screen readers; the button reads 이전으로. */
+  back?: { label: string; onClick: () => void };
 };
 
 export default function RestaurantMapCard({
@@ -39,6 +42,7 @@ export default function RestaurantMapCard({
   onFavorite,
   onReviews,
   onTodayLunch,
+  back,
 }: Props) {
   const { busy: voteBusy } = useVoteState(restaurant.id);
   const [message, setMessage] = useState<string | null>(null);
@@ -54,6 +58,17 @@ export default function RestaurantMapCard({
         ×
       </button>
       <div inert={voteBusy} aria-busy={voteBusy || undefined}>
+        {back && (
+          <button
+            type="button"
+            className={styles.back}
+            aria-label={back.label}
+            onClick={back.onClick}
+          >
+            <ChevronLeftIcon size={16} />
+            이전으로
+          </button>
+        )}
         <div className={styles.header}>
           <h3>{restaurant.name}</h3>
         </div>

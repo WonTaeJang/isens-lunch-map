@@ -19,9 +19,14 @@ function fixture() {
   class Element extends EventTarget {
     className = '';
     textContent = '';
+    type = '';
+    title = '';
     onclick: unknown;
     children: Element[] = [];
-    setAttribute() {}
+    attributes = new Map<string, string>();
+    setAttribute(name: string, value: string) {
+      this.attributes.set(name, value);
+    }
     append(...children: Element[]) {
       this.children.push(...children);
     }
@@ -94,6 +99,7 @@ function fixture() {
   let moves = 0;
   let level = 4;
   let selection: string | null = null;
+  let group: string | null = null;
   const map = {
     getLevel: () => level,
     setCenter() {
@@ -105,15 +111,14 @@ function fixture() {
     setMaxLevel() {},
     addControl() {},
   };
-  const controller = createMapController(
-    maps,
-    map,
-    {},
-    { clientHeight: 450 } as HTMLElement,
-    (id) => {
+  const controller = createMapController(maps, map, {}, { clientHeight: 450 } as HTMLElement, {
+    onSelect: (id) => {
       selection = id;
     },
-  );
+    onGroup: (key) => {
+      group = key;
+    },
+  });
   return {
     controller,
     markers,
@@ -124,6 +129,9 @@ function fixture() {
     },
     get selection() {
       return selection;
+    },
+    get group() {
+      return group;
     },
     /** Simulates the user zooming the map; Kakao then fires zoom_changed. */
     zoom(next: number) {
@@ -220,7 +228,7 @@ test('review markers turn green, keep favorites and selection, and revert after 
 
 test('restaurant names show above markers only at zoom levels 1-2, except the selected one', () => {
   const f = fixture();
-  const other = { ...row, id: 'b', name: '다른 식당' };
+  const other = { ...row, id: 'b', name: '다른 식당', latitude: '37.6' };
   const labels = () =>
     f.overlays
       .slice(2) // The first two overlays are the restaurant and office popups.
@@ -282,6 +290,86 @@ test('the office marker opens a card styled like the restaurant card; selecting 
     f.controller.update([row], new Set(), 'a');
     assert.equal(office.map, null);
     assert.notEqual(f.overlays[0].map, null);
+  } finally {
+    f.restore();
+  }
+});
+
+test('restaurants at one place share a number circle that opens the list', () => {
+  const f = fixture();
+  const twin = { ...row, id: 'b', name: '가게', latitude: '37.50' };
+  const alone = { ...row, id: 'c', name: '혼자', latitude: '37.6' };
+  const marker = (id: string) =>
+    f.markers.find((m) => m.options.title === [row, twin, alone].find((r) => r.id === id)!.name)!;
+  const circles = () =>
+    f.overlays.filter((o) => o.options.content.className === 'restaurant-map-group');
+  try {
+    f.controller.update([row, twin, alone], new Set(), null);
+    assert.equal(marker('a').map, null);
+    assert.equal(marker('b').map, null);
+    assert.ok(marker('c').map);
+    assert.equal(circles().length, 1);
+    const circle = circles()[0];
+    const button = circle.options.content;
+    assert.ok(circle.map);
+    assert.equal(button.textContent, '2');
+    assert.equal(button.attributes.get('aria-label'), '여기 모인 식당 2곳 목록 보기');
+    assert.equal(button.title, '가게 외 1곳'); // The first name in Korean order.
+
+    button.dispatchEvent(new Event('click'));
+    assert.equal(f.selection, null);
+    assert.equal(f.group, '37.5000000,127.0000000');
+    assert.equal(f.moves, 0);
+    f.controller.update([row, twin, alone], new Set(), null, null, f.group);
+    assert.equal(button.attributes.get('aria-expanded'), 'true');
+    assert.ok(f.overlays[0].map); // The list card sits on the circle.
+    assert.equal(f.overlays[0].position, circle.position);
+
+    // Picking from the list (or the lunch list, or a game) shows the usual selected marker.
+    f.controller.update([row, twin, alone], new Set(['a']), 'a', null, null);
+    assert.ok(marker('a').map);
+    assert.match((marker('a').image as { src: string }).src, /selected-favorite/);
+    assert.equal(marker('b').map, null);
+    assert.equal(circle.map, null);
+    assert.equal(f.overlays[0].position, marker('a').options.position);
+
+    f.controller.update([row, twin, alone], new Set(), null);
+    assert.equal(marker('a').map, null);
+    assert.ok(circle.map);
+    assert.equal(f.overlays[0].map, null);
+
+    // Only visible restaurants count; a lone one gets its marker back.
+    f.controller.update([row, alone], new Set(), null);
+    assert.equal(circle.map, null);
+    assert.equal(circles().length, 1);
+    assert.ok(marker('a').map);
+  } finally {
+    f.restore();
+  }
+  assert.ok(f.overlays.every((overlay) => overlay.map === null));
+});
+
+test('a number circle is labeled with the first name when zoomed in', () => {
+  const f = fixture();
+  const twin = { ...row, id: 'b', name: '가게' };
+  const labels = () =>
+    f.overlays
+      .filter((o) => o.map && o.options.content.className === 'restaurant-map-label-anchor')
+      .map((o) => {
+        const label = o.options.content.children[0];
+        const parts = label.children.map((part) => part.textContent);
+        return [label.className, parts.length ? parts.join(' ') : label.textContent];
+      });
+  try {
+    f.zoom(2);
+    f.controller.update([row, twin], new Set(), null);
+    assert.deepEqual(labels(), [['restaurant-map-label restaurant-map-group-label', '가게 외 1']]);
+    f.controller.update([row, twin], new Set(), null, null, '37.5000000,127.0000000');
+    assert.deepEqual(labels(), []); // The list card already covers it.
+    f.controller.update([row, twin], new Set(), 'b');
+    assert.deepEqual(labels(), []);
+    f.controller.update([row], new Set(), null);
+    assert.deepEqual(labels(), [['restaurant-map-label', '식당']]);
   } finally {
     f.restore();
   }

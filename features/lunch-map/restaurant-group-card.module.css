@@ -1,0 +1,77 @@
+/* The tail points at the 24px number circle, lower than the selected marker. article raises
+ * specificity over the shared card rule regardless of stylesheet order. */
+article.card {
+  bottom: 34px;
+  padding-bottom: 12px; /* The rows carry their own 8px padding. */
+}
+.address {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Three rows (44px each, 1px dividers), then scrolls. */
+.list {
+  max-height: calc(3 * 44px + 2px);
+  margin: 10px -8px 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+.list li + li {
+  border-top: 1px solid var(--color-border-subtle);
+}
+.item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px;
+  border-radius: var(--radius-xs);
+  text-align: left;
+  cursor: pointer;
+}
+/* Today's lunch: the same left bar as in the lunch list. */
+.item[data-today-lunch] {
+  box-shadow: inset 3px 0 var(--color-primary);
+}
+.mark {
+  display: inline-flex;
+  flex: none;
+}
+.todayLunch {
+  color: var(--color-primary);
+}
+.item:hover {
+  background: var(--color-surface-muted);
+}
+.item:focus-visible {
+  outline-offset: var(--focus-ring-offset-inset);
+}
+.name {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-md);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.favorite {
+  color: var(--color-favorite-text);
+}
+.favorite svg {
+  fill: var(--color-favorite);
+}
+.category {
+  flex: none;
+  max-width: 40%;
+  margin-left: auto;
+  overflow: hidden;
+  color: var(--color-text-subtle);
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -11,6 +11,8 @@ import { createPortal } from 'react-dom';
 import Button from '@/components/ui/button';
 import useTodayLunchAction from '@/features/lunch-visits/use-today-lunch-action';
 import RestaurantMapCard from './restaurant-map-card';
+import RestaurantGroupCard from './restaurant-group-card';
+import { coordinateKey, groupByCoordinates } from './coordinate-groups';
 import { createMapController, type MapController } from './map-controller';
 import { OFFICE_ADDRESS, OFFICE_POSITION } from '@/lib/office';
 import labelStyles from './map-label.module.css';
@@ -60,6 +62,31 @@ export default function LunchMap({
   const [controller, setController] = useState<MapController | null>(null);
   const [error, setError] = useState(false);
   const selected = restaurants.find((row) => row.id === selectedId);
+  // Restaurants sharing one place show as a number circle that opens their list (by place key).
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const groups = useMemo(() => groupByCoordinates(restaurants), [restaurants]);
+  const groupRows = openGroup ? groups.get(openGroup) : undefined;
+  // Any selection, from the list card, the lunch list or a game, replaces the list card; a
+  // filter that leaves fewer than two restaurants at the place closes it.
+  const [shownSelection, setShownSelection] = useState(selectedId);
+  if (shownSelection !== selectedId) {
+    setShownSelection(selectedId);
+    if (selectedId) setOpenGroup(null);
+  }
+  if (openGroup && (groupRows?.length ?? 0) < 2) setOpenGroup(null);
+  // The selected restaurant's card leads back to the list when others share its place.
+  const selectedKey = selected ? coordinateKey(selected) : null;
+  const selectedPlaceCount = (selectedKey && groups.get(selectedKey)?.length) || 0;
+  const back =
+    selectedKey && selectedPlaceCount > 1
+      ? {
+          label: `여기 모인 식당 ${selectedPlaceCount}곳 목록으로 돌아가기`,
+          onClick: () => {
+            setOpenGroup(selectedKey);
+            onSelect(null);
+          },
+        }
+      : undefined;
   // A new object only when the page data is refreshed (after any review change), which tells the
   // card's 추천/비추천 buttons to reload the own review.
   const selectedCounts = useMemo(
@@ -84,21 +111,21 @@ export default function LunchMap({
           const map = new maps.Map(containerRef.current, { center, level: 4 });
           map.setMaxLevel(5);
           map.addControl(new maps.ZoomControl(), maps.ControlPosition.RIGHT);
-          instance = createMapController(
-            maps,
-            map,
-            center,
-            containerRef.current,
-            (id) => onSelectRef.current(id),
-            { anchor: labelStyles.anchor, label: labelStyles.label },
-            {
+          instance = createMapController(maps, map, center, containerRef.current, {
+            onSelect: (id) => onSelectRef.current(id),
+            onGroup: setOpenGroup,
+            classNames: {
+              labelAnchor: labelStyles.anchor,
+              label: labelStyles.label,
+              group: labelStyles.group,
+              groupLabel: labelStyles.groupLabel,
               overlay: cardStyles.overlay,
               card: cardStyles.card,
               close: cardStyles.close,
               header: cardStyles.header,
               details: cardStyles.details,
             },
-          );
+          });
           setController(instance);
           setError(false);
         } catch {
@@ -117,8 +144,8 @@ export default function LunchMap({
   }, [sdkReady]);
 
   useEffect(() => {
-    controller?.update(restaurants, favorites, selectedId, reviewedIds);
-  }, [controller, restaurants, favorites, selectedId, reviewedIds]);
+    controller?.update(restaurants, favorites, selectedId, reviewedIds, openGroup);
+  }, [controller, restaurants, favorites, selectedId, reviewedIds, openGroup]);
 
   useEffect(() => {
     if (focusRequest) controller?.focus(focusRequest.id);
@@ -196,12 +223,28 @@ export default function LunchMap({
             key={selected.id}
             restaurant={selected}
             favorite={favorites.has(selected.id)}
-            todayLunch={todayLunch.visit?.restaurant_id === selected.id}
+            todayLunch={todayVisit?.restaurant_id === selected.id}
             todayLunchBusy={todayLunch.busy}
             onClose={() => onSelect(null)}
             onReviews={() => onReviews(selected.id)}
             onFavorite={() => onFavorite(selected.id)}
             onTodayLunch={() => todayLunch.request(selected)}
+            back={back}
+          />,
+          controller.host,
+        )}
+      {/* groupRows always has two or more: a smaller group closes above. */}
+      {controller &&
+        !selected &&
+        groupRows &&
+        createPortal(
+          <RestaurantGroupCard
+            rows={groupRows}
+            favorites={favorites}
+            reviewedIds={reviewedIds}
+            todayLunchId={todayVisit?.restaurant_id ?? null}
+            onPick={onSelect}
+            onClose={() => setOpenGroup(null)}
           />,
           controller.host,
         )}

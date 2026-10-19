@@ -1,19 +1,55 @@
 import type { KakaoMaps } from './kakao-maps';
 import type { MapRestaurant } from '@/lib/restaurant-types';
-import { hasCoordinates } from '@/lib/coordinates';
 import { OFFICE_ADDRESS } from '@/lib/office';
+import { coordinateKey, groupByCoordinates } from './coordinate-groups';
 
 // Restaurant names are shown above markers only at this zoom level or closer (1 = closest).
 const NAME_LABEL_MAX_LEVEL = 2;
 type MapInstance = InstanceType<KakaoMaps['Map']>;
 type Overlay = InstanceType<KakaoMaps['CustomOverlay']>;
-type MarkerEntry = {
+type Labeled = {
+  position: object;
+  label: Overlay | null;
+  labelText: HTMLElement | null;
+  /** "외 N" after a group's name, kept visible when the name is cut short. */
+  labelSuffix?: HTMLElement;
+};
+type MarkerEntry = Labeled & {
   row: MapRestaurant;
   marker: InstanceType<KakaoMaps['Marker']>;
-  position: object;
   onClick: () => void;
   appearance: string;
-  label: Overlay | null;
+  /** False while a number circle stands in for it (it shares its place and is not selected). */
+  shown: boolean;
+};
+/** A number circle for restaurants at the same coordinates. */
+type GroupEntry = Labeled & {
+  key: string;
+  rows: MapRestaurant[];
+  overlay: Overlay;
+  button: HTMLButtonElement;
+  onClick: () => void;
+  /** False while one of its restaurants is selected and shows its own marker instead. */
+  shown: boolean;
+};
+
+const CLASS_NAMES = {
+  labelAnchor: 'restaurant-map-label-anchor',
+  label: 'restaurant-map-label',
+  group: 'restaurant-map-group',
+  groupLabel: 'restaurant-map-group-label',
+  overlay: 'restaurant-map-overlay',
+  card: 'restaurant-map-card',
+  close: 'restaurant-card-close',
+  header: 'restaurant-card-header',
+  details: 'restaurant-card-details',
+};
+
+type Options = {
+  onSelect: (id: string | null) => void;
+  /** Opens the list of restaurants at one place (its key), or closes it (null). */
+  onGroup?: (key: string | null) => void;
+  classNames?: Partial<typeof CLASS_NAMES>;
 };
 
 // Owns SDK objects only. Selection and card content belong to React.
@@ -22,48 +58,65 @@ export function createMapController(
   map: MapInstance,
   center: object,
   container: HTMLElement,
-  onSelect: (id: string | null) => void,
-  labelClassNames = { anchor: 'restaurant-map-label-anchor', label: 'restaurant-map-label' },
-  cardClassNames = {
-    overlay: 'restaurant-map-overlay',
-    card: 'restaurant-map-card',
-    close: 'restaurant-card-close',
-    header: 'restaurant-card-header',
-    details: 'restaurant-card-details',
-  },
+  { onSelect, onGroup = () => {}, classNames }: Options,
 ) {
+  const names = { ...CLASS_NAMES, ...classNames };
   const entries = new Map<string, MarkerEntry>();
+  const groups = new Map<string, GroupEntry>();
   let selectedId: string | null = null;
+  let openGroup: string | null = null;
   let showLabels = map.getLevel() <= NAME_LABEL_MAX_LEVEL;
   // Labels are created lazily the first time they are needed, then only toggled.
-  function syncLabel(entry: MarkerEntry) {
-    const visible = showLabels && entry.row.id !== selectedId; // The popup already shows its name.
-    if (visible && !entry.label) {
+  function setLabel(target: Labeled, text: string | null, className: string, suffix?: string) {
+    if (text !== null && !target.label) {
       // Kakao wraps overlay content in a box sized like the content and placed at the anchor,
       // which is exactly over the marker. A zero-size anchor keeps that box from swallowing
       // marker clicks; the visible label is positioned above it and ignores pointer events.
       const content = document.createElement('div');
-      content.className = labelClassNames.anchor;
+      content.className = names.labelAnchor;
       content.setAttribute('aria-hidden', 'true'); // The marker title already names it.
       const label = document.createElement('div');
-      label.className = labelClassNames.label;
-      label.textContent = entry.row.name;
+      label.className = className;
       content.append(label);
-      entry.label = new maps.CustomOverlay({
+      target.labelText = label;
+      if (suffix !== undefined) {
+        target.labelText = document.createElement('span');
+        target.labelSuffix = document.createElement('span');
+        label.append(target.labelText, target.labelSuffix);
+      }
+      target.label = new maps.CustomOverlay({
         content,
-        position: entry.position,
+        position: target.position,
         xAnchor: 0.5,
         yAnchor: 1,
         zIndex: 1,
       });
     }
-    entry.label?.setMap(visible ? map : null);
+    if (text !== null && target.labelText) target.labelText.textContent = text;
+    if (text !== null && target.labelSuffix) target.labelSuffix.textContent = suffix ?? '';
+    target.label?.setMap(text !== null ? map : null);
+  }
+  function syncLabels() {
+    entries.forEach((entry) => {
+      // The popup already shows the selected name.
+      const visible = showLabels && entry.shown && entry.row.id !== selectedId;
+      setLabel(entry, visible ? entry.row.name : null, names.label);
+    });
+    groups.forEach((group) => {
+      const visible = showLabels && group.shown && group.key !== openGroup;
+      setLabel(
+        group,
+        visible ? group.rows[0].name : null,
+        `${names.label} ${names.groupLabel}`,
+        `외 ${group.rows.length - 1}`,
+      );
+    });
   }
   const onZoom = () => {
     const next = map.getLevel() <= NAME_LABEL_MAX_LEVEL;
     if (next === showLabels) return;
     showLabels = next;
-    entries.forEach(syncLabel);
+    syncLabels();
   };
   maps.event.addListener(map, 'zoom_changed', onZoom);
   const image = (file: string, selected: boolean) =>
@@ -79,13 +132,14 @@ export function createMapController(
     selectedFavorite: image('/restaurant-marker-selected-favorite.svg', true),
   };
   const host = document.createElement('div');
-  host.className = cardClassNames.overlay;
+  host.className = names.overlay;
   const stop = (event: Event) => event.stopPropagation();
   const stopDoubleClick = (event: Event) => {
     event.preventDefault();
     event.stopPropagation();
   };
-  const blockedEvents = ['pointerdown', 'mousedown', 'touchstart', 'click'];
+  // wheel scrolls the card's own lists instead of zooming the map.
+  const blockedEvents = ['pointerdown', 'mousedown', 'touchstart', 'click', 'wheel'];
   blockedEvents.forEach((name) => host.addEventListener(name, stop));
   host.addEventListener('dblclick', stopDoubleClick);
   const overlay = new maps.CustomOverlay({
@@ -108,22 +162,22 @@ export function createMapController(
   // The office popup looks like the restaurant card. Restaurant cards are rendered by React;
   // this one never changes, so it is built once here.
   const officeHost = document.createElement('div');
-  officeHost.className = cardClassNames.overlay;
+  officeHost.className = names.overlay;
   const officeCard = document.createElement('article');
-  officeCard.className = cardClassNames.card;
+  officeCard.className = names.card;
   officeCard.setAttribute('aria-label', '아이센스 빌딩 상세 정보');
   const closeButton = document.createElement('button');
   closeButton.type = 'button';
-  closeButton.className = cardClassNames.close;
+  closeButton.className = names.close;
   closeButton.setAttribute('aria-label', '상세 정보 닫기');
   closeButton.textContent = '×';
   const officeHeader = document.createElement('div');
-  officeHeader.className = cardClassNames.header;
+  officeHeader.className = names.header;
   const officeTitle = document.createElement('h3');
   officeTitle.textContent = '아이센스 빌딩';
   officeHeader.append(officeTitle);
   const officeDetails = document.createElement('div');
-  officeDetails.className = cardClassNames.details;
+  officeDetails.className = names.details;
   const officeAddress = document.createElement('p');
   officeAddress.textContent = OFFICE_ADDRESS;
   officeDetails.append(officeAddress);
@@ -141,6 +195,7 @@ export function createMapController(
   const close = () => {
     officeOverlay.setMap(null);
     onSelect(null);
+    onGroup(null);
   };
   closeButton.onclick = close;
   const closeOnEscape = (event: Event) => {
@@ -149,6 +204,7 @@ export function createMapController(
   officeCard.addEventListener('keydown', closeOnEscape);
   const openOffice = () => {
     onSelect(null);
+    onGroup(null);
     overlay.setMap(null);
     officeOverlay.setMap(map);
   };
@@ -159,6 +215,45 @@ export function createMapController(
     entry.marker.setMap(null);
     entry.label?.setMap(null);
   }
+  function createGroup(key: string, rows: MapRestaurant[]): GroupEntry {
+    const position = new maps.LatLng(Number(rows[0].latitude), Number(rows[0].longitude));
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = names.group;
+    const onClick = () => {
+      officeOverlay.setMap(null);
+      onSelect(null);
+      onGroup(key);
+    };
+    button.addEventListener('click', onClick);
+    button.addEventListener('dblclick', stopDoubleClick);
+    // clickable keeps clicks on the circle from reaching the map, which would close the list.
+    const groupOverlay = new maps.CustomOverlay({
+      content: button,
+      position,
+      xAnchor: 0.5,
+      yAnchor: 1,
+      zIndex: 1,
+      clickable: true,
+    });
+    return {
+      key,
+      rows,
+      position,
+      overlay: groupOverlay,
+      button,
+      onClick,
+      label: null,
+      labelText: null,
+      shown: false,
+    };
+  }
+  function removeGroup(group: GroupEntry) {
+    group.button.removeEventListener('click', group.onClick);
+    group.button.removeEventListener('dblclick', stopDoubleClick);
+    group.overlay.setMap(null);
+    group.label?.setMap(null);
+  }
   return {
     host,
     update(
@@ -166,9 +261,12 @@ export function createMapController(
       favorites: ReadonlySet<string>,
       nextSelectedId: string | null,
       reviewedIds?: ReadonlySet<string> | null,
+      nextOpenGroup: string | null = null,
     ) {
       selectedId = nextSelectedId;
-      const visible = new Map(rows.filter(hasCoordinates).map((row) => [row.id, row]));
+      openGroup = nextOpenGroup;
+      const places = groupByCoordinates(rows);
+      const visible = new Map([...places.values()].flat().map((row) => [row.id, row]));
       entries.forEach((entry, id) => {
         const row = visible.get(id);
         if (
@@ -194,7 +292,16 @@ export function createMapController(
           });
           const onClick = () => onSelect(row.id);
           maps.event.addListener(marker, 'click', onClick);
-          entry = { row, marker, position, onClick, appearance: '', label: null };
+          entry = {
+            row,
+            marker,
+            position,
+            onClick,
+            appearance: '',
+            label: null,
+            labelText: null,
+            shown: true,
+          };
           entries.set(row.id, entry);
         }
         const selected = row.id === selectedId;
@@ -215,12 +322,44 @@ export function createMapController(
           entry.marker.setZIndex(selected ? 11 : 0);
           entry.appearance = appearance;
         }
-        syncLabel(entry);
+        // A restaurant in a group shows its own marker only while selected.
+        const shown = places.get(coordinateKey(row))!.length === 1 || selected;
+        if (entry.shown !== shown) {
+          entry.marker.setMap(shown ? map : null);
+          entry.shown = shown;
+        }
       });
+      groups.forEach((group, key) => {
+        if ((places.get(key)?.length ?? 0) < 2) {
+          removeGroup(group);
+          groups.delete(key);
+        }
+      });
+      places.forEach((rowsHere, key) => {
+        if (rowsHere.length < 2) return;
+        let group = groups.get(key);
+        if (!group) {
+          group = createGroup(key, rowsHere);
+          groups.set(key, group);
+        }
+        group.rows = rowsHere;
+        group.button.textContent = String(rowsHere.length);
+        group.button.title = `${rowsHere[0].name} 외 ${rowsHere.length - 1}곳`;
+        group.button.setAttribute('aria-label', `여기 모인 식당 ${rowsHere.length}곳 목록 보기`);
+        group.button.setAttribute('aria-expanded', String(key === openGroup));
+        const shown = !rowsHere.some((row) => row.id === selectedId);
+        if (group.shown !== shown) {
+          group.overlay.setMap(shown ? map : null);
+          group.shown = shown;
+        }
+      });
+      syncLabels();
       const selected = selectedId ? entries.get(selectedId) : undefined;
-      if (selected) {
+      const open = selected ? undefined : openGroup ? groups.get(openGroup) : undefined;
+      const anchor = selected ?? open;
+      if (anchor) {
         officeOverlay.setMap(null);
-        overlay.setPosition(selected.position);
+        overlay.setPosition(anchor.position);
         overlay.setMap(map);
       } else overlay.setMap(null);
     },
@@ -236,6 +375,8 @@ export function createMapController(
     dispose() {
       entries.forEach(remove);
       entries.clear();
+      groups.forEach(removeGroup);
+      groups.clear();
       overlay.setMap(null);
       officeOverlay.setMap(null);
       officeMarker.setMap(null);

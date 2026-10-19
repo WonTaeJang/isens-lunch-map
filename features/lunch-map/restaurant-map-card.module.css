@@ -1,12 +1,21 @@
-/* The raised card leaves a transparent host area; only the card should intercept input. */
+/*
+ * Kakao offsets overlay content by its size when it draws, and does not measure again when the
+ * content changes in place (list card → restaurant card). A zero-size host at the point keeps
+ * that offset at zero; the card is placed above it here, so it never shifts with its height.
+ */
 .overlay {
+  position: relative;
+  width: 0;
+  height: 0;
   pointer-events: none;
 }
 .card {
+  --card-width: min(320px, 78vw);
   pointer-events: auto;
-  position: relative;
+  position: absolute;
   bottom: 48px;
-  width: min(320px, 78vw);
+  left: calc(var(--card-width) / -2);
+  width: var(--card-width);
   padding: 20px;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-xs);
@@ -133,4 +142,20 @@
 }
 .meta .vote {
   margin-left: auto;
+}
+/* Back to the list of restaurants at the same place. */
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: -6px 0 4px -6px;
+  padding: 2px 6px 2px 2px;
+  border-radius: var(--radius-xs);
+  color: var(--color-text-subtle);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+.back:hover {
+  color: var(--color-text);
 }

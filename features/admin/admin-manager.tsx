@@ -1,9 +1,9 @@
 'use client';
 
-import Tabs from '@/components/ui/tabs';
+import Tabs, { TabPanel } from '@/components/ui/tabs';
 import LoadingStatus from '@/components/ui/loading-status';
 import { useState } from 'react';
-import styles from './admin-manager.module.css';
+import tabStyles from '@/components/ui/tabs.module.css';
 import AdminStatistics from './admin-statistics';
 import ExcelImportSection from './excel-import-section';
 import CoordinateSection from './coordinate-section';
@@ -41,15 +41,9 @@ export default function AdminManager({
         onChange={setTab}
         idPrefix="admin"
         label="관리자 메뉴"
-        className={styles.tabs}
+        className={tabStyles.underline}
       />
-      <div
-        role="tabpanel"
-        id="admin-panel-update"
-        aria-labelledby="admin-tab-update"
-        hidden={tab !== 'update'}
-        tabIndex={0}
-      >
+      <TabPanel idPrefix="admin" value="update" selected={tab}>
         <ExcelImportSection
           busy={admin.busy}
           file={admin.file}
@@ -73,14 +67,8 @@ export default function AdminManager({
           error={error}
           measure={admin.measureDistances}
         />
-      </div>
-      <div
-        role="tabpanel"
-        id="admin-panel-restaurants"
-        aria-labelledby="admin-tab-restaurants"
-        hidden={tab !== 'restaurants'}
-        tabIndex={0}
-      >
+      </TabPanel>
+      <TabPanel idPrefix="admin" value="restaurants" selected={tab}>
         {admin.busy && <LoadingStatus label="식당 정보를 반영하는 중…" />}
         <RestaurantTable
           restaurants={restaurants}
@@ -104,16 +92,10 @@ export default function AdminManager({
           busy={admin.busy}
           toggle={admin.toggle}
         />
-      </div>
-      <div
-        role="tabpanel"
-        id="admin-panel-statistics"
-        aria-labelledby="admin-tab-statistics"
-        hidden={tab !== 'statistics'}
-        tabIndex={0}
-      >
+      </TabPanel>
+      <TabPanel idPrefix="admin" value="statistics" selected={tab}>
         {tab === 'statistics' && <AdminStatistics password={password} />}
-      </div>
+      </TabPanel>
     </>
   );
 }

@@ -13,6 +13,31 @@ type Props<T extends string> = {
   className?: string;
 };
 
+/** The panel of tab `value`, labelled by its tab in `Tabs` with the same `idPrefix`; hidden unless selected. */
+export function TabPanel({
+  idPrefix,
+  value,
+  selected,
+  children,
+}: {
+  idPrefix: string;
+  value: string;
+  selected: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      role="tabpanel"
+      id={`${idPrefix}-panel-${value}`}
+      aria-labelledby={`${idPrefix}-tab-${value}`}
+      hidden={selected !== value}
+      tabIndex={0}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function Tabs<T extends string>({
   items,
   value,

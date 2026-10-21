@@ -353,6 +353,7 @@ create index if not exists review_user_created_idx on public.review (user_id, cr
 ## 공지사항 (`/guide`의 공지 탭)
 
 공지는 DB 없이 `content/notices/*.md` 파일로 관리하고, 커밋·배포하면 올라갑니다.
+AI에게 공지를 부탁할 때는 작성 기준(말투, 넣고 뺄 내용, 형식)을 담은 `docs/notice-prompt.md`를 함께 줍니다.
 파일 이름이 공지 ID이고(예: `2026-10-21-v1.0.11.md`, 영문·숫자·`.`·`-`·`_`만),
 맨 위 frontmatter와 그 아래 마크다운 본문으로 씁니다.
 

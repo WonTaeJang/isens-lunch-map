@@ -6,6 +6,8 @@ export type KakaoMaps = {
     options: { center: object; level: number },
   ) => {
     setCenter: (position: object) => void;
+    getCenter: () => object;
+    relayout: () => void;
     panBy: (x: number, y: number) => void;
     setMaxLevel: (level: number) => void;
     getLevel: () => number;

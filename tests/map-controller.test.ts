@@ -100,9 +100,17 @@ function fixture() {
   let level = 4;
   let selection: string | null = null;
   let group: string | null = null;
+  let position: object = {};
+  let layouts = 0;
   const map = {
+    getCenter: () => position,
+    relayout() {
+      layouts++;
+      position = {};
+    },
     getLevel: () => level,
-    setCenter() {
+    setCenter(next: object) {
+      position = next;
       moves++;
     },
     panBy() {
@@ -121,6 +129,9 @@ function fixture() {
   });
   return {
     controller,
+    get layouts() {
+      return layouts;
+    },
     markers,
     overlays,
     listeners,
@@ -370,6 +381,24 @@ test('a number circle is labeled with the first name when zoomed in', () => {
     assert.deepEqual(labels(), []);
     f.controller.update([row], new Set(), null);
     assert.deepEqual(labels(), [['restaurant-map-label', '식당']]);
+  } finally {
+    f.restore();
+  }
+});
+
+test('map resize preserves the current center and zoom without recreating markers', () => {
+  const f = fixture();
+  try {
+    f.controller.update([row], new Set(), null, null, null);
+    const markers = [...f.markers];
+    const position = { latitude: 37.4, longitude: 127.1 };
+    f.map.setCenter(position);
+    f.zoom(3);
+    f.controller.resize();
+    assert.equal(f.layouts, 1);
+    assert.equal(f.map.getCenter(), position);
+    assert.equal(f.map.getLevel(), 3);
+    assert.deepEqual(f.markers, markers);
   } finally {
     f.restore();
   }

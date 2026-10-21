@@ -21,6 +21,22 @@ function Icon({ size = 24, children, ...props }: IconProps & { children: ReactNo
   );
 }
 
+export function ExpandIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" />
+    </Icon>
+  );
+}
+
+export function CollapseIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M3 8h5V3m13 5h-5V3M8 21v-5H3m13 5v-5h5" />
+    </Icon>
+  );
+}
+
 export function MapIcon(props: IconProps) {
   return (
     <Icon {...props}>

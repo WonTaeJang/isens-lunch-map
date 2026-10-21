@@ -372,6 +372,11 @@ export function createMapController(
     center() {
       map.setCenter(center);
     },
+    resize() {
+      const currentCenter = map.getCenter();
+      map.relayout();
+      map.setCenter(currentCenter);
+    },
     dispose() {
       entries.forEach(remove);
       entries.clear();

@@ -2,15 +2,30 @@
 import { getReviewCounts } from '@/lib/reviews/model';
 
 import LoadingSpinner from '@/components/ui/loading-spinner';
-import { BowlChopsticksIcon, CrosshairIcon, DiceIcon } from '@/components/ui/icons';
+import {
+  BowlChopsticksIcon,
+  CrosshairIcon,
+  DiceIcon,
+  ExpandIcon,
+  CollapseIcon,
+} from '@/components/ui/icons';
 
 import type { ReviewCounts } from '@/lib/reviews/model';
 import Script from 'next/script';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type Ref,
+} from 'react';
 import { createPortal } from 'react-dom';
 import Button from '@/components/ui/button';
 import useTodayLunchAction from '@/features/lunch-visits/use-today-lunch-action';
 import RestaurantMapCard from './restaurant-map-card';
+import useExpandedMap from './use-expanded-map';
 import RestaurantGroupCard from './restaurant-group-card';
 import { coordinateKey, groupByCoordinates } from './coordinate-groups';
 import { createMapController, type MapController } from './map-controller';
@@ -57,6 +72,7 @@ export default function LunchMap({
   useLayoutEffect(() => {
     onSelectRef.current = onSelect;
   }, [onSelect]);
+  const { expanded, toggleExpanded, panelRef, expandButtonRef } = useExpandedMap();
   const containerRef = useRef<HTMLDivElement>(null);
   const [sdkReady, setSdkReady] = useState(false);
   const [controller, setController] = useState<MapController | null>(null);
@@ -151,9 +167,21 @@ export default function LunchMap({
     if (focusRequest) controller?.focus(focusRequest.id);
   }, [controller, focusRequest]);
 
+  useEffect(() => {
+    if (!controller || !containerRef.current) return;
+    const observer = new ResizeObserver(() => controller.resize());
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [controller]);
+
   const ready = Boolean(controller);
   return (
-    <section className={styles.panel} aria-label="점심 지도">
+    <section
+      ref={panelRef}
+      className={styles.panel}
+      data-expanded={expanded || undefined}
+      aria-label="점심 지도"
+    >
       <div
         ref={containerRef}
         className={styles.mapCanvas}
@@ -167,6 +195,14 @@ export default function LunchMap({
             icon={<DiceIcon size={18} />}
             disabled={randomDisabled}
             onClick={onRandom}
+          />
+          <MapControlButton
+            ref={expandButtonRef}
+            label={expanded ? '지도 전체 화면 닫기' : '지도 전체 화면 보기'}
+            title={expanded ? '원래 크기로 (Esc)' : '전체 화면 보기'}
+            pressed={expanded}
+            onClick={toggleExpanded}
+            icon={expanded ? <CollapseIcon size={18} /> : <ExpandIcon size={18} />}
           />
           {todayVisit && (
             <MapControlButton
@@ -265,12 +301,16 @@ export default function LunchMap({
 
 /** 32px icon button stacked at the bottom right of the map. */
 function MapControlButton({
+  ref,
+  pressed,
   label,
   title,
   icon,
   disabled,
   onClick,
 }: {
+  ref?: Ref<HTMLButtonElement>;
+  pressed?: boolean;
   label: string;
   title: string;
   icon: ReactNode;
@@ -280,6 +320,8 @@ function MapControlButton({
   return (
     <button
       type="button"
+      ref={ref}
+      aria-pressed={pressed}
       className={styles.controlButton}
       aria-label={label}
       title={title}

@@ -1,7 +1,7 @@
 .userDashboard {
   display: flex;
   flex-direction: column;
-  max-width: 780px;
+  max-width: var(--content-narrow);
   margin: 32px auto;
 }
 /* One column in reading order, with the storage note (inside .userSide) last. */

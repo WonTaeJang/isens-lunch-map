@@ -353,6 +353,8 @@
   --z-toast: 1000;
 
   --header-height: 80px;
+  /* Single-column pages (/user, /guide) keep their content this wide, centered. */
+  --content-narrow: 780px;
 }
 /*
  * The header always stays on top. Wide screens scroll only .app-scroll below it, so the scrollbar

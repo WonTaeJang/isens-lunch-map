@@ -8,6 +8,10 @@ import TodayLunchTitle from '@/features/lunch-visits/today-lunch-title';
 import FirstVisitGuide from '@/features/guide/first-visit-guide';
 import { BlacklistSeedProvider } from '@/features/blacklist/blacklist-seed';
 import { getViewerBlacklist } from '@/lib/server/viewer-blacklist';
+import NoticePreview from '@/features/notices/notice-preview';
+import { getLatestNotice } from '@/lib/server/notices';
+import { isNoticeFresh } from '@/lib/notices/model';
+import { koreanToday } from '@/lib/lunch-visits/model';
 
 export default async function Home({
   searchParams,
@@ -29,13 +33,21 @@ export default async function Home({
       ? requestedId
       : null;
   const initialReviewsOpen = initialRestaurantId !== null && reviews === '1';
+  // The latest notice is previewed for a week after it is posted, until read.
+  const latest = getLatestNotice();
+  const notice =
+    latest && isNoticeFresh(latest.date, koreanToday())
+      ? { id: latest.id, title: latest.title }
+      : null;
   return (
     <main className="page-shell">
       <PageHeading
         eyebrow="YOUR LUNCH, ON THE MAP"
         title={<TodayLunchTitle />}
         description="우리의 점심 리스트를 한눈에. 가까운 맛집을 지도에서 만나보세요."
-      />
+      >
+        <NoticePreview notice={notice} />
+      </PageHeading>
       <BlacklistSeedProvider seed={hidden}>
         <LunchExplorer
           key={initialRestaurantId ? `${initialRestaurantId}:${initialReviewsOpen}` : 'map'}

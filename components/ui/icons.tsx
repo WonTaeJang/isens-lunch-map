@@ -241,12 +241,12 @@ export function SearchIcon(props: IconProps) {
   );
 }
 
-export function HelpIcon(props: IconProps) {
+export function MegaphoneIcon(props: IconProps) {
   return (
     <Icon {...props}>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .8-1 1.5v.6" />
-      <path d="M12 16.8h.01" strokeWidth="2.6" />
+      <path d="M4 9.5h3l9-5v15l-9-5H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z" />
+      <path d="m7 14.5 1.6 5h2.6l-1.3-4.2" />
+      <path d="M19.5 9.5a3.5 3.5 0 0 1 0 5" />
     </Icon>
   );
 }

@@ -1,30 +1,37 @@
 import PageHeading from '@/components/ui/page-heading';
-import { GUIDE_STEPS } from '@/features/guide/guide-steps';
-import styles from '@/features/guide/guide.module.css';
+import GuideStepList from '@/features/guide/guide-step-list';
+import { parseNewsTab } from '@/features/notices/news-tab';
+import NewsTabs from '@/features/notices/news-tabs';
+import NoticeList from '@/features/notices/notice-list';
+import { latestNotice } from '@/lib/notices/model';
+import { getNotices } from '@/lib/server/notices';
 
-export const metadata = { title: '사용법 | Lunch Map' };
+export const metadata = { title: '소식·사용법 | Lunch Map' };
 
-export default function GuidePage() {
+export default async function GuidePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string | string[] }>;
+}) {
+  const { tab } = await searchParams;
+  const initialTab = parseNewsTab(tab);
+  const notices = getNotices();
+  const latestId = latestNotice(notices)?.id ?? null;
   return (
     <main className="page-shell">
       <PageHeading
-        eyebrow="HOW TO USE"
-        title="사용법"
-        description="Lunch Map을 쓰는 방법을 한눈에 정리했어요."
+        eyebrow="NEWS & HOW TO USE"
+        title="소식·사용법"
+        description="새 소식과 Lunch Map을 쓰는 방법을 모았어요."
       />
-      <div className={styles.page}>
-        {GUIDE_STEPS.map((step, index) => (
-          <section key={step.title} className={styles.section} aria-labelledby={`guide-${index}`}>
-            <h2 id={`guide-${index}`}>
-              <span className={styles.number} aria-hidden="true">
-                {index + 1}
-              </span>
-              {step.title}
-            </h2>
-            <div className={styles.body}>{step.body(null)}</div>
-          </section>
-        ))}
-      </div>
+      {/* key: following a link to another ?tab= on this page starts on that tab. */}
+      <NewsTabs
+        key={initialTab}
+        initialTab={initialTab}
+        latestNoticeId={latestId}
+        notices={<NoticeList notices={notices} openId={latestId} />}
+        guide={<GuideStepList />}
+      />
     </main>
   );
 }

@@ -4,6 +4,7 @@ import LocalUserInitializer from '@/features/local-user/local-user-initializer';
 import SiteHeader from '@/components/site-header';
 import SaveStatus from '@/components/ui/save-status';
 import SnackbarHost from '@/components/ui/snackbar';
+import { getLatestNotice } from '@/lib/server/notices';
 import { version } from '@/package.json';
 
 const REPOSITORY_URL = 'https://github.com/WonTaeJang/isens-lunch-map';
@@ -47,7 +48,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
     <html lang="ko">
       <body>
         <LocalUserInitializer />
-        <SiteHeader />
+        <SiteHeader latestNoticeId={getLatestNotice()?.id ?? null} />
         {/* Wide screens scroll this area only, so the scrollbar starts below the header. */}
         <div className="app-scroll">
           {children}

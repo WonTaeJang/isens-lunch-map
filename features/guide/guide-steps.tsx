@@ -1,4 +1,4 @@
-// 사용법 안내: 처음 방문 팝업(한 장씩)과 /guide 페이지(전체)가 같은 내용을 씁니다.
+// 사용법 안내: 처음 방문 팝업(한 장씩)과 /guide 페이지의 사용법 탭(전체)이 같은 내용을 씁니다.
 import Image from 'next/image';
 import type { ReactNode } from 'react';
 import {

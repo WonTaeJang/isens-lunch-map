@@ -11,6 +11,8 @@
 
 ```text
 app/                         # 페이지·레이아웃·API 진입점, error.tsx·not-found.tsx
+content/
+  notices/                   # 공지사항 마크다운 (파일 하나가 공지 하나)
 components/
   ui/                        # Button, Toggle, FilterChip 등 공통 UI
   site-header.tsx            # 페이지 공통 헤더
@@ -22,6 +24,7 @@ features/
   reviews/                   # 리뷰 패널·작성 폼·수정/삭제 훅(use-review-actions)
   ranking/                   # 랭킹 목록 UI
   grade/                     # 사용자 등급 저장·아이콘·등급표·승급 팝업·헤더 아이콘
+  notices/                   # 공지 읽음 저장·홈 공지 미리보기·공지 목록·소식 탭
 lib/                         # features와 서버가 함께 쓰는 코드 (features를 import하지 않음)
   server/                    # 서버 전용 로직
     db.ts                    # DB 연결
@@ -31,9 +34,11 @@ lib/                         # features와 서버가 함께 쓰는 코드 (featu
     coordinates.ts           # 좌표 재측정(주소 재검색) 미리보기·반영
     admin.ts                 # 관리자 공통: 비밀번호 확인·AdminError·리비전·미리보기 서명·잠금 트랜잭션
     api-route.ts             # API 공통: JSON 본문 읽기·오류 응답·캐시 헤더
+    notices.ts               # 공지 파일 읽기·마크다운 HTML 변환
   reviews/                   # 리뷰 타입·입력 검증·태그 등 정책 상수
   ranking/                   # 랭킹 순위 계산·정책 상수
   grades/                    # 등급 배점·구간·진행률 계산 (화면·서버 공용)
+  notices/                   # 공지 frontmatter 해석·정렬·최신 공지·홈 노출 기간
   admin/                     # 관리자 통계·미리보기(거리·좌표·엑셀) 타입
   restaurant-types.ts        # 공통 데이터 타입
   request-error.ts           # API 요청 오류의 공통 부모(RequestError)·UUID 검사
@@ -71,6 +76,8 @@ lib/                         # features와 서버가 함께 쓰는 코드 (featu
 예를 들어 `Toggle`은 전달받은 상태를 표시하고 변경 이벤트를 알립니다.
 따라서 지도 필터 디자인을 바꿔도 관리자 활성·비활성 토글은 독립적으로 유지할 수 있습니다.
 특정 기능에서만 사용하는 UI를 무조건 공통 폴더로 옮기지는 않습니다.
+탭은 `Tabs`·`TabPanel`(`components/ui/tabs.tsx`, 같은 `idPrefix`로 탭과 패널을 연결)을 쓰고, 관리자 화면과
+소식·사용법 페이지는 밑줄 탭 스타일(`components/ui/tabs.module.css`의 `underline`)을 함께 씁니다.
 모든 모달은 `ModalDialog`(`<dialog>`를 띄우고 Esc를 `onClose`로 넘기며 바깥 모달로 전달하지 않음) 위에
 만듭니다. 제목·버튼이 정해진 단순 모달은 `Modal`을 쓰고, 리뷰 패널·확인 창·두 게임처럼 모양이 다른 창은
 `ModalDialog`에 자기 스타일만 얹습니다. 두 게임(슬롯·점심 상자)은 후보 계산(`gameCandidates`, 목록의
@@ -342,6 +349,36 @@ create index if not exists review_user_created_idx on public.review (user_id, cr
 ```
 
 `npm test`는 입력 제한, 소유자 조건, 중복 등록·롤백, 논리 삭제, 하루 작성 제한을 모의 DB로 검증합니다.
+
+## 공지사항 (`/guide`의 공지 탭)
+
+공지는 DB 없이 `content/notices/*.md` 파일로 관리하고, 커밋·배포하면 올라갑니다.
+파일 이름이 공지 ID이고(예: `2026-10-21-v1.0.11.md`, 영문·숫자·`.`·`-`·`_`만),
+맨 위 frontmatter와 그 아래 마크다운 본문으로 씁니다.
+
+```md
+---
+title: 1.0.11 업데이트 소식
+date: 2026-10-21 # 게시일(YYYY-MM-DD)
+pinned: true # 선택. true면 목록 맨 위에 '고정'으로 표시
+---
+
+본문은 마크다운으로 씁니다. ### 소제목, 목록, **굵게**, [링크](/ranking) 등.
+```
+
+- **표시 위치**: 헤더의 확성기 아이콘(`/guide`)이 "소식·사용법" 페이지로, 공지 탭이 먼저 열리고
+  `?tab=guide`면 사용법 탭이 열립니다. 주소와 탭은 `features/notices/news-tab.ts`에 모아 두었습니다. 목록은 고정 공지 먼저, 그다음 최신순이며 가장 최근 공지만 펼쳐 둡니다.
+- **안 읽음**: 이 브라우저(localStorage `notice_read_id`)에 마지막으로 읽은 공지 ID를 남깁니다.
+  저장된 ID가 가장 최근 공지(고정 여부와 관계없이 게시일·파일 이름 기준)와 다르면 안 읽음이라,
+  처음 온 사용자도 최신 공지 하나만 안 읽음입니다. 공지 탭을 열거나 홈의 공지 미리보기를 누르거나 닫으면 읽음이 됩니다.
+- **빨간 점과 공지 미리보기**: 안 읽은 공지가 있으면 헤더 아이콘에 빨간 점이 붙습니다. 홈에는 게시일부터
+  7일 동안(`NOTICE_PREVIEW_DAYS`, 한국 날짜) 안 읽은 최신 공지 제목이 보이고, 읽거나 닫으면 사라집니다.
+  넓은 화면에서는 부제목 줄 오른쪽 끝(`PageHeading`의 오른쪽), 760px 이하에서는 화면 가운데 아래에 떠 있으며
+  떠 있을 때는 전체 화면 지도와 모달보다 아래에 놓입니다.
+- **읽기·검증**: `lib/server/notices.ts`가 서버에서 파일을 읽어 `marked`로 HTML을 만듭니다(운영에서는 한 번만 읽음).
+  본문은 이 저장소의 파일이라 HTML을 그대로 넣습니다. 형식이 틀린 파일은 페이지를 막지 않도록 빼고 로그를 남기며,
+  `npm test`(`tests/notices.test.ts`)가 실제 공지 파일이 모두 올바른지 확인합니다.
+  Vercel 배포에 파일이 포함되도록 `next.config.ts`의 `outputFileTracingIncludes`에 넣어 두었습니다.
 
 ## 사용자 페이지 (`/user`)
 

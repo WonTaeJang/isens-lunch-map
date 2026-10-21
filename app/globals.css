@@ -469,6 +469,18 @@ select:focus-visible {
   height: 40px;
   color: var(--color-text-subtle);
   border-radius: var(--radius-md);
+  position: relative;
+}
+/* A notice this browser has not read yet (소식·사용법). */
+.nav-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-surface);
+  border-radius: var(--radius-full);
+  background: var(--color-danger);
 }
 .main-nav a:hover {
   background: var(--color-surface-muted);

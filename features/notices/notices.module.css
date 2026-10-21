@@ -1,0 +1,203 @@
+/* The latest notice: at the end of the home subtitle line on wide screens (PageHeading's
+ * right side), floating at the bottom center on narrow ones. */
+.preview {
+  display: flex;
+  flex: none;
+  align-self: flex-end;
+  margin-bottom: -8px; /* centered on the subtitle line rather than resting on it */
+  align-items: center;
+  gap: 4px;
+  max-width: min(360px, calc(100vw - 32px));
+  padding: 4px 4px 4px 12px;
+  border-radius: var(--radius-full);
+  /* Brand green so it stands apart from the white cards around it. */
+  background: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text-inverse);
+  --focus-ring-color: var(--color-text-inverse);
+  --preview-out-y: 8px;
+  animation: preview-in 200ms ease-out;
+}
+@media (max-width: 760px) {
+  .preview {
+    position: fixed;
+    left: 50%;
+    margin: 0;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    z-index: var(--z-header); /* under the expanded map and dialogs */
+    translate: -50% 0;
+    box-shadow: var(--shadow-lg);
+    --preview-out-y: calc(100% + 24px);
+  }
+}
+@keyframes preview-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+/* 닫기: moves down and fades (out of view when floating), then NoticePreview marks it read. */
+.preview[data-closing] {
+  pointer-events: none;
+  animation: preview-out 220ms ease-in forwards;
+}
+@keyframes preview-out {
+  to {
+    opacity: 0;
+    transform: translateY(var(--preview-out-y));
+  }
+}
+.previewLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: inherit;
+  font-size: var(--text-md);
+  font-weight: 700;
+}
+.previewLink:hover .previewTitle {
+  text-decoration: underline;
+}
+.previewLink svg {
+  flex: none;
+  color: var(--color-brand-highlight); /* the lime of the logo dot */
+}
+.previewTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.previewClose {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: color-mix(in srgb, var(--color-text-inverse) 75%, transparent);
+  cursor: pointer;
+}
+.previewClose:hover {
+  background: color-mix(in srgb, var(--color-text-inverse) 16%, transparent);
+  color: var(--color-text-inverse);
+}
+
+/* /guide: 공지 | 사용법 */
+.news {
+  max-width: var(--content-narrow);
+  margin: 0 auto 40px;
+}
+.list {
+  display: grid;
+  gap: 12px;
+}
+.notice {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  background: var(--color-surface);
+}
+.notice summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 20px;
+  border-radius: var(--radius-2xl);
+  cursor: pointer;
+  list-style: none;
+}
+.notice summary::-webkit-details-marker {
+  display: none;
+}
+.notice summary:hover {
+  background: var(--color-surface-muted);
+}
+.noticeTitle {
+  flex: 1;
+  min-width: 0;
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  word-break: keep-all;
+}
+.notice time {
+  flex: none;
+  color: var(--color-text-subtle);
+  font-size: var(--text-sm);
+}
+.chevron {
+  flex: none;
+  color: var(--color-text-faint);
+  transition: transform 150ms ease;
+}
+.notice[open] .chevron {
+  transform: rotate(90deg);
+}
+/* '고정' uses the global .count badge, placed before the title. */
+.pin {
+  margin: 0 6px 0 0;
+}
+/* The notice body: HTML rendered from the markdown file. */
+.body {
+  display: grid;
+  gap: 10px;
+  padding: 0 20px 20px;
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+.body > * {
+  margin: 0;
+}
+.body h2,
+.body h3,
+.body h4 {
+  margin-top: 6px;
+  color: var(--color-text);
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+.body ul,
+.body ol {
+  padding-left: 20px;
+}
+.body strong {
+  color: var(--color-text);
+}
+.body a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+.body code {
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-sunken);
+  font-size: var(--text-md);
+}
+.body hr {
+  border: 0;
+  border-top: 1px solid var(--color-border-subtle);
+}
+@media (max-width: 480px) {
+  .notice summary {
+    padding: 16px;
+  }
+  .noticeTitle {
+    font-size: var(--text-base);
+  }
+  .body {
+    padding: 0 16px 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .preview {
+    animation: none;
+  }
+  .chevron {
+    transition: none;
+  }
+}

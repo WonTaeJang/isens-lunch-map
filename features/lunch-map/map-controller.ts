@@ -37,6 +37,8 @@ const CLASS_NAMES = {
   labelAnchor: 'restaurant-map-label-anchor',
   label: 'restaurant-map-label',
   group: 'restaurant-map-group',
+  /** Added to a number circle once the viewer reviewed every restaurant in it. */
+  groupReviewed: 'restaurant-map-group-reviewed',
   groupLabel: 'restaurant-map-group-label',
   overlay: 'restaurant-map-overlay',
   card: 'restaurant-map-card',
@@ -345,7 +347,15 @@ export function createMapController(
         group.rows = rowsHere;
         group.button.textContent = String(rowsHere.length);
         group.button.title = `${rowsHere[0].name} 외 ${rowsHere.length - 1}곳`;
-        group.button.setAttribute('aria-label', `여기 모인 식당 ${rowsHere.length}곳 목록 보기`);
+        // All reviewed: the circle takes the reviewed marker's color, like a single marker would.
+        const allReviewed = rowsHere.every((row) => reviewedIds?.has(row.id));
+        group.button.className = allReviewed
+          ? `${names.group} ${names.groupReviewed}`
+          : names.group;
+        group.button.setAttribute(
+          'aria-label',
+          `여기 모인 식당 ${rowsHere.length}곳 목록 보기${allReviewed ? ', 모두 내 리뷰 작성됨' : ''}`,
+        );
         group.button.setAttribute('aria-expanded', String(key === openGroup));
         const shown = !rowsHere.some((row) => row.id === selectedId);
         if (group.shown !== shown) {

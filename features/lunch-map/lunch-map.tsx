@@ -134,6 +134,7 @@ export default function LunchMap({
               labelAnchor: labelStyles.anchor,
               label: labelStyles.label,
               group: labelStyles.group,
+              groupReviewed: labelStyles.groupReviewed,
               groupLabel: labelStyles.groupLabel,
               overlay: cardStyles.overlay,
               card: cardStyles.card,

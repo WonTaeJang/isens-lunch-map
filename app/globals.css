@@ -287,6 +287,10 @@
   --color-primary-border: #b9ddd3;
   --color-brand-highlight: #bde779;
 
+  /* Map markers: the fills of public/restaurant-marker-*.svg (change both together) */
+  --color-marker: #2785d5;
+  --color-marker-reviewed: #128574;
+
   /* Status */
   --color-info: #2563eb; /* 추천, Saturday */
   --color-info-subtle: #eef4ff;

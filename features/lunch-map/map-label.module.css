@@ -38,18 +38,25 @@
   min-width: 24px;
   height: 24px;
   padding: 0 5px;
-  border: 2px solid #fff;
+  border: 2px solid var(--color-surface);
   border-radius: var(--radius-full);
-  background: #2785d5; /* restaurant-marker-default.svg */
+  background: var(--color-marker);
   box-shadow: var(--shadow-xs);
-  color: #fff;
+  color: var(--color-text-inverse);
   font-size: var(--text-sm);
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
 }
 .group[aria-expanded='true'] {
-  box-shadow: 0 0 0 3px rgb(39 133 213 / 30%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-marker) 30%, transparent);
+}
+/* Every restaurant here has the viewer's review: the reviewed marker's green. */
+.groupReviewed {
+  background: var(--color-marker-reviewed);
+}
+.groupReviewed[aria-expanded='true'] {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-marker-reviewed) 30%, transparent);
 }
 .groupLabel {
   display: flex;

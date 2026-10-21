@@ -403,3 +403,22 @@ test('map resize preserves the current center and zoom without recreating marker
     f.restore();
   }
 });
+
+test('a number circle turns reviewed only when every restaurant in it has the viewer review', () => {
+  const f = fixture();
+  const twin = { ...row, id: 'b', name: '가게', latitude: '37.50' };
+  const circle = () =>
+    f.overlays.find((o) => o.options.content.className.startsWith('restaurant-map-group'))!.options
+      .content;
+  try {
+    f.controller.update([row, twin], new Set(), null, new Set(['a']));
+    assert.equal(circle().className, 'restaurant-map-group');
+    f.controller.update([row, twin], new Set(), null, new Set(['a', 'b']));
+    assert.equal(circle().className, 'restaurant-map-group restaurant-map-group-reviewed');
+    assert.match(circle().attributes.get('aria-label')!, /모두 내 리뷰 작성됨/);
+    f.controller.update([row, twin], new Set(), null, new Set(['b']));
+    assert.equal(circle().className, 'restaurant-map-group');
+  } finally {
+    f.restore();
+  }
+});

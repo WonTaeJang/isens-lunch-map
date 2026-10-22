@@ -5,8 +5,10 @@
   margin-bottom: 24px;
   border-bottom: 1px solid var(--color-border-strong);
 }
-.underline button {
+.underline [role='tab'] {
   flex: 1;
+  text-align: center;
+  text-decoration: none;
   padding: 14px 8px;
   border: 0;
   border-bottom: 3px solid transparent;
@@ -17,14 +19,14 @@
   cursor: pointer;
   word-break: keep-all;
 }
-.underline button[aria-selected='true'] {
+.underline [role='tab'][aria-selected='true'] {
   border-bottom-color: var(--color-primary);
   color: var(--color-primary);
   font-weight: 700;
 }
-.underline button:hover {
+.underline [role='tab']:hover {
   background: var(--color-primary-subtle);
 }
-.underline button:focus-visible {
+.underline [role='tab']:focus-visible {
   outline-offset: var(--focus-ring-offset-inset);
 }

@@ -1,15 +1,14 @@
 'use client';
 
 import { prefersReducedMotion } from '@/lib/motion';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Children, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import Tabs, { SwipeTabPanel } from '@/components/ui/tabs';
+import { useMediaQuery } from '@/components/ui/use-media-query';
+import { panelStep } from '@/components/ui/snap-panels';
+import tabStyles from '@/components/ui/tabs.module.css';
 import styles from './ranking.module.css';
 
 type Tab = { href: string; title: string };
-
-/** Distance between two panels (a panel plus the gap); 0 when nothing scrolls (wide screens). */
-function panelStep(element: HTMLElement, count: number) {
-  return count > 1 ? (element.scrollWidth - element.clientWidth) / (count - 1) : 0;
-}
 
 /**
  * Narrow screens: the rankings sit side by side in a horizontal snap scroller, so a swipe shows
@@ -26,6 +25,7 @@ export default function RankingTabs({
   /** One panel per tab, in the same order. */
   children: ReactNode;
 }) {
+  const wide = useMediaQuery('(min-width: 1100px)');
   const scroller = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(initialIndex);
   const activeRef = useRef(initialIndex);
@@ -110,26 +110,36 @@ export default function RankingTabs({
 
   return (
     <>
-      <nav className={styles.tabs} aria-label="랭킹 분류">
-        {tabs.map((tab, index) => (
-          <a
-            key={tab.href}
-            href={tab.href}
-            aria-current={index === active ? 'page' : undefined}
-            onClick={(event) => {
-              const element = scroller.current;
-              const step = element && panelStep(element, tabs.length);
-              if (!element || !step) return;
-              event.preventDefault();
-              goTo(element, step, index);
-            }}
-          >
-            {tab.title}
-          </a>
-        ))}
-      </nav>
+      <Tabs
+        items={tabs.map((tab, index) => ({
+          value: String(index),
+          label: tab.title,
+          href: tab.href,
+        }))}
+        value={String(active)}
+        onChange={(value) => {
+          const index = Number(value);
+          const element = scroller.current;
+          const step = element && panelStep(element, tabs.length);
+          if (element && step) goTo(element, step, index);
+          else select(index);
+        }}
+        idPrefix="ranking"
+        label="랭킹 분류"
+        className={`${tabStyles.underline} ${styles.tabs}`}
+      />
       <div ref={scroller} className={styles.columns}>
-        {children}
+        {Children.map(children, (child, index) => (
+          <SwipeTabPanel
+            idPrefix="ranking"
+            value={String(index)}
+            selected={String(active)}
+            expanded={wide}
+            label={tabs[index].title}
+          >
+            {child}
+          </SwipeTabPanel>
+        ))}
       </div>
     </>
   );
